@@ -1,0 +1,3 @@
+Jenkinsfile        @corda/blt
+.ci/*              @corda/blt
+.github/*          @corda/blt
