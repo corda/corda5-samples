@@ -1,4 +1,4 @@
-# Obligation-CorDapp
+# C5-Obligation-CorDapp
 
 This app is our signature CorDapp that we use to show the main functionalities of Corda, which are creating a digital asset, 
 updating the digital asset, and transferring the digital asset. This app depicts a simple use 
