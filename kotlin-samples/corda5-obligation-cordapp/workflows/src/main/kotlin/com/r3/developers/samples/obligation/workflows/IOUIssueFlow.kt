@@ -76,7 +76,7 @@ class IOUIssueFlow: ClientStartableFlow {
             )
 
             // Obtain the notary.
-            val notary = notaryLookup.lookup(MemberX500Name.parse("CN=NotaryRep1, OU=Test Dept, O=R3, L=London, C=GB"))
+            val notary = notaryLookup.lookup(MemberX500Name.parse("CN=NotaryService, OU=Test Dept, O=R3, L=London, C=GB"))
                 ?: throw CordaRuntimeException("NotaryLookup can't find notary specified in flow arguments.")
 
             // Use UTXOTransactionBuilder to build up the draft transaction.

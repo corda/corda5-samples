@@ -78,7 +78,7 @@ public class IOUIssueFlow implements ClientStartableFlow {
 
             // Obtain the Notary name and public key.
             NotaryInfo notary = requireNonNull(
-                    notaryLookup.lookup(MemberX500Name.parse("CN=NotaryRep1, OU=Test Dept, O=R3, L=London, C=GB")),
+                    notaryLookup.lookup(MemberX500Name.parse("CN=NotaryService, OU=Test Dept, O=R3, L=London, C=GB")),
                     "NotaryLookup can't find notary specified in flow arguments."
             );
 
