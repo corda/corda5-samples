@@ -12,7 +12,6 @@ import net.corda.v5.application.membership.MemberLookup;
 import net.corda.v5.base.annotations.Suspendable;
 import net.corda.v5.base.exceptions.CordaRuntimeException;
 import net.corda.v5.base.types.MemberX500Name;
-import net.corda.v5.ledger.common.NotaryLookup;
 import net.corda.v5.ledger.common.Party;
 import net.corda.v5.ledger.utxo.StateAndRef;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
@@ -35,17 +34,18 @@ public class IOUTransferFlow implements ClientStartableFlow {
 
     private final static Logger log = LoggerFactory.getLogger(IOUTransferFlow.class);
 
-
+    // Injects the JsonMarshallingService to read and populate JSON parameters.
     @CordaInject
     public JsonMarshallingService jsonMarshallingService;
+
+    // Injects the MemberLookup to look up the VNode identities.
     @CordaInject
     public MemberLookup memberLookup;
 
     // Injects the UtxoLedgerService to enable the flow to make use of the Ledger API.
     @CordaInject
     public UtxoLedgerService ledgerService;
-    @CordaInject
-    public NotaryLookup notaryLookup;
+
     // FlowEngine service is required to run SubFlows.
     @CordaInject
     public FlowEngine flowEngine;
@@ -59,26 +59,26 @@ public class IOUTransferFlow implements ClientStartableFlow {
             // Obtain the deserialized input arguments to the flow from the requestBody.
             IOUTransferFlowArgs flowArgs = requestBody.getRequestBodyAs(jsonMarshallingService, IOUTransferFlowArgs.class);
 
-            // Get MemberInfos for the Vnode running the flow and the otherMember.
+            // Get flow args from the input JSON
+            UUID iouID = flowArgs.getIouID();
+
+            //query the IOU input
+            List<StateAndRef<IOUState>> iouStateAndRefs = ledgerService.findUnconsumedStatesByType(IOUState.class);
+            List<StateAndRef<IOUState>> iouStateAndRefsWithId = iouStateAndRefs.stream()
+                    .filter(sar -> sar.getState().getContractState().getLinearId().equals(iouID)).collect(toList());
+            if (iouStateAndRefsWithId.size() != 1) throw new CordaRuntimeException("Multiple or zero IOU states with id " + iouID + " found");
+            StateAndRef<IOUState> iouStateAndRef = iouStateAndRefsWithId.get(0);
+            IOUState iouInput = iouStateAndRef.getState().getContractState();
+
+            //flow logic checks
             MemberInfo myInfo = memberLookup.myInfo();
+            if (!(myInfo.getName().equals(iouInput.getLender()))) throw new CordaRuntimeException("Only IOU lender can transfer the IOU.");
+
+            // Get MemberInfos for the Vnode running the flow and the otherMember.
             MemberInfo newLenderInfo = requireNonNull(
                     memberLookup.lookup(MemberX500Name.parse(flowArgs.getNewLender())),
                     "MemberLookup can't find otherMember specified in flow arguments."
             );
-
-            UUID iouID = flowArgs.getIouID();
-            List<StateAndRef<IOUState>> iouStateAndRefs = ledgerService.findUnconsumedStatesByType(IOUState.class);
-            List<StateAndRef<IOUState>> iouStateAndRefsWithId = iouStateAndRefs.stream()
-                    .filter(sar -> sar.getState().getContractState().getLinearId().equals(iouID)).collect(toList());
-
-            if (iouStateAndRefsWithId.size() != 1) throw new CordaRuntimeException("Multiple or zero IOU states with id " + iouID + " found");
-            StateAndRef<IOUState> iouStateAndRef = iouStateAndRefsWithId.get(0);
-            Party notary = iouStateAndRef.getState().getNotary();
-
-            IOUState iouInput = iouStateAndRef.getState().getContractState();
-
-            if (!(myInfo.getName().equals(iouInput.getLender()))) throw new CordaRuntimeException("Only IOU lender can transfer the IOU.");
-
             MemberInfo borrower = requireNonNull(
                     memberLookup.lookup(iouInput.getBorrower()),
                     "MemberLookup can't find otherMember specified in flow arguments."
@@ -86,6 +86,9 @@ public class IOUTransferFlow implements ClientStartableFlow {
 
             // Create the IOUState from the input arguments and member information.
             IOUState iouOutput = iouInput.withNewLender(newLenderInfo.getName(), Arrays.asList(borrower.getLedgerKeys().get(0), newLenderInfo.getLedgerKeys().get(0)));
+
+            //get notary from input
+            Party notary = iouStateAndRef.getState().getNotary();
 
             // Use UTXOTransactionBuilder to build up the draft transaction.
             UtxoTransactionBuilder txBuilder = ledgerService.getTransactionBuilder()

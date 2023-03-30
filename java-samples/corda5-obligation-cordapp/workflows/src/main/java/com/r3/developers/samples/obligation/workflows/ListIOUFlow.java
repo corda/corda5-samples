@@ -18,6 +18,7 @@ public class ListIOUFlow implements ClientStartableFlow {
 
     private final static Logger log = LoggerFactory.getLogger(ListIOUFlow.class);
 
+    // Injects the JsonMarshallingService to read and populate JSON parameters.
     @CordaInject
     public JsonMarshallingService jsonMarshallingService;
 
@@ -29,7 +30,7 @@ public class ListIOUFlow implements ClientStartableFlow {
     @Override
     public String call(ClientRequestBody requestBody) {
 
-        log.info("ListIOUFlowHAHAHAHA.call() called");
+        log.info("ListIOUFlow.call() called");
 
         // Queries the VNode's vault for unconsumed states and converts the result to a serializable DTO.
         List<StateAndRef<IOUState>> states = utxoLedgerService.findUnconsumedStatesByType(IOUState.class);

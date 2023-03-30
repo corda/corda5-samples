@@ -11,6 +11,7 @@ import net.corda.v5.ledger.utxo.UtxoLedgerService
 import net.corda.v5.ledger.utxo.transaction.UtxoSignedTransaction
 import org.slf4j.LoggerFactory
 
+// @InitiatingFlow declares the protocol which will be used to link the initiator to the responder.
 @InitiatingFlow(protocol = "finalize-iou-protocol")
 class FinalizeIOUSubFlow(private val signedTransaction: UtxoSignedTransaction, private val otherMember: List<MemberX500Name>): SubFlow<String> {
 
@@ -90,4 +91,4 @@ class FinalizeIOUResponderFlow: ResponderFlow {
             log.warn("Exceptionally finished responder flow", e)
         }
     }
-} 
+}

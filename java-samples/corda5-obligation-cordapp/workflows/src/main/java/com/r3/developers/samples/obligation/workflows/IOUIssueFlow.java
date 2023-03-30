@@ -32,17 +32,22 @@ import static java.util.Objects.requireNonNull;
 public class IOUIssueFlow implements ClientStartableFlow {
     private final static Logger log = LoggerFactory.getLogger(IOUIssueFlow.class);
 
-
+    // Injects the JsonMarshallingService to read and populate JSON parameters.
     @CordaInject
     public JsonMarshallingService jsonMarshallingService;
+
+    // Injects the MemberLookup to look up the VNode identities.
     @CordaInject
     public MemberLookup memberLookup;
 
     // Injects the UtxoLedgerService to enable the flow to make use of the Ledger API.
     @CordaInject
     public UtxoLedgerService ledgerService;
+
+    // Injects the NotaryLookup to look up the notary identity.
     @CordaInject
     public NotaryLookup notaryLookup;
+
     // FlowEngine service is required to run SubFlows.
     @CordaInject
     public FlowEngine flowEngine;
@@ -72,7 +77,12 @@ public class IOUIssueFlow implements ClientStartableFlow {
             );
 
             // Obtain the Notary name and public key.
-            NotaryInfo notary = notaryLookup.getNotaryServices().iterator().next();
+            NotaryInfo notary = requireNonNull(
+                    notaryLookup.lookup(MemberX500Name.parse("CN=NotaryRep1, OU=Test Dept, O=R3, L=London, C=GB")),
+                    "NotaryLookup can't find notary specified in flow arguments."
+            );
+
+
             PublicKey notaryKey = null;
             for(MemberInfo memberInfo: memberLookup.lookup()){
                 if(Objects.equals(
@@ -82,6 +92,7 @@ public class IOUIssueFlow implements ClientStartableFlow {
                     break;
                 }
             }
+
             // Note, in Java CorDapps only unchecked RuntimeExceptions can be thrown not
             // declared checked exceptions as this changes the method signature and breaks override.
             if(notaryKey == null) {

@@ -10,9 +10,6 @@ import net.corda.v5.application.marshalling.JsonMarshallingService
 import net.corda.v5.application.membership.MemberLookup
 import net.corda.v5.base.annotations.Suspendable
 import net.corda.v5.base.exceptions.CordaRuntimeException
-import net.corda.v5.base.types.MemberX500Name
-import net.corda.v5.ledger.common.NotaryLookup
-import net.corda.v5.ledger.common.Party
 import net.corda.v5.ledger.utxo.UtxoLedgerService
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -29,9 +26,11 @@ class IOUSettleFlow: ClientStartableFlow {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
     }
 
+    // Injects the JsonMarshallingService to read and populate JSON parameters.
     @CordaInject
     lateinit var jsonMarshallingService: JsonMarshallingService
 
+    // Injects the MemberLookup to look up the VNode identities.
     @CordaInject
     lateinit var memberLookup: MemberLookup
 
@@ -50,33 +49,32 @@ class IOUSettleFlow: ClientStartableFlow {
         try {
             // Obtain the deserialized input arguments to the flow from the requestBody.
             val flowArgs = requestBody.getRequestBodyAs(jsonMarshallingService, IOUSettleFlowArgs::class.java)
-            val amountSettle = flowArgs.amountSettle.toInt()
-            // Get MemberInfos for the Vnode running the flow and the otherMember.
-            // Good practice in Kotlin CorDapps is to only throw RuntimeException.
-            // Note, in Java CorDapps only unchecked RuntimeExceptions can be thrown not
-            // declared checked exceptions as this changes the method signature and breaks override.
-            val myInfo = memberLookup.myInfo()
 
+            // Get flow args from the input JSON
             val iouID = flowArgs.iouID
+            val amountSettle = flowArgs.amountSettle.toInt()
 
+            //query the IOU input
             val iouStateAndRefs = ledgerService.findUnconsumedStatesByType(IOUState::class.java)
             val iouStateAndRefsWithId = iouStateAndRefs.filter { it.state.contractState.linearId.equals(iouID)}
+
             if (iouStateAndRefsWithId.size != 1) throw CordaRuntimeException("Multiple or zero IOU states with id \" + iouID + \" found")
             val iouStateAndRef = iouStateAndRefsWithId[0]
-
-            val notary = iouStateAndRef.state.notary
-
             val iouInput = iouStateAndRef.state.contractState
 
+            //flow logic checks
+            val myInfo = memberLookup.myInfo()
             if (!(myInfo.name.equals(iouInput.borrower))) throw CordaRuntimeException("Only IOU borrower can settle the IOU.")
-
             val lenderInfo = memberLookup.lookup(iouInput.lender) ?: throw CordaRuntimeException("MemberLookup can't find otherMember specified in flow arguments.")
 
+            // Create the IOUState from the input arguments and member information.
             val iouOutput = iouInput.pay(amountSettle)
 
+            //get notary from input
+            val notary = iouStateAndRef.state.notary
 
             // Use UTXOTransactionBuilder to build up the draft transaction.
-            val txBuilder= ledgerService.getTransactionBuilder()
+            val txBuilder= ledgerService.transactionBuilder
                 .setNotary(notary)
                 .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                 .addInputState(iouStateAndRef.ref)
@@ -93,8 +91,6 @@ class IOUSettleFlow: ClientStartableFlow {
             // If successful the flow will return a String of the created transaction id,
             // if not successful it will return an error message.
             return flowEngine.subFlow(FinalizeIOUSubFlow(signedTransaction, listOf(lenderInfo.name)))
-
-
         }
         // Catch any exceptions, log them and rethrow the exception.
         catch (e: Exception) {

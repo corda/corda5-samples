@@ -29,9 +29,11 @@ class IOUIssueFlow: ClientStartableFlow {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
     }
 
+    // Injects the JsonMarshallingService to read and populate JSON parameters.
     @CordaInject
     lateinit var jsonMarshallingService: JsonMarshallingService
 
+    // Injects the MemberLookup to look up the VNode identities.
     @CordaInject
     lateinit var memberLookup: MemberLookup
 
@@ -39,6 +41,7 @@ class IOUIssueFlow: ClientStartableFlow {
     @CordaInject
     lateinit var ledgerService: UtxoLedgerService
 
+    // Injects the NotaryLookup to look up the notary identity.
     @CordaInject
     lateinit var notaryLookup: NotaryLookup
 
@@ -59,7 +62,8 @@ class IOUIssueFlow: ClientStartableFlow {
             // Note, in Java CorDapps only unchecked RuntimeExceptions can be thrown not
             // declared checked exceptions as this changes the method signature and breaks override.
             val myInfo = memberLookup.myInfo()
-            val lenderInfo = memberLookup.lookup(MemberX500Name.parse(flowArgs.lender)) ?: throw CordaRuntimeException("MemberLookup can't find otherMember specified in flow arguments.")
+            val lenderInfo = memberLookup.lookup(MemberX500Name.parse(flowArgs.lender))
+                ?: throw CordaRuntimeException("MemberLookup can't find otherMember specified in flow arguments.")
 
             // Create the IOUState from the input arguments and member information.
             val iou = IOUState(
@@ -70,11 +74,13 @@ class IOUIssueFlow: ClientStartableFlow {
                 linearId = UUID.randomUUID(),
                 listOf(myInfo.ledgerKeys[0],lenderInfo.ledgerKeys[0])
             )
+
             // Obtain the notary.
-            val notary = notaryLookup.notaryServices.single()
+            val notary = notaryLookup.lookup(MemberX500Name.parse("CN=NotaryRep1, OU=Test Dept, O=R3, L=London, C=GB"))
+                ?: throw CordaRuntimeException("NotaryLookup can't find notary specified in flow arguments.")
 
             // Use UTXOTransactionBuilder to build up the draft transaction.
-            val txBuilder= ledgerService.getTransactionBuilder()
+            val txBuilder= ledgerService.transactionBuilder
                 .setNotary(Party(notary.name, notary.publicKey))
                 .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                 .addOutputState(iou)

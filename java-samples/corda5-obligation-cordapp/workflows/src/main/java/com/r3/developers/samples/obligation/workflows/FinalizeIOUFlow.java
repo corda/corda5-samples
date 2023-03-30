@@ -1,9 +1,11 @@
 package com.r3.developers.samples.obligation.workflows;
 
+import com.r3.developers.samples.obligation.states.IOUState;
 import net.corda.v5.application.flows.*;
 import net.corda.v5.application.messaging.FlowMessaging;
 import net.corda.v5.application.messaging.FlowSession;
 import net.corda.v5.base.annotations.Suspendable;
+import net.corda.v5.base.exceptions.CordaRuntimeException;
 import net.corda.v5.base.types.MemberX500Name;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import net.corda.v5.ledger.utxo.transaction.UtxoSignedTransaction;
@@ -17,6 +19,7 @@ import java.util.List;
 public class FinalizeIOUFlow {
     private final static Logger log = LoggerFactory.getLogger(FinalizeIOUFlow.class);
 
+    // @InitiatingFlow declares the protocol which will be used to link the initiator to the responder.
     @InitiatingFlow(protocol = "finalize-iou-protocol")
     public static class FinalizeIOU implements SubFlow<String> {
 
@@ -91,6 +94,10 @@ public class FinalizeIOUFlow {
             try {
                 // Defines the lambda validator used in receiveFinality below.
                 UtxoTransactionValidator txValidator = ledgerTransaction -> {
+
+                    // Note, this exception will only be shown in the logs if Corda Logging is set to debug.
+                    if(!(ledgerTransaction.getOutputContractStates().get(0).getClass().equals(IOUState.class)))
+                        throw new CordaRuntimeException("Failed verification - transaction did not have exactly one output IOUState.");
 
                     log.info("Verified the transaction - " + ledgerTransaction.getId());
                 };

@@ -2,6 +2,7 @@ package com.r3.developers.samples.obligation.workflows;
 
 import java.util.UUID;
 
+// A class to hold the deserialized arguments required to start the flow.
 public class IOUTransferFlowArgs {
 
     private String newLender;

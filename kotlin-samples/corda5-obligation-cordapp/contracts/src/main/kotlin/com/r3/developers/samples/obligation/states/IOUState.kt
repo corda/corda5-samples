@@ -10,6 +10,7 @@ import java.util.*
 //Link with the Contract class
 @BelongsToContract(IOUContract::class)
 data class IOUState (
+
     //private variables
     val amount: Int,
     val lender: MemberX500Name,
