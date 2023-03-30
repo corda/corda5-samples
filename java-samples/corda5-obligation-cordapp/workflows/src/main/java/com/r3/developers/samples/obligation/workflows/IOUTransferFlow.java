@@ -71,7 +71,7 @@ public class IOUTransferFlow implements ClientStartableFlow {
             List<StateAndRef<IOUState>> iouStateAndRefsWithId = iouStateAndRefs.stream()
                     .filter(sar -> sar.getState().getContractState().getLinearId().equals(iouID)).collect(toList());
 
-            if (iouStateAndRefsWithId.size() != 1) throw new CordaRuntimeException("Multiple or zero Chat states with id " + iouID + " found");
+            if (iouStateAndRefsWithId.size() != 1) throw new CordaRuntimeException("Multiple or zero IOU states with id " + iouID + " found");
             StateAndRef<IOUState> iouStateAndRef = iouStateAndRefsWithId.get(0);
             Party notary = iouStateAndRef.getState().getNotary();
 
@@ -86,7 +86,6 @@ public class IOUTransferFlow implements ClientStartableFlow {
 
             // Create the IOUState from the input arguments and member information.
             IOUState iouOutput = iouInput.withNewLender(newLenderInfo.getName(), Arrays.asList(borrower.getLedgerKeys().get(0), newLenderInfo.getLedgerKeys().get(0)));
-            log.info("iouOutput withNewLender Done");
 
             // Use UTXOTransactionBuilder to build up the draft transaction.
             UtxoTransactionBuilder txBuilder = ledgerService.getTransactionBuilder()
@@ -99,9 +98,7 @@ public class IOUTransferFlow implements ClientStartableFlow {
 
             // Convert the transaction builder to a UTXOSignedTransaction and sign with this Vnode's first Ledger key.
             // Note, toSignedTransaction() is currently a placeholder method, hence being marked as deprecated.
-            log.info("UtxoTransactionBuilder Done");
             UtxoSignedTransaction signedTransaction = txBuilder.toSignedTransaction();
-            log.info("toSignedTransaction Done");
 
             // Call FinalizeIOUSubFlow which will finalise the transaction.
             // If successful the flow will return a String of the created transaction id,

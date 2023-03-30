@@ -10,9 +10,11 @@ import java.security.PublicKey;
 import java.util.List;
 import java.util.UUID;
 
+//Link with the Contract class
 @BelongsToContract(IOUContract.class)
 public class IOUState implements ContractState {
 
+    //private variables
     public final int amount;
     public final MemberX500Name lender;
     public final MemberX500Name borrower;
@@ -65,11 +67,13 @@ public class IOUState implements ContractState {
         return participants;
     }
 
+    //Helper method for settle flow
     public IOUState pay(int amountToPay) {
         int newAmountPaid = this.paid + (amountToPay);
         return new IOUState(amount, lender, borrower, newAmountPaid,this.linearId,this.participants);
     }
 
+    //Helper method for transfer flow
     public IOUState withNewLender(MemberX500Name newLender, List<PublicKey> newParticipants) {
         return new IOUState(amount, newLender, borrower, paid,linearId,newParticipants);
     }

@@ -1,4 +1,4 @@
-//package com.r3.developers.csdetemplate.flowexample.workflows;
+package com.r3.developers.samples.obligation;
 //
 //import net.corda.simulator.RequestData;
 //import net.corda.simulator.SimulatedVirtualNode;
