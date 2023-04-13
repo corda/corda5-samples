@@ -52,7 +52,7 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Ali
 }
 ```
 
-After trigger the create-chat flow, hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the short 
+Now hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the short 
 hash(Alice's hash) and clientrequestid to view the flow result
 
 ##Stop corda 
