@@ -12,14 +12,6 @@ RUNTIME_OS=~/Corda/corda5/corda-runtime-os
 
 echo "\n---Create a mock CA and signing keys---"
 cd "$WORK_DIR"
-#Generate a signing key:
-keytool -genkeypair -alias "signing key 1" -keystore signingkeys.pfx -storepass "keystore password" -dname "cn=CPI Plugin Example - Signing Key 1, o=R3, L=London, c=GB" -keyalg RSA -storetype pkcs12 -validity 4000
-#Import gradle-plugin-default-key.pem into the keystore
-keytool -importcert -keystore signingkeys.pfx -storepass "keystore password" -noprompt -alias gradle-plugin-default-key -file gradle-plugin-default-key.pem
-cd "$RUNTIME_OS"
-./gradlew :applications:tools:p2p-test:fake-ca:clean :applications:tools:p2p-test:fake-ca:appJar
-java -jar ./applications/tools/p2p-test/fake-ca/build/bin/corda-fake-ca-5.0.0.0-Gecko-SNAPSHOT.jar -m /tmp/ca -a RSA -s 3072 ca
-cd "$WORK_DIR"
 #default signing key
 echo '-----BEGIN CERTIFICATE-----
 MIIB7zCCAZOgAwIBAgIEFyV7dzAMBggqhkjOPQQDAgUAMFsxCzAJBgNVBAYTAkdC
@@ -34,6 +26,15 @@ VR0OBBYEFLMkL2nlYRLvgZZq7GIIqbe4df4pMAwGCCqGSM49BAMCBQADSAAwRQIh
 ALB0ipx6EplT1fbUKqgc7rjH+pV1RQ4oKF+TkfjPdxnAAiArBdAI15uI70wf+xlL
 zU+Rc5yMtcOY4/moZUq36r0Ilg==
 -----END CERTIFICATE-----' > ./gradle-plugin-default-key.pem
+#Generate a signing key:
+keytool -genkeypair -alias "signing key 1" -keystore signingkeys.pfx -storepass "keystore password" -dname "cn=CPI Plugin Example - Signing Key 1, o=R3, L=London, c=GB" -keyalg RSA -storetype pkcs12 -validity 4000
+#Import gradle-plugin-default-key.pem into the keystore
+keytool -importcert -keystore signingkeys.pfx -storepass "keystore password" -noprompt -alias gradle-plugin-default-key -file gradle-plugin-default-key.pem
+cd "$RUNTIME_OS"
+./gradlew :applications:tools:p2p-test:fake-ca:clean :applications:tools:p2p-test:fake-ca:appJar
+java -jar ./applications/tools/p2p-test/fake-ca/build/bin/corda-fake-ca-5.0.0.0-Gecko-SNAPSHOT.jar -m /tmp/ca -a RSA -s 3072 ca
+cd "$WORK_DIR"
+
 
 echo "\n---Build mgm CPB---"
 cd "$RUNTIME_OS"
