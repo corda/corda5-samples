@@ -1,0 +1,22 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.25.0
+# ignores vulnerabilities until expiry date; change duration by modifying expiry date
+ignore:
+  SNYK-JAVA-ORGJETBRAINSKOTLIN-2393744:
+    - '*':
+        reason: >-
+          This vulnerability relates to information exposure via creation of
+          temporary files (via Kotlin functions) with insecure permissions.
+          Corda does not use any of the vulnerable functions so it is not
+          susceptible to this vulnerability
+        expires: 2023-06-19T17:08:41.029Z
+        created: 2023-02-02T17:08:41.032Z
+  SNYK-JAVA-ORGJETBRAINSKOTLIN-2628385:
+    - '*':
+        reason: >-
+          corda-simulator-runtime is a testRuntimeOnly dependency, as such this
+          dependency  will not be included in any cordaApp produced by the CSDE
+          project Template.
+        expires: 2023-06-19T17:09:11.451Z
+        created: 2023-02-02T17:09:11.455Z
+patch: {}

@@ -11,6 +11,7 @@ This is the Java Samples folder.
 ```
 .
 ├── README.md
-└── corda5-obligation-cordapp
+├── corda5-obligation-cordapp
+└── mgm-dynamic-network
 ```
 
