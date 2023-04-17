@@ -11,9 +11,6 @@ import net.corda.v5.ledger.utxo.transaction.UtxoTransactionValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-// See Chat CorDapp Design section of the getting started docs for a description of this flow.
-
 //@InitiatingBy declares the protocol which will be used to link the initiator to the responder.
 @InitiatedBy(protocol = "finalize-gold-protocol")
 public class FinalizeMintResponderFlow implements ResponderFlow {
@@ -27,7 +24,7 @@ public class FinalizeMintResponderFlow implements ResponderFlow {
     @Override
     public void call(FlowSession session) {
 
-        log.info("FinalizeChatResponderFlow1.call() called");
+        log.info("FinalizeMintResponderFlow.call() called");
 
         try {
             // Defines the lambda validator used in receiveFinality below.

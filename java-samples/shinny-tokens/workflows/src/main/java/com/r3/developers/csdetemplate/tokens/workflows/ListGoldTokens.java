@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
+// This flow is used to list all the gold tokens available in the vault.
 public class ListGoldTokens implements ClientStartableFlow {
 
     private final static Logger log = LoggerFactory.getLogger(ListGoldTokens.class);
