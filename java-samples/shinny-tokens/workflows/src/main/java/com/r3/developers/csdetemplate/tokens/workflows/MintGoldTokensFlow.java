@@ -5,7 +5,6 @@ import com.r3.developers.csdetemplate.utxoexample.states.GoldState;
 import net.corda.v5.application.flows.ClientRequestBody;
 import net.corda.v5.application.flows.ClientStartableFlow;
 import net.corda.v5.application.flows.CordaInject;
-import net.corda.v5.application.flows.FlowEngine;
 import net.corda.v5.application.marshalling.JsonMarshallingService;
 import net.corda.v5.application.membership.MemberLookup;
 import net.corda.v5.base.annotations.Suspendable;
@@ -34,7 +33,7 @@ import java.util.Objects;
 import static java.util.Objects.requireNonNull;
 import static net.corda.v5.crypto.DigestAlgorithmName.SHA2_256;
 
-// See Chat CorDapp Design section of the getting started docs for a description of this flow.
+// Alice will trigger this flow, by specifying the issuer. The issuer will issue tokens worth of given amount to Alice.
 public class MintGoldTokensFlow implements ClientStartableFlow {
 
     private final static Logger log = LoggerFactory.getLogger(MintGoldTokensFlow.class);
@@ -51,11 +50,6 @@ public class MintGoldTokensFlow implements ClientStartableFlow {
 
     @CordaInject
     public NotaryLookup notaryLookup;
-
-    // FlowEngine service is required to run SubFlows.
-    @CordaInject
-    public FlowEngine flowEngine;
-
 
     @Suspendable
     @Override
@@ -111,9 +105,8 @@ public class MintGoldTokensFlow implements ClientStartableFlow {
             // the current node.
             UtxoSignedTransaction signedTransaction = txBuilder.toSignedTransaction();
 
-            // Call FinalizeChatSubFlow which will finalise the transaction.
-            // If successful the flow will return a String of the created transaction id,
-            // if not successful it will return an error message.
+            // Call FinalizeChatSubFlow which will finalise the transaction.There is no counter-party from whom
+            // we have to take signature and hence we will not pass any flow sessions.
             UtxoSignedTransaction finalizedSignedTransaction = ledgerService.finalize(
                     signedTransaction,
                     Arrays.asList()

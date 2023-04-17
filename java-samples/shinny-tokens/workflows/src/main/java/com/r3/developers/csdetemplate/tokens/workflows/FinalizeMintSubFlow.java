@@ -38,14 +38,14 @@ public class FinalizeMintSubFlow implements SubFlow<String> {
     @Suspendable
     public String call() {
 
-        log.info("FinalizeChatFlow.call() called");
+        log.info("FinalizeMintSubFlow.call() called");
 
         // Initiates a session with the other Member.
         FlowSession session = flowMessaging.initiateFlow(otherMember);
 
         // Calls the Corda provided finalise() function which gather signatures from the counterparty,
         // notarises the transaction and persists the transaction to each party's vault.
-        // On success returns the id of the transaction created. (This is different to the ChatState id)
+        // On success returns the id of the transaction created.
         String result;
         try {
             List<FlowSession> sessionsList = Arrays.asList(session);
