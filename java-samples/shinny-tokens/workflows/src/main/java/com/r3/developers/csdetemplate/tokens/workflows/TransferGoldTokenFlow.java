@@ -40,6 +40,8 @@ import java.util.stream.Collectors;
 import static java.util.Objects.requireNonNull;
 import static net.corda.v5.crypto.DigestAlgorithmName.SHA2_256;
 
+// This flow will be triggered by Alice to transfer some of his tokens to Charlie. The remaining
+// amount of tokens will be given back as change to Alice.
 public class TransferGoldTokenFlow implements ClientStartableFlow {
 
     private final static Logger log = LoggerFactory.getLogger(TransferGoldTokenFlow.class);
@@ -53,6 +55,7 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
     @CordaInject
     public NotaryLookup notaryLookup;
 
+    // Token Selection API can be injected with CordaInject
     @CordaInject
     public TokenSelection tokenSelection;
 
@@ -75,11 +78,13 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
 
             MemberInfo myInfo = memberLookup.myInfo();
 
+            // Take the new owner of the token whom Alice will transfer the token
             MemberInfo newOwnerMember = requireNonNull(
                     memberLookup.lookup(MemberX500Name.parse(flowArgs.getNewOwner())),
                     "MemberLookup can't find otherMember specified in flow arguments."
             );
 
+            // Get the issuer of the token
             MemberInfo issuerMember = requireNonNull(
                     memberLookup.lookup(MemberX500Name.parse(flowArgs.getIssuer())),
                     "MemberLookup can't find otherMember specified in flow arguments."
@@ -100,6 +105,7 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
                 throw new CordaRuntimeException("No notary PublicKey found");
             }
 
+            // Create the token claim criteria by specifying the issuer and amount
             TokenClaimCriteria tokenClaimCriteria = new TokenClaimCriteria(
                     GoldState.class.getName(),
                     getSecureHash(issuerMember.getName().getCommonName()),
@@ -108,6 +114,9 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
                     new BigDecimal(flowArgs.getValue())
             );
 
+            // tryClaim will check in the vault if there are tokens which can satisfy the expected amount.
+            // If yes all the fungible tokens are returned back.
+            // Remaining change will be returned back to the sender.
             tokenClaim = tokenSelection.tryClaim(tokenClaimCriteria);
 
             if(tokenClaim == null) {
@@ -117,11 +126,13 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
 
             List<ClaimedToken> claimedTokenList = tokenClaim.getClaimedTokens().stream().collect(Collectors.toList());
 
+            // calculate the change to be given back to the sender
             totalAmount = claimedTokenList.stream().map(ClaimedToken::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
             change = totalAmount.subtract(new BigDecimal(flowArgs.getValue()));
 
             log.info("Found total " + totalAmount + " amount of tokens for " + jsonMarshallingService.format(tokenClaimCriteria));
 
+            // create a new state representing the new owner and the expected amount.
             GoldState goldStateNew = new GoldState(getSecureHash(issuerMember.getName().getCommonName()),
                     flowArgs.getSymbol(), new BigDecimal(flowArgs.getValue()),
                     Arrays.asList(newOwnerMember.getLedgerKeys().get(0)),
@@ -129,7 +140,10 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
 
             UtxoTransactionBuilder txBuilder = null;
 
+
             if(change.compareTo(BigDecimal.ZERO) > 0) {
+                // if there is change to be returned back to the sender, create a new gold state representing the original
+                // sender and the change.
                 GoldState goldStateChange = new GoldState(getSecureHash(issuerMember.getName().getCommonName()),
                         flowArgs.getSymbol(), change,
                         Arrays.asList(myInfo.getLedgerKeys().get(0)),
@@ -143,6 +157,7 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
                         .addCommand(new GoldContract.Transfer())
                         .addSignatories(Arrays.asList(myInfo.getLedgerKeys().get(0), newOwnerMember.getLedgerKeys().get(0)));
             } else {
+                // if there is no change, no need to create state representing the change to be given back to the sender.
                 txBuilder = ledgerService.getTransactionBuilder()
                         .setNotary(new Party(notary.getName(), notaryKey))
                         .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
@@ -154,8 +169,6 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
 
             UtxoSignedTransaction signedTransaction = txBuilder.toSignedTransaction();
 
-           // flowEngine.subFlow(new FinalizeMintSubFlow(signedTransaction, issuerMember.getName()));
-            // calling the above gives an exception
             flowEngine.subFlow(new FinalizeMintSubFlow(signedTransaction, newOwnerMember.getName()));
 
         }
@@ -163,12 +176,13 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
             log.warn("Failed to process utxo flow for request body " + requestBody + " because: " + e.getMessage());
 
             log.info("Released the claim on the token states, indicating we spent none of them");
-
+            // None of the tokens were used, so release all the claimed tokens
             tokenClaim.useAndRelease(Arrays.asList());
 
             throw new CordaRuntimeException(e.getMessage());
         }
         finally {
+            // Remove any used tokens from the cache and unlocks any remaining tokens for other flows to claim.
             if(tokenClaim != null) {
                 log.info("Release the claim on the token states, indicating we spent them all");
 

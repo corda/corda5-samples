@@ -11,7 +11,6 @@ public class GoldStateList {
     private BigDecimal value;
     private SecureHash owner;
 
-
     public GoldStateList(SecureHash issuer, String symbol, BigDecimal value, SecureHash owner) {
         this.issuer = issuer;
         this.symbol = symbol;
