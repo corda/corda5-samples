@@ -6,7 +6,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.jpa'
     id 'java'
     id 'maven-publish'
-    id 'csde'
+    id 'net.corda.plugins.csde'
 }
 
 allprojects {
@@ -14,6 +14,25 @@ allprojects {
     version '1.0-SNAPSHOT'
 
     def javaVersion = VERSION_11
+
+    // Configure the CSDE
+    csde {
+        cordaClusterURL = "https://localhost:8888"
+        networkConfigFile = "config/static-network-config.json"
+        r3RootCertFile = "config/r3-ca-key.pem"
+        corDappCpiName = "MyCorDapp"
+        notaryCpiName = "NotaryServer"
+        cordaRpcUser = "admin"
+        cordaRpcPasswd ="admin"
+        workflowsModuleName = workflowsModule
+        csdeWorkspaceDir = "workspace"
+        notaryVersion = cordaNotaryPluginsVersion
+        combinedWorkerVersion = combinedWorkerJarVersion
+        postgresJdbcVersion = "42.4.3"
+        cordaDbContainerName = "CSDEpostgresql"
+        cordaBinDir = "${System.getProperty("user.home")}/.corda/corda5"
+        cordaCliBinDir = "${System.getProperty("user.home")}/.corda/cli"
+    }
 
     // Declare the set of Java compiler options we need to build a CorDapp.
     tasks.withType(JavaCompile) {
@@ -25,7 +44,24 @@ allprojects {
 
     repositories {
         // All dependencies are held in Maven Central
+        mavenLocal()
         mavenCentral()
+
+        // R3 Internal repositories for dev
+        // Repository provides Corda 5 binaries that implement Corda-API.
+        // These will be made publicly available.
+        // Final location to be decided.
+        // Repository subject to change
+        maven {
+            url = "$artifactoryContextUrl/corda-os-maven"
+            authentication {
+                basic(BasicAuthentication)
+            }
+            credentials {
+                username = findProperty('cordaArtifactoryUsername') ?: System.getenv('CORDA_ARTIFACTORY_USERNAME')
+                password = findProperty('cordaArtifactoryPassword') ?: System.getenv('CORDA_ARTIFACTORY_PASSWORD')
+            }
+        }
     }
 
     tasks.withType(Test).configureEach {
@@ -37,7 +73,7 @@ allprojects {
 publishing {
     publications {
         maven(MavenPublication) {
-            artifactId "corda-CSDE-java-sample"
+            artifactId "ping-pong"
             groupId project.group
             artifact jar
     }

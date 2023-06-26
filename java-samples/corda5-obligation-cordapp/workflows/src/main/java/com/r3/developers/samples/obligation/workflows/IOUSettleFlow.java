@@ -12,7 +12,7 @@ import net.corda.v5.application.marshalling.JsonMarshallingService;
 import net.corda.v5.application.membership.MemberLookup;
 import net.corda.v5.base.annotations.Suspendable;
 import net.corda.v5.base.exceptions.CordaRuntimeException;
-import net.corda.v5.ledger.common.Party;
+import net.corda.v5.base.types.MemberX500Name;
 import net.corda.v5.ledger.utxo.StateAndRef;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import net.corda.v5.ledger.utxo.transaction.UtxoSignedTransaction;
@@ -84,10 +84,10 @@ public class IOUSettleFlow implements ClientStartableFlow {
             IOUState iouOutput = iouInput.pay(amountSettle);
 
             //get notary from input
-            Party notary = iouStateAndRef.getState().getNotary();
+            MemberX500Name notary = iouStateAndRef.getState().getNotaryName();
 
             // Use UTXOTransactionBuilder to build up the draft transaction.
-            UtxoTransactionBuilder txBuilder = ledgerService.getTransactionBuilder()
+            UtxoTransactionBuilder txBuilder = ledgerService.createTransactionBuilder()
                     .setNotary(notary)
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                     .addInputState(iouStateAndRef.getRef())

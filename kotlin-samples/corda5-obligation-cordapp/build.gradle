@@ -6,7 +6,7 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.jpa'
     id 'java'
     id 'maven-publish'
-    id 'csde'
+    id 'net.corda.plugins.csde'
 }
 
 allprojects {
@@ -14,6 +14,25 @@ allprojects {
     version '1.0-SNAPSHOT'
 
     def javaVersion = VERSION_11
+
+    // Configure the CSDE
+    csde {
+        cordaClusterURL = "https://localhost:8888"
+        networkConfigFile = "config/static-network-config.json"
+        r3RootCertFile = "config/r3-ca-key.pem"
+        corDappCpiName = "MyCorDapp"
+        notaryCpiName = "NotaryServer"
+        cordaRpcUser = "admin"
+        cordaRpcPasswd ="admin"
+        workflowsModuleName = workflowsModule
+        csdeWorkspaceDir = "workspace"
+        notaryVersion = cordaNotaryPluginsVersion
+        combinedWorkerVersion = combinedWorkerJarVersion
+        postgresJdbcVersion = "42.4.3"
+        cordaDbContainerName = "CSDEpostgresql"
+        cordaBinDir = "${System.getProperty("user.home")}/.corda/corda5"
+        cordaCliBinDir = "${System.getProperty("user.home")}/.corda/cli"
+    }
 
     // Declare the set of Kotlin compiler options we need to build a CorDapp.
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
@@ -44,8 +63,8 @@ allprojects {
 
     repositories {
         // All dependencies are held in Maven Central
-        mavenCentral()
         mavenLocal()
+        mavenCentral()
     }
 
     tasks.withType(Test).configureEach {
@@ -62,9 +81,4 @@ publishing {
                 artifact jar
          }
     }
-}
-
-clean.doFirst {
-    delete "${rootDir}/workspace/"
-    delete "${rootDir}/logs/"
 }

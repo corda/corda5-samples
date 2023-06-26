@@ -62,7 +62,7 @@ public class FinalizeIOUFlow {
                 UtxoSignedTransaction finalizedSignedTransaction = ledgerService.finalize(
                         signedTransaction,
                         sessionsList
-                );
+                ).getTransaction();
 
                 result = finalizedSignedTransaction.getId().toString();
                 log.info("Success! Response: " + result);
@@ -105,7 +105,7 @@ public class FinalizeIOUFlow {
                 // Calls receiveFinality() function which provides the responder to the finalise() function
                 // in the Initiating Flow. Accepts a lambda validator containing the business logic to decide whether
                 // responder should sign the Transaction.
-                UtxoSignedTransaction finalizedSignedTransaction = utxoLedgerService.receiveFinality(session, txValidator);
+                UtxoSignedTransaction finalizedSignedTransaction = utxoLedgerService.receiveFinality(session, txValidator).getTransaction();
                 log.info("Finished responder flow - " + finalizedSignedTransaction.getId());
             }
             // Soft fails the flow and log the exception.

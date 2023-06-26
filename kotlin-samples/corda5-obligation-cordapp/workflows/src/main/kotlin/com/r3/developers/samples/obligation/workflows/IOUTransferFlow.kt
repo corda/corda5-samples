@@ -72,10 +72,10 @@ class IOUTransferFlow: ClientStartableFlow {
             val iouOutput = iouInput.withNewLender(newLenderInfo.name, listOf(borrower.ledgerKeys[0],newLenderInfo.ledgerKeys[0]))
 
             //get notary from input
-            val notary = iouStateAndRef.state.notary
+            val notary = iouStateAndRef.state.notaryName
 
             // Use UTXOTransactionBuilder to build up the draft transaction.
-            val txBuilder= ledgerService.transactionBuilder
+            val txBuilder= ledgerService.createTransactionBuilder()
                 .setNotary(notary)
                 .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                 .addInputState(iouStateAndRef.ref)
