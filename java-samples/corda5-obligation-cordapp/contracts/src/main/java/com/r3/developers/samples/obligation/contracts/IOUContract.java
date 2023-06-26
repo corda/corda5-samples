@@ -13,11 +13,6 @@ import java.util.Set;
 
 public class IOUContract implements Contract {
 
-    @Override
-    public boolean isRelevant(ContractState state, Set<PublicKey> myKeys) {
-        return Contract.super.isRelevant(state, myKeys);
-    }
-
     //IOU Commands
     public static class Issue implements Command { }
     public static class Settle implements Command { }

@@ -1,5 +1,0 @@
-@Library('corda-shared-build-pipeline-steps@5.0') _
-
-cordaNexusScanPipeline(
-    nexusAppId: 'com.corda.CSDE-Java.5.0'
-)

@@ -12,7 +12,6 @@ import net.corda.v5.base.annotations.Suspendable;
 import net.corda.v5.base.exceptions.CordaRuntimeException;
 import net.corda.v5.base.types.MemberX500Name;
 import net.corda.v5.ledger.common.NotaryLookup;
-import net.corda.v5.ledger.common.Party;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import net.corda.v5.ledger.utxo.transaction.UtxoSignedTransaction;
 import net.corda.v5.ledger.utxo.transaction.UtxoTransactionBuilder;
@@ -100,8 +99,8 @@ public class IOUIssueFlow implements ClientStartableFlow {
             }
 
             // Use UTXOTransactionBuilder to build up the draft transaction.
-            UtxoTransactionBuilder txBuilder = ledgerService.getTransactionBuilder()
-                    .setNotary(new Party(notary.getName(), notaryKey))
+            UtxoTransactionBuilder txBuilder = ledgerService.createTransactionBuilder()
+                    .setNotary(notary.getName())
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                     .addOutputState(iou)
                     .addCommand(new IOUContract.Issue())

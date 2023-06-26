@@ -81,3 +81,6 @@ bin/
 *.cpb
 *.cpk
 workspace/**
+
+# ingore temporary data files
+*.dat

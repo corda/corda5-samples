@@ -81,8 +81,6 @@ bin/
 *.cpb
 *.cpk
 workspace/**
-#CordaPID.dat
-#*.pem
-#*.pfx
-#CPIFileStatus*.json
-#GroupPolicy.json
+
+# ingore temporary data files
+*.dat

@@ -12,7 +12,6 @@ import net.corda.v5.application.membership.MemberLookup;
 import net.corda.v5.base.annotations.Suspendable;
 import net.corda.v5.base.exceptions.CordaRuntimeException;
 import net.corda.v5.base.types.MemberX500Name;
-import net.corda.v5.ledger.common.Party;
 import net.corda.v5.ledger.utxo.StateAndRef;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import net.corda.v5.ledger.utxo.transaction.UtxoSignedTransaction;
@@ -88,10 +87,10 @@ public class IOUTransferFlow implements ClientStartableFlow {
             IOUState iouOutput = iouInput.withNewLender(newLenderInfo.getName(), Arrays.asList(borrower.getLedgerKeys().get(0), newLenderInfo.getLedgerKeys().get(0)));
 
             //get notary from input
-            Party notary = iouStateAndRef.getState().getNotary();
+            MemberX500Name notary = iouStateAndRef.getState().getNotaryName();
 
             // Use UTXOTransactionBuilder to build up the draft transaction.
-            UtxoTransactionBuilder txBuilder = ledgerService.getTransactionBuilder()
+            UtxoTransactionBuilder txBuilder = ledgerService.createTransactionBuilder()
                     .setNotary(notary)
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                     .addInputState(iouStateAndRef.getRef())

@@ -12,7 +12,6 @@ import net.corda.v5.base.annotations.Suspendable
 import net.corda.v5.base.exceptions.CordaRuntimeException
 import net.corda.v5.base.types.MemberX500Name
 import net.corda.v5.ledger.common.NotaryLookup
-import net.corda.v5.ledger.common.Party
 import net.corda.v5.ledger.utxo.UtxoLedgerService
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -80,8 +79,8 @@ class IOUIssueFlow: ClientStartableFlow {
                 ?: throw CordaRuntimeException("NotaryLookup can't find notary specified in flow arguments.")
 
             // Use UTXOTransactionBuilder to build up the draft transaction.
-            val txBuilder= ledgerService.transactionBuilder
-                .setNotary(Party(notary.name, notary.publicKey))
+            val txBuilder= ledgerService.createTransactionBuilder()
+                .setNotary(notary.name)
                 .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                 .addOutputState(iou)
                 .addCommand(IOUContract.Issue())
