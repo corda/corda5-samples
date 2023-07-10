@@ -20,7 +20,7 @@ This CorDapp allows two nodes to enter into an IOU agreement, but enforces that 
 ### Running the app
 
 In Corda 5, flows will be triggered via `POST /flow/{holdingidentityshorthash}` and flow result will need to be view at `GET /flow/{holdingidentityshorthash}/{clientrequestid}`
-* holdingidentityshorthash: the id of the network participants, ie Bob, Alice, Charlie. You can view all the short hashes of the network member with another gradle task called `ListVNodes`
+* holdingidentityshorthash: the id of the network participants, ie SanctionBody, Bob, Charlie and DodgyParty. You can view all the short hashes of the network member with another gradle task called `ListVNodes`
 * clientrequestid: the id you specify in the flow requestBody when you trigger a flow.
 
 
@@ -36,7 +36,7 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(San
       }
     }
 
-Now that the sanctions list has been made, Next, we want to issue an IOU. Pick Alice VNode identity to issue the sanctions list.
+Now that the sanctions list has been made, Next, we want to issue an IOU. Pick Bob VNode identity to issue the IOU.
 Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Bob's hash) and request body:
 
     {
