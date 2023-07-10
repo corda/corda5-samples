@@ -110,7 +110,7 @@ public class IOUIssueFlow implements ClientStartableFlow {
   "flowClassName": "com.r3.developers.samples.referencestate.workflows.IOUIssueFlow",
   "requestBody": {
     "iouValue": 100,
-    "otherParty": "CN=Dave, OU=Test Dept, O=R3, L=London, C=GB",
+    "otherParty": "CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB",
     "sanctionsBody": "CN=SanctionsBody, OU=Test Dept, O=R3, L=London, C=GB"
   }
 }
