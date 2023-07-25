@@ -46,22 +46,6 @@ allprojects {
         // All dependencies are held in Maven Central
         mavenLocal()
         mavenCentral()
-
-        // R3 Internal repositories for dev
-        // Repository provides Corda 5 binaries that implement Corda-API.
-        // These will be made publicly available.
-        // Final location to be decided.
-        // Repository subject to change
-        maven {
-            url = "$artifactoryContextUrl/corda-os-maven"
-            authentication {
-                basic(BasicAuthentication)
-            }
-            credentials {
-                username = findProperty('cordaArtifactoryUsername') ?: System.getenv('CORDA_ARTIFACTORY_USERNAME')
-                password = findProperty('cordaArtifactoryPassword') ?: System.getenv('CORDA_ARTIFACTORY_PASSWORD')
-            }
-        }
     }
 
     tasks.withType(Test).configureEach {
