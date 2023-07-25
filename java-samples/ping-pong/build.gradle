@@ -10,7 +10,7 @@ plugins {
 }
 
 allprojects {
-    group 'net.corda.samples'
+    group 'com.r3.developers.csdetemplate'
     version '1.0-SNAPSHOT'
 
     def javaVersion = VERSION_11
@@ -46,22 +46,6 @@ allprojects {
         // All dependencies are held in Maven Central
         mavenLocal()
         mavenCentral()
-
-        // R3 Internal repositories for dev
-        // Repository provides Corda 5 binaries that implement Corda-API.
-        // These will be made publicly available.
-        // Final location to be decided.
-        // Repository subject to change
-        maven {
-            url = "$artifactoryContextUrl/corda-os-maven"
-            authentication {
-                basic(BasicAuthentication)
-            }
-            credentials {
-                username = findProperty('cordaArtifactoryUsername') ?: System.getenv('CORDA_ARTIFACTORY_USERNAME')
-                password = findProperty('cordaArtifactoryPassword') ?: System.getenv('CORDA_ARTIFACTORY_PASSWORD')
-            }
-        }
     }
 
     tasks.withType(Test).configureEach {
@@ -73,11 +57,10 @@ allprojects {
 publishing {
     publications {
         maven(MavenPublication) {
-            artifactId "ping-pong"
+            artifactId "corda-CSDE-java-sample"
             groupId project.group
             artifact jar
+        }
+
     }
-
-   }
 }
-
