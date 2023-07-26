@@ -10,7 +10,7 @@ plugins {
 }
 
 allprojects {
-    group 'net.corda.samples'
+    group 'com.r3.developers.csdetemplate'
     version '1.0-SNAPSHOT'
 
     def javaVersion = VERSION_11
@@ -75,10 +75,10 @@ allprojects {
 
 publishing {
     publications {
-            maven(MavenPublication) {
-                artifactId "corda5-obligation-cordapp"
-                groupId project.group
-                artifact jar
-         }
+        maven(MavenPublication) {
+            artifactId "corda-CSDE-kotlin-sample"
+            groupId project.group
+            artifact jar
+        }
     }
 }

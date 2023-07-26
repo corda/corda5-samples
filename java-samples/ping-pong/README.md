@@ -45,7 +45,7 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Ali
 ```
 {
   "clientRequestId": "ping-1",
-  "flowClassName": "Ping",
+  "flowClassName": "com.r3.developers.pingpong.workflows.Ping",
   "requestBody": {
     "otherMember": "CN=Bob, OU=Test Dept, O=R3, L=London, C=GB"
   }
