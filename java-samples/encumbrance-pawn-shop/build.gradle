@@ -1,0 +1,67 @@
+import static org.gradle.api.JavaVersion.VERSION_11
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'net.corda.cordapp.cordapp-configuration'
+    id 'org.jetbrains.kotlin.plugin.jpa'
+    id 'java'
+    id 'maven-publish'
+    id 'net.corda.plugins.csde'
+}
+
+allprojects {
+    group 'com.r3.developers.csdetemplate'
+    version '1.0-SNAPSHOT'
+
+    def javaVersion = VERSION_11
+
+    // Configure the CSDE
+    csde {
+        cordaClusterURL = "https://localhost:8888"
+        networkConfigFile = "config/static-network-config.json"
+        r3RootCertFile = "config/r3-ca-key.pem"
+        corDappCpiName = "MyCorDapp"
+        notaryCpiName = "NotaryServer"
+        cordaRpcUser = "admin"
+        cordaRpcPasswd ="admin"
+        workflowsModuleName = workflowsModule
+        csdeWorkspaceDir = "workspace"
+        notaryVersion = cordaNotaryPluginsVersion
+        combinedWorkerVersion = combinedWorkerJarVersion
+        postgresJdbcVersion = "42.4.3"
+        cordaDbContainerName = "CSDEpostgresql"
+        cordaBinDir = "${System.getProperty("user.home")}/.corda/corda5"
+        cordaCliBinDir = "${System.getProperty("user.home")}/.corda/cli"
+    }
+
+    // Declare the set of Java compiler options we need to build a CorDapp.
+    tasks.withType(JavaCompile) {
+        // -parameters - Needed for reflection and serialization to work correctly.
+        options.compilerArgs += [
+                "-parameters"
+        ]
+    }
+
+    repositories {
+        // All dependencies are held in Maven Central
+        mavenLocal()
+        mavenCentral()
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+    }
+
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifactId "corda-CSDE-java-sample"
+            groupId project.group
+            artifact jar
+    }
+
+   }
+}
+
