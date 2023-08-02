@@ -6,6 +6,10 @@ import net.corda.v5.base.types.MemberX500Name;
 
 import java.security.PublicKey;
 
+/**
+ * This class encompasses a participants X500 name and its key. This is used in the contract to conveniently
+ * get the key corresponding to a participant, so it can be checked for required signatures.
+ */
 @CordaSerializable
 public class Member {
     private MemberX500Name name;
