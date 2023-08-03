@@ -23,11 +23,20 @@ import java.time.temporal.ChronoUnit
 data class QueryPrimeRequest(val n: Int)
 
 @CordaSerializable
-data class QueryPrimeResponse(val n: Int)
+data class QueryPrimeResponse(val nthPrime: Int)
 
+// This is the client-side workflow that get called first, and will:
+// - set up and identify the corda notary service and the independently written prime service
+// - call the QueryPrimeSubFlow to calculate the Nth prime
+// - use the result of the QueryPrimeSubFlow to create a proposedUtxoTransaction
+// - (while this is happening, the Contract for the State verifies the transaction)
+// - sign the proposedUtxoTransaction
+// - call the FinalizePrimeSubFlow to finalize the transaction
+// - return the proposedUtxoTransaction state's as a string to give the Nth prime given index n
 @InitiatingFlow(protocol = "create-prime")
 class CreatePrime(): ClientStartableFlow {
 
+    //
     private data class CreatePrimeRequest(
         val index: Int
     )
@@ -82,10 +91,10 @@ class CreatePrime(): ClientStartableFlow {
         val primeCommandData = PrimeCommands.Create(index,nthPrimeResult)
         val primeCommandRequiredSigners = listOf(primeServiceIdentity, ourIdentity)
 
-        log.info(VERIFYING_THE_TX) //this happens when the contractState is fed to the .addOutputState() method
+        log.info(VERIFYING_THE_TX)
         val transaction = ledgerService.createTransactionBuilder()
             .setNotary(notary.name)
-            .addOutputState(primeState)
+            .addOutputState(primeState) //verification happens under the hood here
             .addCommand(primeCommandData)
             .setTimeWindowUntil(Instant.now().plus(1,ChronoUnit.DAYS))
             .addSignatories(primeCommandRequiredSigners)

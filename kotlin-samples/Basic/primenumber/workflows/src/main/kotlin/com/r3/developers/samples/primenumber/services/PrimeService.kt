@@ -7,7 +7,7 @@ class MaxSizeHashMap<K, V>(private val maxSize: Int = 1024) : LinkedHashMap<K, V
     override fun removeEldestEntry(eldest: Map.Entry<K, V>?) = size > maxSize
 }
 
-class PrimeService() { //SingletonSerializeAsToken
+class PrimeService() {
 
     private val cache = MaxSizeHashMap<Int,Int>()
 

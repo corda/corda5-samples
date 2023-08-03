@@ -9,6 +9,8 @@ import net.corda.v5.base.exceptions.CordaRuntimeException
 import net.corda.v5.base.types.MemberX500Name
 import org.slf4j.LoggerFactory
 
+// This class initiates the subflow session with the primeService vNode requesting for the Nth prime given index n
+// then receives the message from the corresponding subflow and returns the
 @InitiatingFlow(protocol = "query-prime")
 class QueryPrimeSubFlow(private val primeService: MemberX500Name, private val n: Int): SubFlow<Int> {
 
@@ -29,10 +31,12 @@ class QueryPrimeSubFlow(private val primeService: MemberX500Name, private val n:
         val message = QueryPrimeRequest(n)
         val receivedMessage = session.sendAndReceive(QueryPrimeResponse::class.java,message)
 
-        return receivedMessage.n
+        return receivedMessage.nthPrime
     }
 }
 
+// This class handles the initiating flow to request for the Nth prime, calls the primeService's queryNthPrime method
+// and returns the response back to the initiating QueryPrimeSubFlow subflow
 @InitiatedBy(protocol = "query-prime")
 class QueryPrimeResponderSubFlow(): ResponderFlow {
 
