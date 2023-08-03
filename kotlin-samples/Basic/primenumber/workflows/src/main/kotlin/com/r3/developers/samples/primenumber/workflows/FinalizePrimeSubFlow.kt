@@ -16,6 +16,8 @@ import net.corda.v5.ledger.utxo.UtxoLedgerService
 import net.corda.v5.ledger.utxo.transaction.UtxoSignedTransaction
 import org.slf4j.LoggerFactory
 
+// This class creates a flow session with the primeService virtual node to request for its verification and signature
+// If successful, the sub-flow will return the transaction id and log the successful signed transaction
 @InitiatingFlow(protocol = "finalize-prime")
 class FinalizePrimeSubFlow(private val signedTransaction: UtxoSignedTransaction, private val primeServiceName: MemberX500Name):
     SubFlow<SecureHash> {
@@ -51,6 +53,7 @@ class FinalizePrimeSubFlow(private val signedTransaction: UtxoSignedTransaction,
     }
 }
 
+// This class handles the flow session messages sent by the initiating subflow that requested for transaction finalization
 @InitiatedBy(protocol = "finalize-prime")
 class FinalizePrimeResponderSubFlow: ResponderFlow {
 
@@ -70,6 +73,7 @@ class FinalizePrimeResponderSubFlow: ResponderFlow {
         log.info(FLOW_CALL)
 
         try{
+            //[receiveFinality] will automatically verify the transaction and its signatures before signing it.
             val finalizedSignedTransaction = ledgerService.receiveFinality(session) { transaction ->
                 log.info(PRIME_SERVICE_SIGNS)
                 transaction.getOutputStates(Prime::class.java).singleOrNull() ?:throw CordaRuntimeException("Failed verification")

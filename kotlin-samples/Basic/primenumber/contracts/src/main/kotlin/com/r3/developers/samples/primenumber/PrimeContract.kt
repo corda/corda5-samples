@@ -21,6 +21,8 @@ class PrimeContract: Contract {
         when(command) {
             is PrimeCommands.Create -> {
                 NON_MATCHING using {
+                    // This checks that the information in the command matches the state
+                    // This does NOT check that the Nth prime is correct
                     (command.n == output.n && command.nthPrime == output.nthPrime)
                 }
             }

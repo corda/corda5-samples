@@ -5,8 +5,10 @@ import net.corda.v5.ledger.utxo.ContractState
 import java.security.PublicKey
 
 
+// Links the state "Prime" with the PrimeContract Contract class
 @BelongsToContract(PrimeContract::class)
 class Prime(
+    // The nthPrime is the indexed prime number defined by n
     val n: Int,
     val nthPrime: Int,
     private val participants: List<PublicKey>
