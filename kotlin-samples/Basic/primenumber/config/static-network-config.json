@@ -21,7 +21,7 @@
     "serviceX500Name": "CN=NotaryService, OU=Test Dept, O=R3, L=London, C=GB"
   },
   {
-    "x500Name" : "CN=Oracle, OU=Test Dept, O=R3, L=London, C=GB",
+    "x500Name" : "CN=PrimeService, OU=Test Dept, O=R3, L=London, C=GB",
     "cpi" : "MyCorDapp"
   }
 ]

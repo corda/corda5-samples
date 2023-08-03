@@ -8,13 +8,14 @@ import java.lang.IllegalArgumentException
 class PrimeContract: Contract {
 
     internal companion object {
-        const val REQUIRE_SINGLE_COMMAND = "Requires a single command."
-        const val UNRECOGNISED_COMMAND = "Incorrect type of Prime command"
+        const val REQUIRE_SINGLE_COMMAND = "Requires a single PrimeCommands command."
+        const val UNRECOGNISED_COMMAND = "Incorrect type of PrimeCommands"
         const val NON_MATCHING = "The prime in the output does not match the prime in the command."
     }
 
     override fun verify(transaction: UtxoLedgerTransaction) {
-        val command = transaction.commands.singleOrNull() ?: throw CordaRuntimeException(REQUIRE_SINGLE_COMMAND)
+
+        val command = transaction.getCommands(PrimeCommands::class.java).singleOrNull() ?: throw CordaRuntimeException(REQUIRE_SINGLE_COMMAND)
         val output = transaction.getOutputStates(Prime::class.java).first()
 
         when(command) {
@@ -32,5 +33,4 @@ class PrimeContract: Contract {
     private infix fun String.using(expr: () -> Boolean) {
         if (!expr.invoke()) throw CordaRuntimeException("Failed requirement: $this")
     }
-
 }

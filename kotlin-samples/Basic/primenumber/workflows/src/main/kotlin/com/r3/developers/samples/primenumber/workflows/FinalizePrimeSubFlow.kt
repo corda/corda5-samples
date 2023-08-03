@@ -1,4 +1,4 @@
-package com.r3.developers.samples.primenumber.flows
+package com.r3.developers.samples.primenumber.workflows
 
 import com.r3.developers.samples.primenumber.Prime
 import net.corda.v5.application.flows.CordaInject
@@ -17,11 +17,15 @@ import net.corda.v5.ledger.utxo.transaction.UtxoSignedTransaction
 import org.slf4j.LoggerFactory
 
 @InitiatingFlow(protocol = "finalize-prime")
-class FinalizePrimeSubFlow(private val signedTransaction: UtxoSignedTransaction, private val oracleName: MemberX500Name):
+class FinalizePrimeSubFlow(private val signedTransaction: UtxoSignedTransaction, private val primeServiceName: MemberX500Name):
     SubFlow<SecureHash> {
 
         private companion object {
             val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
+
+            const val FLOW_CALL = "FinalizePrimeSubFlow.call() called"
+            const val FLOW_SUCCESS = "FinalizePrimeSubFlow.call() succeeded! Final Transaction Id: "
+            const val FLOW_FAIL = "FinalizePrimeSubFlow.call() transaction finality failed"
         }
 
     @CordaInject
@@ -32,17 +36,17 @@ class FinalizePrimeSubFlow(private val signedTransaction: UtxoSignedTransaction,
 
     @Suspendable
     override fun call(): SecureHash {
-        log.info("FinalizePrimeSubFlow.call() called")
+        log.info(FLOW_CALL)
 
-        val session = flowMessaging.initiateFlow(oracleName)
+        val session = flowMessaging.initiateFlow(primeServiceName)
 
         return try {
             val finalizedSignedTransaction = ledgerService.finalize(signedTransaction, listOf(session))
 
             finalizedSignedTransaction.transaction.id
-                .also {log.info("Success! Response: $it")}
+                .also {log.info(FLOW_SUCCESS + it)}
         } catch (e: Exception) {
-            throw CordaRuntimeException("Finality failed", e)
+            throw CordaRuntimeException(FLOW_FAIL, e)
         }
     }
 }
@@ -53,7 +57,9 @@ class FinalizePrimeResponderSubFlow: ResponderFlow {
     private companion object {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
 
-        const val ORACLE_SIGNS = "Requesting oracle signature."
+        const val PRIME_SERVICE_SIGNS = "Requesting PrimeService signature."
+        const val FLOW_CALL = "FinalizePrimeResponderSubFlow.call() called."
+        const val FLOW_FAIL = "FinalizePrimeResponderSubFlow.call() failed: "
     }
 
     @CordaInject
@@ -61,27 +67,16 @@ class FinalizePrimeResponderSubFlow: ResponderFlow {
 
     @Suspendable
     override fun call(session: FlowSession){
-        log.info("FinalizePrimeResponderSubFlow.call() called")
+        log.info(FLOW_CALL)
 
         try{
-            /*
-            * [receiveFinality] will automatically verify the transaction and its signatures before signing it.
-            * However, just because a transaction is contractually valid doesn't mean we necessarily want to sign.
-            * What if we don't want to deal with the counterparty in question, or the value is too high,
-            * or we're not happy with the transaction's structure? [UtxoTransactionValidator] (the lambda created
-            * here) allows us to define the additional checks. If any of these conditions are not met,
-            * we will not sign the transaction - even if the transaction and its signatures are contractually valid.
-            */
             val finalizedSignedTransaction = ledgerService.receiveFinality(session) { transaction ->
-                log.info(ORACLE_SIGNS)
-
-                transaction.getOutputStates(Prime::class.java).singleOrNull()
-                    ?:throw CordaRuntimeException("Failed verification")
+                log.info(PRIME_SERVICE_SIGNS)
+                transaction.getOutputStates(Prime::class.java).singleOrNull() ?:throw CordaRuntimeException("Failed verification")
             }
-        log.info("Transaction id ${finalizedSignedTransaction.transaction.id} verified: $finalizedSignedTransaction")
+            log.info("Transaction id ${finalizedSignedTransaction.transaction.id} verified: $finalizedSignedTransaction")
         } catch(e: Exception) {
-            log.warn("FinalizePrimeResponderSubFlow failed", e)
-            throw CordaRuntimeException("FinalizePrimeResponderSubFlow failed: ${e.message}")
+            throw CordaRuntimeException(FLOW_FAIL, e)
         }
     }
 }
