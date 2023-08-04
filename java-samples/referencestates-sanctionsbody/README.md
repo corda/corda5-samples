@@ -64,7 +64,7 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(San
 Now try an issue an IOU to DodgyParty. Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Bob's hash) and request body:
 
     {
-      "clientRequestId": "issue-iou",
+      "clientRequestId": "issue-iou-1",
       "flowClassName": "com.r3.developers.samples.referencestate.workflows.IOUIssueFlow",
       "requestBody": {
       "iouValue": 100,
