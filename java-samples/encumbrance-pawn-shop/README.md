@@ -57,9 +57,25 @@ Now request for a Loan from Bob, pick Alice VNode's identity again. Go to POST /
       "requestBody": {
          "lender": "CN=Bob, OU=Test Dept, O=R3, L=London, C=GB",
          "loanAmount": 1000,
-         "collateral": "<asset-id>", // Check Viewing Data in the Vault Section on get this
+         "collateral": "<asset-id>" // Check Viewing Data in the Vault Section on get this
       }
     }
+
+### Viewing Data in the Vault
+
+You could view the Loan and the Asset using the GetLoanFlow and GetAssetFlow respectively. The request body are as below:
+
+      {
+         "clientRequestId": "get-asset",
+         "flowClassName": "com.r3.developers.samples.encumbrance.workflows.GetAssetFlow",
+         "requestBody": {
+         }
+      }
+Replace the ```flowClassName``` with ```com.r3.developers.samples.encumbrance.workflows.GetLoanFlow``` to view the available Loans in the vault. Don't forget to change the client-id as well.
+
+Note that the Asset is encumbered. But Encumbrances should form a complete directed cycle,
+otherwise one can spend the "encumbrance" (Loan) state, which would freeze the "encumbered" (Asset) state forever.
+That's why Loan should also be dependent on Asset.
 
 ### Transfer Encumbered Asset (Should Fail)
 
@@ -75,21 +91,6 @@ Now try to transfer the Asset to Charlie, pick Alice VNode's identity. Go to POS
       }
 This would result in an error, since the Asset is encumbered with the Loan and hence locked until the loan is repaid.
 
-### Viewing Data in the Vault
-
-You could view the Loan and the Asset using the GetLoanFlow and GetAssetFlow respectively. The request body are as below:
-
-      {
-         "clientRequestId": "get-asset",
-         "flowClassName": "com.r3.developers.samples.encumbrance.workflows.GetAssetFlow",
-         "requestBody": {
-         }
-      }
-Replace the ```flowClassName``` with ```com.r3.developers.samples.encumbrance.workflows.GetLoanFlow``` to view the Loan's available in the vault.
-
-Note that the Asset is encumbered. But Encumbrances should form a complete directed cycle,
-otherwise one can spend the "encumbrance" (Loan) state, which would freeze the "encumbered" (Asset) state forever.
-That's why Loan should also be dependent on Asset.
 
 ### Settle The Loan
 
@@ -107,7 +108,7 @@ Now to settle the Loan, pick Alice's VNode's identity. Go to POST /flow/{holding
 Once the Loan is settled, the asset is unlocked and can be transferred. To transfer the asset to Charlie, pick Alice's VNode's identity. Go to POST /flow/{holdingidentityshorthash}, enter the identity short hash(Alice's hash) and request body:
 
       {
-      "clientRequestId": "transfer-asset",
+      "clientRequestId": "transfer-asset-second-try",
       "flowClassName": "com.r3.developers.samples.encumbrance.workflows.TransferAssetFlow",
          "requestBody": {
             "assetId": "<asset-id>",
