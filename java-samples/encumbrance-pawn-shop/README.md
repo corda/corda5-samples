@@ -18,6 +18,10 @@ This is a basic sample which shows how you can use encumbrance in Corda. For thi
 created on Corda. We will request for a loan using the asset as a collateral. The Asset will would thus be locked
 and cannot be transferred to another party till the loan has been repaid.
 
+<p align="center">
+  <img src="./encumbrance-sample.png" alt="EncumbranceSampleFlow">
+</p>
+
 ## Usage
 
 
@@ -35,7 +39,7 @@ In Corda 5, flows will be triggered via `POST /flow/{holdingidentityshorthash}` 
 * clientrequestid: the id you specify in the flow requestBody when you trigger a flow.
 
 
-### Crete The Asset
+### Create The Asset
 
 Pick the Alice VNode's identity to create the Asset. Go to POST /flow/{holdingidentityshorthash}, enter the identity short hash(Alice's hash) and request body:
 
