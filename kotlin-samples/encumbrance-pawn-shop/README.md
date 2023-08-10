@@ -61,7 +61,7 @@ Now request for a Loan from Bob, pick Alice VNode's identity again. Go to POST /
       "clientRequestId": "request-loan",
       "flowClassName": "com.r3.developers.samples.encumbrance.workflows.RequestLoanFlow",
       "requestBody": {
-         "lender": "CN=Bob, OU=Test Dept, O=R3, L=London, C=GB",
+         "lender": "CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB",
          "loanAmount": 1000,
          "collateral": "<asset-id>" // Check Viewing Data in the Vault Section on get this
       }
@@ -92,7 +92,7 @@ Now try to transfer the Asset to Charlie, pick Alice VNode's identity. Go to POS
          "flowClassName": "com.r3.developers.samples.encumbrance.workflows.TransferAssetFlow",
          "requestBody": {
             "assetId": "<asset-id>", // Check Viewing Data in the Vault Section on get this
-            "buyer": "CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB"
+            "buyer": "CN=Bob, OU=Test Dept, O=R3, L=London, C=GB"
          }
       }
 This would result in an error, since the Asset is encumbered with the Loan and hence locked until the loan is repaid.
@@ -118,7 +118,7 @@ Once the Loan is settled, the asset is unlocked and can be transferred. To trans
       "flowClassName": "com.r3.developers.samples.encumbrance.workflows.TransferAssetFlow",
          "requestBody": {
             "assetId": "<asset-id>",
-            "buyer": "CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB"
+            "buyer": "CN=Bob, OU=Test Dept, O=R3, L=London, C=GB"
          }
       }
-The transfer should not complete successfully.
+The transfer should now complete successfully.
