@@ -19,7 +19,7 @@ created on Corda. We will request for a loan using the asset as a collateral. Th
 and cannot be transferred to another party till the loan has been repaid.
 
 <p align="center">
-  <img src="./encumbrance-sample.png" alt="EncumbranceSampleFlow">
+  <img width="1000" alt="Encumbrance Flow" src="https://github.com/corda/corda5-samples/assets/52695915/0445431d-9aa8-4862-ba22-fc3b1e1c4cb8">
 </p>
 
 ## Usage
