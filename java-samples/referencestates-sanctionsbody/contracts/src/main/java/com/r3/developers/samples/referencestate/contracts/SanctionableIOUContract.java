@@ -2,7 +2,7 @@ package com.r3.developers.samples.referencestate.contracts;
 
 import com.r3.developers.samples.referencestate.states.Member;
 import com.r3.developers.samples.referencestate.states.SanctionableIOUState;
-import com.r3.developers.samples.referencestate.states.SanctionedEntities;
+import com.r3.developers.samples.referencestate.states.SanctionList;
 import net.corda.v5.base.exceptions.CordaRuntimeException;
 import net.corda.v5.base.types.MemberX500Name;
 import net.corda.v5.ledger.utxo.Command;
@@ -29,14 +29,14 @@ import java.util.stream.Collectors;
 public class SanctionableIOUContract implements Contract {
 
     public static class Create implements Command {
-        private MemberX500Name sanctionsBody;
+        private MemberX500Name sanctionAuthority;
 
-        public Create(MemberX500Name sanctionsBody) {
-            this.sanctionsBody = sanctionsBody;
+        public Create(MemberX500Name sanctionAuthority) {
+            this.sanctionAuthority = sanctionAuthority;
         }
 
-        public MemberX500Name getSanctionsBody() {
-            return sanctionsBody;
+        public MemberX500Name getsanctionAuthority() {
+            return sanctionAuthority;
         }
     }
 
@@ -56,12 +56,12 @@ public class SanctionableIOUContract implements Contract {
         Create command = transaction.getCommands(Create.class).get(0);
 
         requireThat(transaction.getReferenceStates(
-                SanctionedEntities.class).size() > 0, REQUIRES_SANCTIONED_ENTITY);
+                SanctionList.class).size() > 0, REQUIRES_SANCTIONED_ENTITY);
 
-        SanctionedEntities sanctionedEntities = transaction.getReferenceStates(SanctionedEntities.class).get(0);
+        SanctionList sanctionList = transaction.getReferenceStates(SanctionList.class).get(0);
         requireThat(
-                sanctionedEntities.getIssuer().getName().equals(command.getSanctionsBody()),
-                sanctionedEntities.getIssuer().getName().getOrganization() + " is an invalid issuer of " +
+                sanctionList.getIssuer().getName().equals(command.getsanctionAuthority()),
+                sanctionList.getIssuer().getName().getOrganization() + " is an invalid issuer of " +
                         "sanctions lists for this contracts."
         );
 
@@ -76,7 +76,7 @@ public class SanctionableIOUContract implements Contract {
         // IOU-specific constraints.
         requireThat(out.getValue()>0, REQUIRE_POSITIVE_IOU_VALUE);
 
-        List<PublicKey> sanctionedPK = sanctionedEntities.getBadPeople().stream().map(Member::getLedgerKey)
+        List<PublicKey> sanctionedPK = sanctionList.getBadPeople().stream().map(Member::getLedgerKey)
                 .collect(Collectors.toList());
         requireThat(!sanctionedPK.contains(out.getLender().getLedgerKey()),
                 "The lender " + out.getLender().getName() + " is a sanctioned entity");

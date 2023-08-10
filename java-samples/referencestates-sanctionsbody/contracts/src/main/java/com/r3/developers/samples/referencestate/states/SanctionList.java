@@ -1,6 +1,6 @@
 package com.r3.developers.samples.referencestate.states;
 
-import com.r3.developers.samples.referencestate.contracts.SanctionedEntitiesContract;
+import com.r3.developers.samples.referencestate.contracts.SanctionListContract;
 import net.corda.v5.base.annotations.ConstructorForDeserialization;
 import net.corda.v5.ledger.utxo.BelongsToContract;
 import net.corda.v5.ledger.utxo.ContractState;
@@ -16,8 +16,8 @@ import java.util.UUID;
  * A states must implement [ContractState] or one of its descendants.
  *
  */
-@BelongsToContract(SanctionedEntitiesContract.class)
-public class SanctionedEntities implements ContractState {
+@BelongsToContract(SanctionListContract.class)
+public class SanctionList implements ContractState {
 
     private List<Member> badPeople;
     private Member issuer;
@@ -26,14 +26,14 @@ public class SanctionedEntities implements ContractState {
     private List<PublicKey> participants;
 
     @ConstructorForDeserialization
-    public SanctionedEntities(List<Member> badPeople, Member issuer, UUID uniqueId, List<PublicKey> participants) {
+    public SanctionList(List<Member> badPeople, Member issuer, UUID uniqueId, List<PublicKey> participants) {
         this.badPeople = badPeople;
         this.issuer = issuer;
         this.uniqueId = uniqueId;
         this.participants = participants;
     }
 
-    public SanctionedEntities(List<Member> badPeople, Member issuer, List<PublicKey> participants) {
+    public SanctionList(List<Member> badPeople, Member issuer, List<PublicKey> participants) {
         this(badPeople, issuer, UUID.randomUUID(), participants);
     }
 

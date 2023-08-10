@@ -51,7 +51,6 @@ class IOUIssueFlow : ClientStartableFlow {
             val (iouValue, lenderName, sanctionAuthority) = requestBody.getRequestBodyAs(jsonMarshallingService,IOUIssueFlowArgs::class.java)
             val myInfo = memberLookup.myInfo()
             val lender =  memberLookup.lookup(lenderName) ?: throw CordaRuntimeException("MemberLookup can't find otherMember specified in flow arguments.")
-            val notary = notaryLookup.notaryServices.single()
 
             val sanctionsListToUse = getSanctionsList(sanctionAuthority) ?: throw CordaRuntimeException("The sanctionAuthority did not issue any sanction list")
 
@@ -60,8 +59,9 @@ class IOUIssueFlow : ClientStartableFlow {
                 Member(myInfo.name,myInfo.ledgerKeys[0])
             )
 
+            val notaryName = sanctionsListToUse.state.notaryName
             val txBuilder = ledgerService.createTransactionBuilder()
-                .setNotary(notary.name)
+                .setNotary(notaryName)
                 .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                 .addReferenceState(sanctionsListToUse.ref)
                 .addOutputState(iouState)

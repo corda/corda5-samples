@@ -91,7 +91,7 @@ To Get Sanction List:
 
     {
        "clientRequestId": "get-sanction",
-       "flowClassName": "com.r3.developers.samples.referencestate.workflows.GetSactionListFlow",
+       "flowClassName": "com.r3.developers.samples.referencestate.workflows.GetSanctionListFlow",
        "requestBody": {
        }
     }

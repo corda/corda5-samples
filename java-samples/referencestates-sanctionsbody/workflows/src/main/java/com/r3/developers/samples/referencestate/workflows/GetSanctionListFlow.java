@@ -1,7 +1,6 @@
 package com.r3.developers.samples.referencestate.workflows;
 
 import com.r3.developers.samples.referencestate.states.Member;
-import com.r3.developers.samples.referencestate.states.SanctionedEntities;
 import net.corda.v5.application.flows.ClientRequestBody;
 import net.corda.v5.application.flows.ClientStartableFlow;
 import net.corda.v5.application.flows.CordaInject;
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class GetSactionListFlow implements ClientStartableFlow {
+public class GetSanctionListFlow implements ClientStartableFlow {
 
     @CordaInject
     public JsonMarshallingService jsonMarshallingService;
@@ -29,7 +28,7 @@ public class GetSactionListFlow implements ClientStartableFlow {
     public String call(@NotNull ClientRequestBody requestBody) {
 
         List<SanctionList> sanctionList =
-                ledgerService.findUnconsumedStatesByType(SanctionedEntities.class).stream().map(
+                ledgerService.findUnconsumedStatesByType(com.r3.developers.samples.referencestate.states.SanctionList.class).stream().map(
                         it-> new SanctionList(
                                 it.getState().getContractState().getBadPeople().stream().map(Member::getName)
                                         .collect(Collectors.toList()),
