@@ -44,8 +44,8 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Bob
       "flowClassName": "com.r3.developers.samples.referencestate.workflows.IOUIssueFlow",
       "requestBody": {
       "iouValue": 100,
-      "otherParty": "CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB",
-      "sanctionsBody": "CN=SanctionsBody, OU=Test Dept, O=R3, L=London, C=GB"
+      "lenderName": "CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB",
+      "sanctionAuthority": "CN=SanctionsBody, OU=Test Dept, O=R3, L=London, C=GB"
       }
     }
 
@@ -68,8 +68,8 @@ Now try an issue an IOU to DodgyParty. Go to `POST /flow/{holdingidentityshortha
       "flowClassName": "com.r3.developers.samples.referencestate.workflows.IOUIssueFlow",
       "requestBody": {
       "iouValue": 100,
-      "otherParty": "CN=DodgyParty, OU=Test Dept, O=R3, L=London, C=GB",
-      "sanctionsBody": "CN=SanctionsBody, OU=Test Dept, O=R3, L=London, C=GB"
+      "lenderName": "CN=DodgyParty, OU=Test Dept, O=R3, L=London, C=GB",
+      "sanctionAuthority": "CN=SanctionsBody, OU=Test Dept, O=R3, L=London, C=GB"
       }
     }
 

@@ -35,7 +35,7 @@ public class SanctionableIOUContract implements Contract {
             this.sanctionAuthority = sanctionAuthority;
         }
 
-        public MemberX500Name getsanctionAuthority() {
+        public MemberX500Name getSanctionAuthority() {
             return sanctionAuthority;
         }
     }
@@ -60,7 +60,7 @@ public class SanctionableIOUContract implements Contract {
 
         SanctionList sanctionList = transaction.getReferenceStates(SanctionList.class).get(0);
         requireThat(
-                sanctionList.getIssuer().getName().equals(command.getsanctionAuthority()),
+                sanctionList.getIssuer().getName().equals(command.getSanctionAuthority()),
                 sanctionList.getIssuer().getName().getOrganization() + " is an invalid issuer of " +
                         "sanctions lists for this contracts."
         );

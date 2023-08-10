@@ -56,12 +56,12 @@ public class IOUIssueFlow implements ClientStartableFlow {
                     requestBody.getRequestBodyAs(jsonMarshallingService, IOUIssueFlowArgs.class);
             MemberInfo myInfo = memberLookup.myInfo();
 
-            StateAndRef<SanctionList> sanctionsListToUse = getSanctionsList(flowArgs.getSanctionsBody());
+            StateAndRef<SanctionList> sanctionsListToUse = getSanctionsList(flowArgs.getSanctionAuthority());
             SanctionableIOUState iouState = new SanctionableIOUState(
                     flowArgs.getIouValue(),
-                    new Member(myInfo.getName(), myInfo.getLedgerKeys().get(0)),
-                    new Member(flowArgs.getOtherParty(),
-                            Objects.requireNonNull(memberLookup.lookup(flowArgs.getOtherParty())).getLedgerKeys().get(0))
+                    new Member(flowArgs.getLenderName(),
+                            Objects.requireNonNull(memberLookup.lookup(flowArgs.getLenderName())).getLedgerKeys().get(0)),
+                    new Member(myInfo.getName(), myInfo.getLedgerKeys().get(0))
             );
 
             MemberX500Name notaryName = sanctionsListToUse.getState().getNotaryName();
@@ -70,13 +70,13 @@ public class IOUIssueFlow implements ClientStartableFlow {
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                     .addReferenceState(sanctionsListToUse.getRef())
                     .addOutputState(iouState)
-                    .addCommand(new SanctionableIOUContract.Create(flowArgs.getSanctionsBody()))
+                    .addCommand(new SanctionableIOUContract.Create(flowArgs.getSanctionAuthority()))
                     .addSignatories(iouState.getParticipants());
 
             UtxoSignedTransaction signedTransaction = txBuilder.toSignedTransaction();
 
             UtxoSignedTransaction finalizedTransaction = ledgerService.finalize(signedTransaction,
-                    Collections.singletonList(flowMessaging.initiateFlow(flowArgs.getOtherParty()))).getTransaction();
+                    Collections.singletonList(flowMessaging.initiateFlow(flowArgs.getLenderName()))).getTransaction();
 
             return finalizedTransaction.getId().toString();
 
