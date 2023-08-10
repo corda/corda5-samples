@@ -49,7 +49,6 @@ public class SettleLoanFlow implements ClientStartableFlow {
     public String call(@NotNull ClientRequestBody requestBody) {
         try{
             SettleLoanFlowArgs flowArgs = requestBody.getRequestBodyAs(jsonMarshallingService, SettleLoanFlowArgs.class);
-            MemberInfo myInfo = memberLookup.myInfo();
 
             List<StateAndRef<Loan>> filteredLoanStateAndRefs =
                 ledgerService.findUnconsumedStatesByType(Loan.class).stream().filter(
