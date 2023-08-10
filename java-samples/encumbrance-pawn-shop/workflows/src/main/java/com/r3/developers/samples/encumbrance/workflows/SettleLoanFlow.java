@@ -72,7 +72,8 @@ public class SettleLoanFlow implements ClientStartableFlow {
 
             if (filteredAssetStateAndRefs.size() != 1) {
                 throw new CordaRuntimeException(
-                        "Multiple or zero Asset states with id " + flowArgs.getLoanId() + " found");
+                        "Multiple or zero Asset states with id " +
+                                loanStateAndRef.getState().getContractState().getCollateral() + " found");
             }
 
             StateAndRef<Asset> assetStateAndRef = filteredAssetStateAndRefs.get(0);
