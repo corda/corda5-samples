@@ -1,6 +1,8 @@
 package com.r3.developers.samples.referencestate.workflows;
 
 import com.r3.developers.samples.referencestate.states.Member;
+import com.r3.developers.samples.referencestate.states.SanctionList;
+import com.r3.developers.samples.referencestate.states.SanctionableIOUState;
 import net.corda.v5.application.flows.ClientRequestBody;
 import net.corda.v5.application.flows.ClientStartableFlow;
 import net.corda.v5.application.flows.CordaInject;
@@ -27,9 +29,9 @@ public class GetSanctionListFlow implements ClientStartableFlow {
     @Suspendable
     public String call(@NotNull ClientRequestBody requestBody) {
 
-        List<SanctionList> sanctionList =
-                ledgerService.findUnconsumedStatesByType(com.r3.developers.samples.referencestate.states.SanctionList.class).stream().map(
-                        it-> new SanctionList(
+        List<SanctionListDetail> sanctionList =
+                ledgerService.findUnconsumedStatesByType(SanctionList.class).stream().map(
+                        it-> new SanctionListDetail(
                                 it.getState().getContractState().getBadPeople().stream().map(Member::getName)
                                         .collect(Collectors.toList()),
                                 it.getState().getContractState().getIssuer().getName(),
@@ -40,12 +42,12 @@ public class GetSanctionListFlow implements ClientStartableFlow {
         return jsonMarshallingService.format(sanctionList);
     }
 
-    class SanctionList{
+    class SanctionListDetail{
         private List<MemberX500Name> badPeople;
         private MemberX500Name issuer;
         private UUID uniqueId;
 
-        public SanctionList(List<MemberX500Name> badPeople, MemberX500Name issuer, UUID uniqueId) {
+        public SanctionListDetail(List<MemberX500Name> badPeople, MemberX500Name issuer, UUID uniqueId) {
             this.badPeople = badPeople;
             this.issuer = issuer;
             this.uniqueId = uniqueId;
