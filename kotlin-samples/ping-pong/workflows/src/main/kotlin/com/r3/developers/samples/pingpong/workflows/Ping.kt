@@ -1,20 +1,14 @@
-package com.r3.developers.pingpong.workflows
+package com.r3.developers.samples.pingpong.workflows
 
 import net.corda.v5.application.flows.*
 import net.corda.v5.application.marshalling.JsonMarshallingService
 import net.corda.v5.application.messaging.FlowMessaging
 import net.corda.v5.application.messaging.FlowSession
 import net.corda.v5.application.membership.MemberLookup
-import net.corda.v5.membership.MemberInfo
 import net.corda.v5.base.annotations.Suspendable
-import net.corda.v5.base.exceptions.CordaRuntimeException
 import net.corda.v5.base.types.MemberX500Name
-import net.corda.v5.ledger.common.NotaryLookup
-import net.corda.v5.ledger.utxo.UtxoLedgerService
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.time.Duration
-import java.time.Instant
-import java.util.*
 
 // A class to hold the deserialized arguments required to start the flow.
 data class PingFlowArgs( val otherMember: MemberX500Name)
@@ -60,5 +54,32 @@ class Ping: ClientStartableFlow {
             log.warn("Failed to process ping flow for request body '$requestBody' because:'${e.message}'")
             throw e
         }
+    }
+}
+
+@InitiatedBy(protocol = "ping")
+class Pong : ResponderFlow {
+    // FlowMessaging provides a service that establishes flow sessions between virtual nodes
+    // that send and receive payloads between them.
+    @CordaInject
+    var flowMessaging: FlowMessaging? = null
+
+    // MemberLookup provides a service for looking up information about members of the virtual network which
+    // this CorDapp operates in.
+    @CordaInject
+    var memberLookup: MemberLookup? = null
+
+    @Suspendable
+    override fun call(session: FlowSession) {
+        log.info("Pong.call() called")
+        val message = session.receive<String>(String::class.java)
+        if (message == "ping") {
+            log.info("Received Ping")
+            session.send("pong")
+        }
+    }
+
+    companion object {
+        private val log: Logger = LoggerFactory.getLogger(Ping::class.java)
     }
 }
