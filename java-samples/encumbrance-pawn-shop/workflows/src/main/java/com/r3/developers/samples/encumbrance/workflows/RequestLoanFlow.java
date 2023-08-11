@@ -56,7 +56,6 @@ public class RequestLoanFlow implements ClientStartableFlow {
         try{
             RequestLoanFlowArgs flowArgs = requestBody.getRequestBodyAs(jsonMarshallingService, RequestLoanFlowArgs.class);
             MemberInfo myInfo = memberLookup.myInfo();
-            NotaryInfo notary = notaryLookup.getNotaryServices().iterator().next();
 
             MemberInfo memberInfo = memberLookup.lookup(MemberX500Name.parse(flowArgs.getLender()));
             Member lender = new Member(memberInfo.getName(), memberInfo.getLedgerKeys().get(0));
@@ -89,8 +88,9 @@ public class RequestLoanFlow implements ClientStartableFlow {
                     )
             );
 
+            MemberX500Name notaryName = assetStateAndRef.getState().getNotaryName();
             UtxoTransactionBuilder transactionBuilder = ledgerService.createTransactionBuilder()
-                    .setNotary(notary.getName())
+                    .setNotary(notaryName)
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofMinutes(5).toMillis()))
                     .addInputStates(assetStateAndRef.getRef())
                     .addEncumberedOutputStates("loan-" + loan.getLoanId(), loan, collateral)

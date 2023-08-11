@@ -1,8 +1,8 @@
 package com.r3.developers.samples.referencestate.workflows;
 
-import com.r3.developers.samples.referencestate.contracts.SanctionedEntitiesContract;
+import com.r3.developers.samples.referencestate.contracts.SanctionListContract;
 import com.r3.developers.samples.referencestate.states.Member;
-import com.r3.developers.samples.referencestate.states.SanctionedEntities;
+import com.r3.developers.samples.referencestate.states.SanctionList;
 import net.corda.v5.application.flows.ClientRequestBody;
 import net.corda.v5.application.flows.ClientStartableFlow;
 import net.corda.v5.application.flows.CordaInject;
@@ -58,7 +58,7 @@ public class IssueSanctionsListFlow implements ClientStartableFlow {
             allParties = allParties.stream().filter(it ->
                     !it.getName().getCommonName().contains("Notary")).collect(Collectors.toList());
 
-            SanctionedEntities state = new SanctionedEntities(
+            SanctionList state = new SanctionList(
                     Collections.emptyList(),
                     new Member(myInfo.getName(), myInfo.getLedgerKeys().get(0)),
                     allParties.stream().map(it->it.getLedgerKeys().get(0)).collect(Collectors.toList())
@@ -67,7 +67,7 @@ public class IssueSanctionsListFlow implements ClientStartableFlow {
                     .setNotary(notary.getName())
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                     .addOutputState(state)
-                    .addCommand(new SanctionedEntitiesContract.Create())
+                    .addCommand(new SanctionListContract.Create())
                     .addSignatories(myInfo.getLedgerKeys().get(0));
 
             UtxoSignedTransaction signedTransaction = transactionBuilder.toSignedTransaction();

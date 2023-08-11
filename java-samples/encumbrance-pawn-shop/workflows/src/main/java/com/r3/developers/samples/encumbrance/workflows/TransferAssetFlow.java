@@ -51,8 +51,6 @@ public class TransferAssetFlow implements ClientStartableFlow {
         try{
             TransferAssetFlowArgs flowArgs = requestBody
                     .getRequestBodyAs(jsonMarshallingService, TransferAssetFlowArgs.class);
-            MemberInfo myInfo = memberLookup.myInfo();
-            NotaryInfo notary = notaryLookup.getNotaryServices().iterator().next();
 
             MemberInfo memberInfo = memberLookup.lookup(MemberX500Name.parse(flowArgs.getBuyer()));
             Member buyer = new Member(memberInfo.getName(), memberInfo.getLedgerKeys().get(0));

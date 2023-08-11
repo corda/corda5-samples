@@ -20,7 +20,7 @@ pluginManagement {
 }
 
 // Root project name, used in naming the project as a whole and used in naming objects built by the project.
-rootProject.name = 'corda5-encumbrance-cordapp'
+rootProject.name = 'corda5-encumbrance-cordapp-java'
 include ':workflows'
 include ':contracts'
 

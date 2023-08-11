@@ -3,7 +3,7 @@ package com.r3.developers.samples.referencestate.workflows;
 import com.r3.developers.samples.referencestate.contracts.SanctionableIOUContract;
 import com.r3.developers.samples.referencestate.states.Member;
 import com.r3.developers.samples.referencestate.states.SanctionableIOUState;
-import com.r3.developers.samples.referencestate.states.SanctionedEntities;
+import com.r3.developers.samples.referencestate.states.SanctionList;
 import net.corda.v5.application.flows.ClientRequestBody;
 import net.corda.v5.application.flows.ClientStartableFlow;
 import net.corda.v5.application.flows.CordaInject;
@@ -55,31 +55,28 @@ public class IOUIssueFlow implements ClientStartableFlow {
             IOUIssueFlowArgs flowArgs =
                     requestBody.getRequestBodyAs(jsonMarshallingService, IOUIssueFlowArgs.class);
             MemberInfo myInfo = memberLookup.myInfo();
-            NotaryInfo notary = notaryLookup.getNotaryServices().iterator().next();
 
-            StateAndRef<SanctionedEntities> sanctionsListToUse = getSanctionsList(flowArgs.getSanctionsBody());
+            StateAndRef<SanctionList> sanctionsListToUse = getSanctionsList(flowArgs.getSanctionAuthority());
             SanctionableIOUState iouState = new SanctionableIOUState(
                     flowArgs.getIouValue(),
-                    new Member(myInfo.getName(), myInfo.getLedgerKeys().get(0)),
-                    new Member(flowArgs.getOtherParty(),
-                            Objects.requireNonNull(memberLookup.lookup(flowArgs.getOtherParty())).getLedgerKeys().get(0))
+                    new Member(flowArgs.getLenderName(),
+                            Objects.requireNonNull(memberLookup.lookup(flowArgs.getLenderName())).getLedgerKeys().get(0)),
+                    new Member(myInfo.getName(), myInfo.getLedgerKeys().get(0))
             );
 
+            MemberX500Name notaryName = sanctionsListToUse.getState().getNotaryName();
             UtxoTransactionBuilder txBuilder = ledgerService.createTransactionBuilder()
-                    .setNotary(notary.getName())
+                    .setNotary(notaryName)
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
+                    .addReferenceState(sanctionsListToUse.getRef())
                     .addOutputState(iouState)
-                    .addCommand(new SanctionableIOUContract.Create(flowArgs.getSanctionsBody()))
+                    .addCommand(new SanctionableIOUContract.Create(flowArgs.getSanctionAuthority()))
                     .addSignatories(iouState.getParticipants());
-
-            if (sanctionsListToUse != null) {
-                txBuilder.addReferenceState(sanctionsListToUse.getRef());
-            }
 
             UtxoSignedTransaction signedTransaction = txBuilder.toSignedTransaction();
 
             UtxoSignedTransaction finalizedTransaction = ledgerService.finalize(signedTransaction,
-                    Collections.singletonList(flowMessaging.initiateFlow(flowArgs.getOtherParty()))).getTransaction();
+                    Collections.singletonList(flowMessaging.initiateFlow(flowArgs.getLenderName()))).getTransaction();
 
             return finalizedTransaction.getId().toString();
 
@@ -91,9 +88,9 @@ public class IOUIssueFlow implements ClientStartableFlow {
     }
 
     @Suspendable
-    public StateAndRef<SanctionedEntities> getSanctionsList(MemberX500Name sanctionsBody) {
-        List<StateAndRef<SanctionedEntities>> sanctionLists =
-                ledgerService.findUnconsumedStatesByType(SanctionedEntities.class).stream().filter(
+    public StateAndRef<SanctionList> getSanctionsList(MemberX500Name sanctionsBody) {
+        List<StateAndRef<SanctionList>> sanctionLists =
+                ledgerService.findUnconsumedStatesByType(SanctionList.class).stream().filter(
                         it -> it.getState().getContractState().getIssuer().getName().equals(sanctionsBody)
                         ).collect(Collectors.toList());
         if(sanctionLists.isEmpty()){

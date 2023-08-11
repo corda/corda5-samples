@@ -6,8 +6,8 @@ import net.corda.v5.base.types.MemberX500Name;
 @CordaSerializable
 public class IOUIssueFlowArgs{
     private int iouValue;
-    private MemberX500Name otherParty;
-    private MemberX500Name sanctionsBody;
+    private MemberX500Name lenderName;
+    private MemberX500Name sanctionAuthority;
 
     public IOUIssueFlowArgs() {
     }
@@ -16,11 +16,11 @@ public class IOUIssueFlowArgs{
         return iouValue;
     }
 
-    public MemberX500Name getOtherParty() {
-        return otherParty;
+    public MemberX500Name getLenderName() {
+        return lenderName;
     }
 
-    public MemberX500Name getSanctionsBody() {
-        return sanctionsBody;
+    public MemberX500Name getSanctionAuthority() {
+        return sanctionAuthority;
     }
 }
