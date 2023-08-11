@@ -55,7 +55,7 @@ Pick the Alice VNode's identity to create the Asset. Go to POST /flow/{holdingid
 
 ### Request Loan
 
-Now request for a Loan from Bob, pick Alice VNode's identity again. Go to POST /flow/{holdingidentityshorthash}, enter the identity short hash(Alice's hash) and request body:
+Now request for a Loan from Charlie, pick Alice VNode's identity again. Go to POST /flow/{holdingidentityshorthash}, enter the identity short hash(Alice's hash) and request body:
 
     {
       "clientRequestId": "request-loan",
@@ -85,7 +85,7 @@ That's why Loan should also be dependent on Asset.
 
 ### Transfer Encumbered Asset (Should Fail)
 
-Now try to transfer the Asset to Charlie, pick Alice VNode's identity. Go to POST /flow/{holdingidentityshorthash}, enter the identity short hash(Alice's hash) and request body:
+Now try to transfer the Asset to Bob, pick Alice VNode's identity. Go to POST /flow/{holdingidentityshorthash}, enter the identity short hash(Alice's hash) and request body:
 
       {
          "clientRequestId": "transfer-asset",
@@ -111,7 +111,7 @@ Now to settle the Loan, pick Alice's VNode's identity. Go to POST /flow/{holding
       }
 
 ### Transfer Asset
-Once the Loan is settled, the asset is unlocked and can be transferred. To transfer the asset to Charlie, pick Alice's VNode's identity. Go to POST /flow/{holdingidentityshorthash}, enter the identity short hash(Alice's hash) and request body:
+Once the Loan is settled, the asset is unlocked and can be transferred. To transfer the asset to Bob, pick Alice's VNode's identity. Go to POST /flow/{holdingidentityshorthash}, enter the identity short hash(Alice's hash) and request body:
 
       {
       "clientRequestId": "transfer-asset-second-try",
