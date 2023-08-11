@@ -34,12 +34,31 @@ allprojects {
         cordaCliBinDir = "${System.getProperty("user.home")}/.corda/cli"
     }
 
-    // Declare the set of Java compiler options we need to build a CorDapp.
-    tasks.withType(JavaCompile) {
-        // -parameters - Needed for reflection and serialization to work correctly.
-        options.compilerArgs += [
-                "-parameters"
-        ]
+    // Declare the set of Kotlin compiler options we need to build a CorDapp.
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions {
+            allWarningsAsErrors = false
+
+            // Specify the version of Kotlin that we are that we will be developing.
+            languageVersion = '1.7'
+            // Specify the Kotlin libraries that code is compatible with
+            apiVersion = '1.7'
+            // Note that we Need to use a version of Kotlin that will be compatible with the Corda API.
+            // Currently that is developed in Kotlin 1.7 so picking the same version ensures compatibility with that.
+
+            // Specify the version of Java to target.
+            jvmTarget = javaVersion
+
+            // Needed for reflection to work correctly.
+            javaParameters = true
+
+            // -Xjvm-default determines how Kotlin supports default methods.
+            // JetBrains currently recommends developers use -Xjvm-default=all
+            // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-default/
+            freeCompilerArgs += [
+                    "-Xjvm-default=all"
+            ]
+        }
     }
 
     repositories {
@@ -56,12 +75,10 @@ allprojects {
 
 publishing {
     publications {
-        maven(MavenPublication) {
-            artifactId "corda5-encumbrance-cordapp"
-            groupId project.group
-            artifact jar
+            maven(MavenPublication) {
+                artifactId "corda5-pingpong-cordapp"
+                groupId project.group
+                artifact jar
+         }
     }
-
-   }
 }
-
