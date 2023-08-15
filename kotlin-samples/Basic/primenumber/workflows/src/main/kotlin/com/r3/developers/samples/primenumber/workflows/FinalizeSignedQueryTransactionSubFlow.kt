@@ -19,15 +19,14 @@ import org.slf4j.LoggerFactory
 // This class creates a flow session with the primeService virtual node to request for its verification and signature
 // If successful, the sub-flow will return the transaction id and log the successful signed transaction
 @InitiatingFlow(protocol = "finalize-prime")
-class FinalizePrimeSubFlow(private val signedTransaction: UtxoSignedTransaction, private val primeServiceName: MemberX500Name):
+class FinalizeSignedTransactionSubFlow(private val signedTransaction: UtxoSignedTransaction, private val otherMember: MemberX500Name):
     SubFlow<SecureHash> {
 
         private companion object {
             val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
-
-            const val FLOW_CALL = "FinalizePrimeSubFlow.call() called"
-            const val FLOW_SUCCESS = "FinalizePrimeSubFlow.call() succeeded! Final Transaction Id: "
-            const val FLOW_FAIL = "FinalizePrimeSubFlow.call() transaction finality failed"
+            const val FLOW_CALL = "FinalizeSignedTransactionSubFlow.call() called"
+            const val FLOW_SUCCESS = "FinalizeSignedTransactionSubFlow.call() succeeded! Final Transaction Id: "
+            const val FLOW_FAIL = "FinalizeSignedTransactionSubFlow.call() transaction finality failed"
         }
 
     @CordaInject
@@ -40,13 +39,12 @@ class FinalizePrimeSubFlow(private val signedTransaction: UtxoSignedTransaction,
     override fun call(): SecureHash {
         log.info(FLOW_CALL)
 
-        val session = flowMessaging.initiateFlow(primeServiceName)
+        val session = flowMessaging.initiateFlow(otherMember)
 
         return try {
             val finalizedSignedTransaction = ledgerService.finalize(signedTransaction, listOf(session))
-
             finalizedSignedTransaction.transaction.id
-                .also {log.info(FLOW_SUCCESS + it)}
+                .also {log.info(FLOW_SUCCESS, it)}
         } catch (e: Exception) {
             throw CordaRuntimeException(FLOW_FAIL, e)
         }
@@ -55,14 +53,13 @@ class FinalizePrimeSubFlow(private val signedTransaction: UtxoSignedTransaction,
 
 // This class handles the flow session messages sent by the initiating subflow that requested for transaction finalization
 @InitiatedBy(protocol = "finalize-prime")
-class FinalizePrimeResponderSubFlow: ResponderFlow {
+class FinalizeSignedTransactionResponderSubFlow: ResponderFlow {
 
     private companion object {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
 
-        const val PRIME_SERVICE_SIGNS = "Requesting PrimeService signature."
-        const val FLOW_CALL = "FinalizePrimeResponderSubFlow.call() called."
-        const val FLOW_FAIL = "FinalizePrimeResponderSubFlow.call() failed: "
+        const val FLOW_CALL = "FinalizeSignedTransactionResponderSubFlow.call() called."
+        const val FLOW_FAIL = "FinalizeSignedTransactionResponderSubFlow.call() failed: "
     }
 
     @CordaInject
@@ -74,10 +71,7 @@ class FinalizePrimeResponderSubFlow: ResponderFlow {
 
         try{
             //[receiveFinality] will automatically verify the transaction and its signatures before signing it.
-            val finalizedSignedTransaction = ledgerService.receiveFinality(session) { transaction ->
-                log.info(PRIME_SERVICE_SIGNS)
-                transaction.getOutputStates(Prime::class.java).singleOrNull() ?:throw CordaRuntimeException("Failed verification")
-            }
+            val finalizedSignedTransaction = ledgerService.receiveFinality(session) { _ -> }
             log.info("Transaction id ${finalizedSignedTransaction.transaction.id} verified: $finalizedSignedTransaction")
         } catch(e: Exception) {
             throw CordaRuntimeException(FLOW_FAIL, e)
