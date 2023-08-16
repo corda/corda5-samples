@@ -1,10 +1,11 @@
-package com.r3.developers.samples.obligation.workflows.util;
+package com.r3.developers.samples.negotiation.workflows.util;
 
-import com.r3.developers.samples.obligation.states.Proposal;
+import com.r3.developers.samples.negotiation.states.Proposal;
 import net.corda.v5.application.flows.ClientRequestBody;
 import net.corda.v5.application.flows.ClientStartableFlow;
 import net.corda.v5.application.flows.CordaInject;
 import net.corda.v5.application.marshalling.JsonMarshallingService;
+import com.r3.developers.samples.negotiation.workflows.util.ListProposalResults;
 import net.corda.v5.ledger.utxo.StateAndRef;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +30,7 @@ public class ListProposal implements ClientStartableFlow {
       List<StateAndRef<Proposal>> states= utxoLedgerService.findUnconsumedStatesByType(Proposal.class);
         List<ListProposalResults> results = states.stream().map(stateAndRef ->
                 new ListProposalResults(
-                        stateAndRef.getState().getContractState().getLinearId(),
+                        stateAndRef.getState().getContractState().getProposalID(),
                         stateAndRef.getState().getContractState().getAmount(),
                         stateAndRef.getState().getContractState().getBuyer().toString(),
                         stateAndRef.getState().getContractState().getSeller().toString(),

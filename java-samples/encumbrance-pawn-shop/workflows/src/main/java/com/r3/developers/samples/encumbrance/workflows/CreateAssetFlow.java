@@ -50,7 +50,7 @@ public class CreateAssetFlow implements ClientStartableFlow {
                     new Member(myInfo.getName(), myInfo.getLedgerKeys().get(0)),
                     flowArgs.getAssetName(),
                     UUID.randomUUID().toString(),
-                    Collections.singletonList(myInfo.getLedgerKeys().get(0))
+                    CollecCtions.singletonList(myInfo.getLedgerKeys().get(0))
             );
             UtxoTransactionBuilder transactionBuilder = ledgerService.createTransactionBuilder()
                     .setNotary(notary.getName())
@@ -58,6 +58,7 @@ public class CreateAssetFlow implements ClientStartableFlow {
                     .addOutputState(asset)
                     .addCommand(new AssetContract.Create())
                     .addSignatories(asset.getOwner().getLedgerKey());
+
             UtxoSignedTransaction signedTransaction = transactionBuilder.toSignedTransaction();
             UtxoSignedTransaction finalizedTransaction =
                     ledgerService.finalize(signedTransaction, Collections.emptyList()).getTransaction();

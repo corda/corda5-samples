@@ -1,4 +1,4 @@
-package com.r3.developers.samples.obligation.states;
+package com.r3.developers.samples.negotiation.states;
 import net.corda.v5.base.annotations.ConstructorForDeserialization;
 import net.corda.v5.base.annotations.CordaSerializable;
 import net.corda.v5.base.types.MemberX500Name;

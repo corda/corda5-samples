@@ -1,9 +1,8 @@
-package com.r3.developers.samples.obligation.states;
+package com.r3.developers.samples.negotiation.states;
 
 
-import com.r3.developers.samples.obligation.contracts.ProposalAndTradeContract;
+import com.r3.developers.samples.negotiation.contracts.ProposalAndTradeContract;
 import net.corda.v5.base.annotations.ConstructorForDeserialization;
-import net.corda.v5.base.types.MemberX500Name;
 import net.corda.v5.ledger.utxo.BelongsToContract;
 import net.corda.v5.ledger.utxo.ContractState;
 import org.jetbrains.annotations.NotNull;
@@ -20,17 +19,17 @@ public class Proposal implements ContractState {
     private  Member seller;
     private  Member proposer;
     private  Member proposee;
-    private final UUID linearId;
+    private final UUID proposalID;
 
 
     @ConstructorForDeserialization
-    public Proposal(int amount, Member buyer, Member seller, Member proposer, Member proposee, UUID linearId) {
+    public Proposal(int amount, Member buyer, Member seller, Member proposer, Member proposee, UUID proposalID) {
         this.amount=amount;
         this.buyer= buyer;
         this.seller=seller;
         this.proposee= proposee;
         this.proposer=proposer;
-        this.linearId=linearId;
+        this.proposalID=proposalID;
     }
 
     public Proposal(int amount, Member buyer, Member seller, Member proposer, Member proposee) {
@@ -39,7 +38,7 @@ public class Proposal implements ContractState {
         this.seller=seller;
         this.proposee= proposee;
         this.proposer=proposer;
-        this.linearId=UUID.randomUUID();
+        this.proposalID=UUID.randomUUID();
     }
 
     public int getAmount(){return amount;}
@@ -60,8 +59,8 @@ public class Proposal implements ContractState {
         return proposee;
     }
 
-    public UUID getLinearId() {
-        return linearId;
+    public UUID getProposalID() {
+        return proposalID;
     }
 
     @NotNull

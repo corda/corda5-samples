@@ -1,15 +1,13 @@
-package com.r3.developers.samples.obligation.contracts;
+package com.r3.developers.samples.negotiation.contracts;
 
-import com.r3.developers.samples.obligation.states.Proposal;
-import com.r3.developers.samples.obligation.states.Trade;
+import com.r3.developers.samples.negotiation.states.Proposal;
+import com.r3.developers.samples.negotiation.states.Trade;
 import net.corda.v5.base.exceptions.CordaRuntimeException;
 import net.corda.v5.ledger.utxo.Command;
 import net.corda.v5.ledger.utxo.Contract;
 
 import net.corda.v5.ledger.utxo.transaction.UtxoLedgerTransaction;
 
-import java.security.PublicKey;
-import java.util.List;
 import java.util.Objects;
 
 

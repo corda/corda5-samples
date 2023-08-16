@@ -1,7 +1,7 @@
-package com.r3.developers.samples.obligation.workflows.propose;
+package com.r3.developers.samples.negotiation.workflows.propose;
 
-import com.r3.developers.samples.obligation.contracts.ProposalAndTradeContract;
-import com.r3.developers.samples.obligation.states.Member;
+import com.r3.developers.samples.negotiation.contracts.ProposalAndTradeContract;
+import com.r3.developers.samples.negotiation.states.Member;
 import net.corda.v5.application.flows.ClientRequestBody;
 import net.corda.v5.application.flows.*;
 import net.corda.v5.application.flows.CordaInject;
@@ -16,11 +16,11 @@ import net.corda.v5.ledger.common.NotaryLookup;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import net.corda.v5.ledger.utxo.transaction.UtxoSignedTransaction;
 import net.corda.v5.ledger.utxo.transaction.UtxoTransactionBuilder;
+import com.r3.developers.samples.negotiation.workflows.propose.ProposalFlowArgs;
 import net.corda.v5.membership.MemberInfo;
 import net.corda.v5.membership.NotaryInfo;
 import org.jetbrains.annotations.NotNull;
-import com.r3.developers.samples.obligation.states.Proposal;
-import com.r3.developers.samples.obligation.workflows.propose.ProposalFlowArgs;
+import com.r3.developers.samples.negotiation.states.Proposal;
 
 import java.time.Instant;
 import java.util.List;
@@ -69,6 +69,7 @@ public class ProposalFlowRequest implements ClientStartableFlow {
             seller= memberLookup.myInfo().getName();
         }
 
+        //Create a new Proposal state as an output state
         Proposal output = new Proposal(request.getAmount(),
                 new Member(seller,memberLookup.lookup(seller).getLedgerKeys().get(0)),
                 new Member(buyer,memberLookup.lookup(seller).getLedgerKeys().get(0)),
@@ -77,14 +78,9 @@ public class ProposalFlowRequest implements ClientStartableFlow {
 
 
 
-//        NotaryInfo notary = requireNonNull(
-//                notaryLookup.lookup(MemberX500Name.parse("O=Notary,L=London,C=GB")),
-//                "NotaryLookup can't find notary specified in flow arguments."
-//        );
-
         NotaryInfo notary = notaryLookup.getNotaryServices().iterator().next();
 
-        //doubt about this add Signatories
+        //Initiate the transactionBuilder with command to "propose"
         UtxoTransactionBuilder transactionBuilder = utxoLedgerService.createTransactionBuilder()
                 .setNotary(notary.getName())
                 .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofMinutes(5).toMillis()))
@@ -116,8 +112,8 @@ public class ProposalFlowRequest implements ClientStartableFlow {
 
 ALice hash: 5B9459F205F0
 {
-  "clientRequestId": "name",
-  "flowClassName": "com.r3.developers.samples.obligation.workflows.propose.ProposalFlowRequest",
+  "clientRequestId": "createProposal",
+  "flowClassName": "com.r3.developers.samples.negotiation.workflows.propose.ProposalFlowRequest",
   "requestBody": {
       "amount": 20,
       "counterParty":"CN=Bob, OU=Test Dept, O=R3, L=London, C=GB"

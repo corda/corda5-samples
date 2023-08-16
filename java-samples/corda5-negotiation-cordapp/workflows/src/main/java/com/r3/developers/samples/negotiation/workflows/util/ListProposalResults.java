@@ -1,4 +1,4 @@
-package com.r3.developers.samples.obligation.workflows.util;
+package com.r3.developers.samples.negotiation.workflows.util;
 
 import net.corda.v5.base.types.MemberX500Name;
 

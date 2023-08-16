@@ -1,4 +1,4 @@
-package com.r3.developers.samples.obligation.workflows.modify;
+package com.r3.developers.samples.negotiation.workflows.modify;
 
 import net.corda.v5.base.annotations.CordaSerializable;
 

@@ -1,9 +1,10 @@
-package com.r3.developers.samples.obligation.workflows.modify;
+package com.r3.developers.samples.negotiation.workflows.accept;
 
-
-import com.r3.developers.samples.obligation.contracts.ProposalAndTradeContract;
-import com.r3.developers.samples.obligation.states.Member;
-import com.r3.developers.samples.obligation.states.Proposal;
+import com.r3.developers.samples.negotiation.contracts.ProposalAndTradeContract;
+import com.r3.developers.samples.negotiation.states.Member;
+import com.r3.developers.samples.negotiation.states.Proposal;
+import com.r3.developers.samples.negotiation.states.Trade;
+import com.r3.developers.samples.negotiation.workflows.modify.ModifyFlowRequest;
 import net.corda.v5.application.flows.*;
 import net.corda.v5.application.marshalling.JsonMarshallingService;
 import net.corda.v5.application.membership.MemberLookup;
@@ -26,10 +27,10 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@InitiatingFlow(protocol = "modify")
-public class ModifyFlowRequest implements ClientStartableFlow {
+@InitiatingFlow(protocol = "accept")
+public class AcceptFlowRequest implements ClientStartableFlow {
 
-    private final static Logger log = LoggerFactory.getLogger(ModifyFlowRequest.class);
+    private final static Logger log = LoggerFactory.getLogger(AcceptFlowRequest.class);
 
     @CordaInject
     public FlowMessaging flowMessaging;
@@ -52,38 +53,37 @@ public class ModifyFlowRequest implements ClientStartableFlow {
     @Suspendable
     @Override
     public String call(@NotNull ClientRequestBody requestBody) {
-        // Obtain the deserialized input arguments to the flow from the requestBody.
-        ModifyFlowArgs request = requestBody.getRequestBodyAs(jsonMarshallingService,ModifyFlowArgs.class);
-
+        AcceptFlowArgs request = requestBody.getRequestBodyAs(jsonMarshallingService,AcceptFlowArgs.class);
         // Get UUID from input JSON
         UUID proposalID = request.getProposalID();
 
-        UUID stateID = utxoLedgerService.findUnconsumedStatesByType(Proposal.class).get(0).getState().getContractState().getLinearId();
+        UUID stateID = utxoLedgerService.findUnconsumedStatesByType(Proposal.class).get(0).getState().getContractState().getProposalID();
 
-        List< StateAndRef<Proposal>> proposalStatAndRef = utxoLedgerService.findUnconsumedStatesByType(Proposal.class);
+        // Getting the old Proposal State as an input state
+        List<StateAndRef<Proposal>> proposalStatAndRef = utxoLedgerService.findUnconsumedStatesByType(Proposal.class);
         List< StateAndRef<Proposal>> proposalStatAndRefWithId = proposalStatAndRef.stream().
-                filter(it->it.getState().getContractState().getLinearId().equals(proposalID)).collect(Collectors.toList());
+                filter(it->it.getState().getContractState().getProposalID().equals(proposalID)).collect(Collectors.toList());
 
         if(proposalStatAndRefWithId.size()!=1) throw  new CordaRuntimeException("Multiple or zero Proposal states with id " + proposalID + "found");
         StateAndRef<Proposal> proposalStateAndRef = proposalStatAndRefWithId.get(0);
         Proposal proposalInput = proposalStateAndRef.getState().getContractState();
 
-        //creating output
-        Member counterParty = (memberLookup.myInfo().getName().equals(proposalInput.getProposer()))? proposalInput.getProposee(): proposalInput.getProposer();
-        Proposal output= new Proposal(request.getNewAmount(),
+        // Creating a Trade as an output state
+        Trade output = new Trade(proposalInput.getAmount(),
                 new Member(proposalInput.getBuyer().getName(),proposalInput.getBuyer().getLedgerKey()),
-                new Member(proposalInput.getSeller().getName(),proposalInput.getSeller().getLedgerKey()),
-                new Member(memberLookup.myInfo().getName(),memberLookup.myInfo().getLedgerKeys().get(0)),
-                new Member(counterParty.getName(),counterParty.getLedgerKey()),
-                proposalID);
+                new Member(proposalInput.getSeller().getName(), proposalInput.getSeller().getLedgerKey()),
+                proposalInput.getParticipants()
+                );
 
+        Member counterParty= (memberLookup.myInfo().getName().equals(proposalInput.getProposer().getName()))?proposalInput.getProposee(): proposalInput.getProposer();
 
+        //Initiate the transactionBuilder with command to "Accept"
         UtxoTransactionBuilder transactionBuilder = utxoLedgerService.createTransactionBuilder()
                 .setNotary(proposalStateAndRef.getState().getNotaryName())
                 .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofMinutes(5).toMillis()))
                 .addInputState(proposalStateAndRef.getRef())
                 .addOutputState(output)
-                .addCommand(new ProposalAndTradeContract.Modify())
+                .addCommand(new ProposalAndTradeContract.Accept())
                 .addSignatories(output.getParticipants());
 
 
@@ -92,7 +92,6 @@ public class ModifyFlowRequest implements ClientStartableFlow {
         // if not successful it will return an error message.
         try{
             UtxoSignedTransaction signedTransaction = transactionBuilder.toSignedTransaction();
-
             FlowSession counterPartySession = flowMessaging.initiateFlow(counterParty.getName());
             UtxoSignedTransaction finalizedTransaction= utxoLedgerService.finalize(signedTransaction,List.of(counterPartySession)).getTransaction();
 
@@ -101,22 +100,17 @@ public class ModifyFlowRequest implements ClientStartableFlow {
         catch (Exception e){
             return String.format("Flow failed, message: %s", e.getMessage());
         }
-
     }
 }
-
-
 /*
 
-Bob hash: DC2AF23BF800
+Alice hash: 5B9459F205F0
 
 {
-  "clientRequestId": "b",
-  "flowClassName": "com.r3.developers.samples.obligation.workflows.modify.ModifyFlowRequest",
+  "clientRequestId": "flow name",
+  "flowClassName": "com.r3.developers.samples.negotiation.workflows.accept.AcceptFlowRequest",
   "requestBody": {
-      "newAmount": 22,
-      "proposalID": "4ac176b8-af21-4cd5-aa0d-5609610b6d23"
+      "proposalID": "9d9d36df-6091-4bcf-8334-5926a6ba422b"
   }
 }
-
  */

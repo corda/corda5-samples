@@ -31,7 +31,7 @@ In the `AcceptanceFlow.java`, we receive the modified ProposalState and it's con
 1. We will begin our test deployment with clicking the `startCorda`. This task will load up the combined Corda workers in docker.
    A successful deployment will allow you to open the REST APIs at: https://localhost:8888/api/v1/swagger#. You can test out some
    functions to check connectivity. (GET /cpi function call should return an empty list as for now.)
-2. We will now deploy the cordapp with a click of `5-vNodeSetup` task. Upon successful deployment of the CPI, the GET /cpi function call should now return the meta data of the cpi you just upload
+2. We will now deploy the cordapp with a click of `5-vNodeSetup` task. Upon successful deployment of the CPI, the GET /cpi function call should now return the meta data of the cpi you just upload.
 
 
 
@@ -47,15 +47,15 @@ Pick a VNode identity to initiate the Proposal creation, and get its short hash.
 Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Alice's hash) and request body:
 ```
 {
-  "clientRequestId": "createProposal1",
-  "flowClassName": "com.r3.developers.samples.obligation.workflows.propose.ProposalFlowRequest",
+  "clientRequestId": "createProposal",
+  "flowClassName": "com.r3.developers.samples.negotiation.workflows.propose.ProposalFlowRequest",
   "requestBody": {
       "amount": 20,
       "counterParty":"CN=Bob, OU=Test Dept, O=R3, L=London, C=GB"
   }
 }
 ```
-After trigger the create-ProposalFlow, hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the short hash(Alice's hash) and client request id to view the flow result
+After trigger the create-ProposalFlow, hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the short hash(Alice's hash) and client request id ("createProposal" in the case above) to view the flow result.
 
 
 #### Step 2: List created Proposal state
@@ -64,11 +64,11 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Ali
 ```
 {
     "clientRequestId": "list-1",
-    "flowClassName": "com.r3.developers.samples.obligation.workflows.util.ListProposal",
+    "flowClassName": "com.r3.developers.samples.negotiation.workflows.util.ListProposal",
     "requestBody": {}
 }
 ```
-After trigger the List Proposal, hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the short hash(Alice's hash) and client request id to view the flow result 
+After trigger the List Proposal, hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the short hash(Alice's hash) and client request id ("list-1" in the case above) to view the flow result.
 
 
 #### Step 3: Modify the proposal 
@@ -77,7 +77,7 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Bob
 ```
 {
   "clientRequestId": "ModifyFlow",
-  "flowClassName": "com.r3.developers.samples.obligation.workflows.modify.CreateModifyRequestFlow",
+  "flowClassName": "com.r3.developers.samples.negotiation.workflows.modify.ModifyFlowRequest",
   "requestBody": {
       "newAmount": 22,
       "proposalID": "<use the proposal id here>"
@@ -89,11 +89,11 @@ After triggering the modify flow we need to hop to `GET /flow/{holdingidentitysh
 
 #### Step 4: Accept the new proposal from bob  `AcceptFlow`
 In this step, alice will accept the new proposal of Bob.
-Goto `POST /flow/{holdingidentityshorthash}`, enter the identity short hash (of Alice) and request body, we also need to provide the proposalId, which is same as the proposal ID used in the modifyFlow body. 
+Goto `POST /flow/{holdingidentityshorthash}`, enter the identity short hash (of Alice) and request body, we also need to provide the proposalId, which is same as the proposal ID used in modifyFlow body. 
 ```
 {
   "clientRequestId": "AcceptFlow",
-  "flowClassName": "com.r3.developers.samples.obligation.workflows.modify.CreateModifyRequestFlow",
+  "flowClassName": "com.r3.developers.samples.negotiation.workflows.accept.AcceptFlowRequest",
   "requestBody": {
       "proposalID": "<use the proposal id here>"
   }
@@ -102,6 +102,23 @@ Goto `POST /flow/{holdingidentityshorthash}`, enter the identity short hash (of 
 And as for the result of this flow, go to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the required fields.
 
 Thus, we have concluded a full run through of the Negotiation app.
+
+### App Diagrams
+Below are the app diagrams which are useful for the visual understanding.
+
+#### Dynamic Diagram
+
+
+![img_2.png](img_2.png)
+
+
+
+
+
+#### Static Diagram
+
+![img.png](img.png)
+
 
 
 

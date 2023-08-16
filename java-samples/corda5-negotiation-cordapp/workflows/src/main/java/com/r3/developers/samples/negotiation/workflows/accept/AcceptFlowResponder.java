@@ -1,7 +1,7 @@
-package com.r3.developers.samples.obligation.workflows.accept;
+package com.r3.developers.samples.negotiation.workflows.accept;
 
-import com.r3.developers.samples.obligation.states.Proposal;
-import com.r3.developers.samples.obligation.workflows.propose.ProposalFlowResponder;
+import com.r3.developers.samples.negotiation.states.Proposal;
+import com.r3.developers.samples.negotiation.workflows.accept.AcceptFlowResponder;
 import net.corda.v5.application.flows.CordaInject;
 import net.corda.v5.application.flows.InitiatedBy;
 import net.corda.v5.application.flows.ResponderFlow;

@@ -1,6 +1,6 @@
-package com.r3.developers.samples.obligation.workflows.propose;
+package com.r3.developers.samples.negotiation.workflows.propose;
 
-import com.r3.developers.samples.obligation.states.Member;
+import com.r3.developers.samples.negotiation.states.Member;
 import net.corda.v5.base.annotations.CordaSerializable;
 
 @CordaSerializable
