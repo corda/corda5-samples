@@ -9,4 +9,6 @@
 **/out/
 **/logs/
 **/node_modules/
+**/workspace/
+**/CordaPIDCache.dat
 *~*

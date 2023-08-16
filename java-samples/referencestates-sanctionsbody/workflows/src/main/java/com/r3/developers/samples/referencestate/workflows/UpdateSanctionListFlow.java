@@ -1,8 +1,8 @@
 package com.r3.developers.samples.referencestate.workflows;
 
-import com.r3.developers.samples.referencestate.contracts.SanctionedEntitiesContract;
+import com.r3.developers.samples.referencestate.contracts.SanctionListContract;
 import com.r3.developers.samples.referencestate.states.Member;
-import com.r3.developers.samples.referencestate.states.SanctionedEntities;
+import com.r3.developers.samples.referencestate.states.SanctionList;
 import net.corda.v5.application.flows.ClientRequestBody;
 import net.corda.v5.application.flows.ClientStartableFlow;
 import net.corda.v5.application.flows.CordaInject;
@@ -12,6 +12,7 @@ import net.corda.v5.application.membership.MemberLookup;
 import net.corda.v5.application.messaging.FlowMessaging;
 import net.corda.v5.base.annotations.Suspendable;
 import net.corda.v5.base.exceptions.CordaRuntimeException;
+import net.corda.v5.base.types.MemberX500Name;
 import net.corda.v5.ledger.common.NotaryLookup;
 import net.corda.v5.ledger.utxo.StateAndRef;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
@@ -50,7 +51,6 @@ public class UpdateSanctionListFlow implements ClientStartableFlow {
     public String call(@NotNull ClientRequestBody requestBody) {
         try{
             MemberInfo myInfo = memberLookup.myInfo();
-            NotaryInfo notary = notaryLookup.getNotaryServices().iterator().next();
             List<MemberInfo> allParties = memberLookup.lookup();
             allParties = allParties.stream().filter(it ->
                     !it.getName().getCommonName().contains("Notary")).collect(Collectors.toList());
@@ -58,13 +58,13 @@ public class UpdateSanctionListFlow implements ClientStartableFlow {
             UpdateSanctionListFlowArgs flowArgs =
                     requestBody.getRequestBodyAs(jsonMarshallingService, UpdateSanctionListFlowArgs.class);
 
-            List<StateAndRef<SanctionedEntities>> oldList =
-                    ledgerService.findUnconsumedStatesByType(SanctionedEntities.class);
+            List<StateAndRef<SanctionList>> oldList =
+                    ledgerService.findUnconsumedStatesByType(SanctionList.class);
 
             if(oldList.isEmpty()){
                 throw new CordaRuntimeException("Sanction List not found.");
             }
-            SanctionedEntities oldStateData = oldList.get(0).getState().getContractState();
+            SanctionList oldStateData = oldList.get(0).getState().getContractState();
 
             List<Member> badPeople = new ArrayList<>(oldStateData.getBadPeople());
             Member partyToSanction = new Member(
@@ -72,20 +72,21 @@ public class UpdateSanctionListFlow implements ClientStartableFlow {
                 memberLookup.lookup(flowArgs.getPartyToSanction()).getLedgerKeys().get(0)
             );
             badPeople.add(partyToSanction);
-            SanctionedEntities newList = new SanctionedEntities(
+            SanctionList newList = new SanctionList(
                     badPeople,
                     oldStateData.getIssuer(),
                     oldStateData.getUniqueId(),
                     oldStateData.getParticipants()
             );
 
+            MemberX500Name notaryName = oldList.get(0).getState().getNotaryName();
             //Create an unsigned transaction
             UtxoTransactionBuilder txBuilder = ledgerService.createTransactionBuilder()
-                    .setNotary(notary.getName())
+                    .setNotary(notaryName)
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                     .addInputState(oldList.get(0).getRef())
                     .addOutputState(newList)
-                    .addCommand(new SanctionedEntitiesContract.Update())
+                    .addCommand(new SanctionListContract.Update())
                     .addSignatories(myInfo.getLedgerKeys().get(0));
 
             UtxoSignedTransaction signedTransaction = txBuilder.toSignedTransaction();

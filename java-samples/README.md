@@ -11,6 +11,9 @@ This is the Java Samples folder.
 ```
 .
 ├── README.md
-└── corda5-obligation-cordapp
+├── corda5-obligation-cordapp
+├── encumbrance-pawn-shop
+├── ping-pong
+└── referencestates-sanctionsbody
 ```
 

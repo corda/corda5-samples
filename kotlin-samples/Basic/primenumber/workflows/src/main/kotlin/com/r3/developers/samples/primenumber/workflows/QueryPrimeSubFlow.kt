@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 // This class initiates the subflow session with the primeService vNode requesting for the Nth prime given index n
 // then receives the message from the corresponding subflow and returns the
 @InitiatingFlow(protocol = "query-prime")
-class QueryPrimeSubFlow(private val primeService: MemberX500Name, private val n: Int): SubFlow<Int> {
+class QueryPrimeSubFlow(private val primeServiceName: MemberX500Name, private val n: Int, private val primeService: PrimeService): SubFlow<QueryPrimeResponse> {
 
     private companion object {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
@@ -24,14 +24,13 @@ class QueryPrimeSubFlow(private val primeService: MemberX500Name, private val n:
     lateinit var flowMessaging: FlowMessaging
 
     @Suspendable
-    override fun call(): Int {
+    override fun call(): QueryPrimeResponse {
         log.info(FLOW_CALL)
 
-        val session = flowMessaging.initiateFlow(primeService)
-        val message = QueryPrimeRequest(n)
-        val receivedMessage = session.sendAndReceive(QueryPrimeResponse::class.java,message)
+        val session = flowMessaging.initiateFlow(primeServiceName)
+        val message = QueryPrimeRequest(n, primeService)
 
-        return receivedMessage.nthPrime
+        return session.sendAndReceive(QueryPrimeResponse::class.java,message)
     }
 }
 
@@ -56,12 +55,12 @@ class QueryPrimeResponderSubFlow(): ResponderFlow {
         log.info(RECEIVING)
         val receivedMessage = session.receive(QueryPrimeRequest::class.java)
         log.info("receivedMessage $receivedMessage")
+        val primeService = receivedMessage.primeService
+        val n = receivedMessage.n
 
         log.info(CALCULATING)
-        val primeService = PrimeService();
         val response: QueryPrimeResponse = try {
-            val result = primeService.queryNthPrime(receivedMessage.n)
-            QueryPrimeResponse(result)
+            primeService.queryNthPrime(n,primeService)
         } catch(e: Exception) {
             throw CordaRuntimeException("$e")
         }
