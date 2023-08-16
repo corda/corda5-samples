@@ -26,10 +26,6 @@ dependencies {
 
     // Alternatively we can explicitly specify all our Corda-API dependencies:
     cordaProvided 'net.corda:corda-base'
-    cordaProvided 'net.corda:corda-application'
-    cordaProvided 'net.corda:corda-crypto'
-    cordaProvided 'net.corda:corda-membership'
-    // cordaProvided 'net.corda:corda-persistence'
     cordaProvided 'net.corda:corda-serialization'
     cordaProvided 'net.corda:corda-ledger-utxo'
     cordaProvided 'net.corda:corda-ledger-consensual'
@@ -39,12 +35,6 @@ dependencies {
 
     // The CorDapp uses the slf4j logging framework. Corda-API provides this so we need a 'cordaProvided' declaration.
     cordaProvided 'org.slf4j:slf4j-api'
-
-    // This are shared so should be here.
-    // Dependencies Required By Test Tooling
-    // Todo:  these are commented out as the simulator UTXO work has not been merged into Gecko yet.
-//    testImplementation "net.corda:corda-simulator-api:$simulatorVersion"
-//    testRuntimeOnly "net.corda:corda-simulator-runtime:$simulatorVersion"
 
     // 3rd party libraries
     // Required

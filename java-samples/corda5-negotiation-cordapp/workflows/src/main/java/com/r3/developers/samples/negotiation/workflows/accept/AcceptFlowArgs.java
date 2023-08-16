@@ -9,9 +9,10 @@ public class AcceptFlowArgs {
 
     private UUID proposalID;
 
-    public AcceptFlowArgs(){}
+    public AcceptFlowArgs() {
+    }
 
-    public AcceptFlowArgs(UUID proposalId){
+    public AcceptFlowArgs(UUID proposalId) {
         this.proposalID = proposalId;
     }
 

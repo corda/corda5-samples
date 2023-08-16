@@ -1,7 +1,6 @@
-package com.r3.developers.samples.negotiation.states;
+package com.r3.developers.samples.negotiation.contracts;
 
-
-import com.r3.developers.samples.negotiation.contracts.ProposalAndTradeContract;
+import com.r3.developers.samples.negotiation.util.Member;
 import net.corda.v5.base.annotations.ConstructorForDeserialization;
 import net.corda.v5.ledger.utxo.BelongsToContract;
 import net.corda.v5.ledger.utxo.ContractState;
@@ -15,12 +14,11 @@ import java.util.UUID;
 @BelongsToContract(ProposalAndTradeContract.class)
 public class Trade implements ContractState {
 
-    private int amount;
-    private Member buyer;
-    private Member seller;
-    private UUID proposalID;
+    private final int amount;
+    private final Member buyer;
+    private final Member seller;
+    private final UUID proposalID;
     public List<PublicKey> participants;
-
 
     @ConstructorForDeserialization
     public Trade(int amount, Member buyer, Member seller, UUID proposalID, List<PublicKey> participants) {
@@ -40,7 +38,9 @@ public class Trade implements ContractState {
     }
 
 
-    public int getAmount(){return amount;}
+    public int getAmount() {
+        return amount;
+    }
 
     public Member getSeller() {
         return seller;

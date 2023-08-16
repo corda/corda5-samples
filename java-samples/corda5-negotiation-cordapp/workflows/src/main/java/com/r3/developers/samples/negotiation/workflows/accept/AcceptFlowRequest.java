@@ -1,10 +1,10 @@
 package com.r3.developers.samples.negotiation.workflows.accept;
 
+import com.r3.developers.samples.negotiation.contracts.Proposal;
 import com.r3.developers.samples.negotiation.contracts.ProposalAndTradeContract;
-import com.r3.developers.samples.negotiation.states.Member;
-import com.r3.developers.samples.negotiation.states.Proposal;
-import com.r3.developers.samples.negotiation.states.Trade;
-import com.r3.developers.samples.negotiation.workflows.modify.ModifyFlowRequest;
+import com.r3.developers.samples.negotiation.contracts.Trade;
+import com.r3.developers.samples.negotiation.util.Member;
+import com.r3.developers.samples.negotiation.workflows.util.FInalizeFlow;
 import net.corda.v5.application.flows.*;
 import net.corda.v5.application.marshalling.JsonMarshallingService;
 import net.corda.v5.application.membership.MemberLookup;
@@ -12,14 +12,11 @@ import net.corda.v5.application.messaging.FlowMessaging;
 import net.corda.v5.application.messaging.FlowSession;
 import net.corda.v5.base.annotations.Suspendable;
 import net.corda.v5.base.exceptions.CordaRuntimeException;
-import net.corda.v5.ledger.common.NotaryLookup;
 import net.corda.v5.ledger.utxo.StateAndRef;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import net.corda.v5.ledger.utxo.transaction.UtxoSignedTransaction;
 import net.corda.v5.ledger.utxo.transaction.UtxoTransactionBuilder;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -29,9 +26,6 @@ import java.util.stream.Collectors;
 
 @InitiatingFlow(protocol = "accept")
 public class AcceptFlowRequest implements ClientStartableFlow {
-
-    private final static Logger log = LoggerFactory.getLogger(AcceptFlowRequest.class);
-
     @CordaInject
     public FlowMessaging flowMessaging;
 
@@ -42,40 +36,40 @@ public class AcceptFlowRequest implements ClientStartableFlow {
     public MemberLookup memberLookup;
 
     @CordaInject
-    NotaryLookup notaryLookup;
-
-    @CordaInject
     UtxoLedgerService utxoLedgerService;
 
+    // FlowEngine service is required to run SubFlows.
     @CordaInject
     public FlowEngine flowEngine;
 
     @Suspendable
     @Override
     public String call(@NotNull ClientRequestBody requestBody) {
-        AcceptFlowArgs request = requestBody.getRequestBodyAs(jsonMarshallingService,AcceptFlowArgs.class);
+        String statesNotFound = "Multiple or zero Proposal states not found wth id: ";
+
+        AcceptFlowArgs request = requestBody.getRequestBodyAs(jsonMarshallingService, AcceptFlowArgs.class);
         // Get UUID from input JSON
         UUID proposalID = request.getProposalID();
 
-        UUID stateID = utxoLedgerService.findUnconsumedStatesByType(Proposal.class).get(0).getState().getContractState().getProposalID();
-
         // Getting the old Proposal State as an input state
         List<StateAndRef<Proposal>> proposalStatAndRef = utxoLedgerService.findUnconsumedStatesByType(Proposal.class);
-        List< StateAndRef<Proposal>> proposalStatAndRefWithId = proposalStatAndRef.stream().
-                filter(it->it.getState().getContractState().getProposalID().equals(proposalID)).collect(Collectors.toList());
+        List<StateAndRef<Proposal>> proposalStatAndRefWithId = proposalStatAndRef.stream().
+                filter(it -> it.getState().getContractState().getProposalID().equals(proposalID)).collect(Collectors.toList());
 
-        if(proposalStatAndRefWithId.size()!=1) throw  new CordaRuntimeException("Multiple or zero Proposal states with id " + proposalID + "found");
+
+        if (proposalStatAndRefWithId.size() != 1)
+            throw new CordaRuntimeException(statesNotFound + proposalID);
         StateAndRef<Proposal> proposalStateAndRef = proposalStatAndRefWithId.get(0);
         Proposal proposalInput = proposalStateAndRef.getState().getContractState();
 
         // Creating a Trade as an output state
         Trade output = new Trade(proposalInput.getAmount(),
-                new Member(proposalInput.getBuyer().getName(),proposalInput.getBuyer().getLedgerKey()),
+                new Member(proposalInput.getBuyer().getName(), proposalInput.getBuyer().getLedgerKey()),
                 new Member(proposalInput.getSeller().getName(), proposalInput.getSeller().getLedgerKey()),
                 proposalInput.getParticipants()
-                );
+        );
 
-        Member counterParty= (memberLookup.myInfo().getName().equals(proposalInput.getProposer().getName()))?proposalInput.getProposee(): proposalInput.getProposer();
+        Member counterParty = (memberLookup.myInfo().getName().equals(proposalInput.getProposer().getName())) ? proposalInput.getProposee() : proposalInput.getProposer();
 
         //Initiate the transactionBuilder with command to "Accept"
         UtxoTransactionBuilder transactionBuilder = utxoLedgerService.createTransactionBuilder()
@@ -90,27 +84,13 @@ public class AcceptFlowRequest implements ClientStartableFlow {
         // Call FinalizeIOUSubFlow which will finalise the transaction.
         // If successful the flow will return a String of the created transaction id,
         // if not successful it will return an error message.
-        try{
+        try {
             UtxoSignedTransaction signedTransaction = transactionBuilder.toSignedTransaction();
             FlowSession counterPartySession = flowMessaging.initiateFlow(counterParty.getName());
-            UtxoSignedTransaction finalizedTransaction= utxoLedgerService.finalize(signedTransaction,List.of(counterPartySession)).getTransaction();
+            return flowEngine.subFlow(new FInalizeFlow.FinalizeRequest(signedTransaction, List.of(counterPartySession)));
 
-            return  finalizedTransaction.getId().toString();
-        }
-        catch (Exception e){
-            return String.format("Flow failed, message: %s", e.getMessage());
+        } catch (Exception e) {
+            throw new CordaRuntimeException(e.getMessage());
         }
     }
 }
-/*
-
-Alice hash: 5B9459F205F0
-
-{
-  "clientRequestId": "flow name",
-  "flowClassName": "com.r3.developers.samples.negotiation.workflows.accept.AcceptFlowRequest",
-  "requestBody": {
-      "proposalID": "9d9d36df-6091-4bcf-8334-5926a6ba422b"
-  }
-}
- */

@@ -109,7 +109,7 @@ Below are the app diagrams which are useful for the visual understanding.
 #### Dynamic Diagram
 
 
-![img_2.png](img_2.png)
+![img_2.png](negotiation-cordapp-sequence-diagram.png)
 
 
 
@@ -117,7 +117,7 @@ Below are the app diagrams which are useful for the visual understanding.
 
 #### Static Diagram
 
-![img.png](img.png)
+![img.png](negotiation-cordapp-design-diagram.png)
 
 
 

@@ -1,11 +1,10 @@
 package com.r3.developers.samples.negotiation.workflows.util;
 
-import com.r3.developers.samples.negotiation.states.Proposal;
+import com.r3.developers.samples.negotiation.contracts.Proposal;
 import net.corda.v5.application.flows.ClientRequestBody;
 import net.corda.v5.application.flows.ClientStartableFlow;
 import net.corda.v5.application.flows.CordaInject;
 import net.corda.v5.application.marshalling.JsonMarshallingService;
-import com.r3.developers.samples.negotiation.workflows.util.ListProposalResults;
 import net.corda.v5.ledger.utxo.StateAndRef;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import org.jetbrains.annotations.NotNull;
@@ -27,9 +26,9 @@ public class ListProposal implements ClientStartableFlow {
     @Override
     public String call(@NotNull ClientRequestBody requestBody) {
         // Queries the VNode's vault for unconsumed states and converts the result to a serializable DTO.
-      List<StateAndRef<Proposal>> states= utxoLedgerService.findUnconsumedStatesByType(Proposal.class);
-        List<ListProposalResults> results = states.stream().map(stateAndRef ->
-                new ListProposalResults(
+        List<StateAndRef<Proposal>> states = utxoLedgerService.findUnconsumedStatesByType(Proposal.class);
+        List<ListProposalArgs> results = states.stream().map(stateAndRef ->
+                new ListProposalArgs(
                         stateAndRef.getState().getContractState().getProposalID(),
                         stateAndRef.getState().getContractState().getAmount(),
                         stateAndRef.getState().getContractState().getBuyer().toString(),
@@ -53,7 +52,7 @@ public class ListProposal implements ClientStartableFlow {
 RequestBody for triggering the flow via http-rpc:
 {
     "clientRequestId": "list-1",
-    "flowClassName": "com.r3.developers.samples.obligation.workflows.util.ListProposal",
+    "flowClassName": "com.r3.developers.samples.negotiation.workflows.util.ListProposal",
     "requestBody": {}
 }
 */
