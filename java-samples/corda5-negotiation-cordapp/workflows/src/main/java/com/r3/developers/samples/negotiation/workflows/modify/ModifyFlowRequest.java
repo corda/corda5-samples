@@ -69,7 +69,7 @@ public class ModifyFlowRequest implements ClientStartableFlow {
         Proposal proposalInput = proposalStateAndRef.getState().getContractState();
 
         //creating a new Proposal as an output state
-        Member counterParty = (memberLookup.myInfo().getName().equals(proposalInput.getProposer()))? proposalInput.getProposee(): proposalInput.getProposer();
+        Member counterParty = (memberLookup.myInfo().getName().equals(proposalInput.getProposer().getName()))? proposalInput.getProposee(): proposalInput.getProposer();
         Proposal output= new Proposal(request.getNewAmount(),
                 new Member(proposalInput.getBuyer().getName(),proposalInput.getBuyer().getLedgerKey()),
                 new Member(proposalInput.getSeller().getName(),proposalInput.getSeller().getLedgerKey()),
