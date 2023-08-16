@@ -52,7 +52,6 @@ public class ProposalFlowRequest implements ClientStartableFlow {
     @Override
     public String call(@NotNull ClientRequestBody requestBody) {
 
-
         // Obtain the deserialized input arguments to the flow from the requestBody.
         ProposalFlowArgs request = requestBody.getRequestBodyAs(jsonMarshallingService, ProposalFlowArgs.class);
         MemberX500Name buyer;
@@ -87,7 +86,6 @@ public class ProposalFlowRequest implements ClientStartableFlow {
                 .addOutputState(output)
                 .addCommand(new ProposalAndTradeContract.Propose())
                 .addSignatories(output.getParticipants());
-
 
 
         // Call FinalizeIOUSubFlow which will finalise the transaction.

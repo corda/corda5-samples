@@ -58,7 +58,6 @@ public class ModifyFlowRequest implements ClientStartableFlow {
         // Get UUID from input JSON
         UUID proposalID = request.getProposalID();
 
-
         // Getting the old Proposal State as an input state
         List< StateAndRef<Proposal>> proposalStatAndRef = utxoLedgerService.findUnconsumedStatesByType(Proposal.class);
         List< StateAndRef<Proposal>> proposalStatAndRefWithId = proposalStatAndRef.stream().
