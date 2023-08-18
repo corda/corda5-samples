@@ -9,7 +9,7 @@
             <column name="duration" type="int"/>
             <column name="premium" type="int"/>
             <column name="insured_value" type="BIGINT"/>
-            <column name="id" type="NVARCHAR(64)"/>
+            <column name="vehicleid" type="NVARCHAR(64)"/>
             <column name="registrationnumber" type="NVARCHAR(64)"/>
 
         </createTable>

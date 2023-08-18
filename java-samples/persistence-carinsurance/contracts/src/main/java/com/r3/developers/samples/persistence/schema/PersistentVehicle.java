@@ -17,7 +17,7 @@ import java.util.UUID;
 public class PersistentVehicle {
 
     @Id
-    private final UUID id;
+    private final UUID vehicleId;
     @Column(name = "registration_number")
     private final String registrationNumber;
     @Column(name = "chasis_number")
@@ -37,7 +37,7 @@ public class PersistentVehicle {
      * Default constructor required by Hibernate
      */
     public PersistentVehicle() {
-        this.id = null;
+        this.vehicleId = null;
         this.registrationNumber = null;
         this.chasisNumber = null;
         this.make = null;
@@ -49,7 +49,7 @@ public class PersistentVehicle {
 
     public PersistentVehicle(String registrationNumber, String chasisNumber, String make, String model, String variant,
                              String color, String fuelType) {
-        this.id = UUID.randomUUID();
+        this.vehicleId = UUID.randomUUID();
         this.registrationNumber = registrationNumber;
         this.chasisNumber = chasisNumber;
         this.make = make;
@@ -59,8 +59,8 @@ public class PersistentVehicle {
         this.fuelType = fuelType;
     }
 
-    public UUID getId() {
-        return id;
+    public UUID getVehicleId() {
+        return vehicleId;
     }
 
     public String getRegistrationNumber() {

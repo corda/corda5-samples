@@ -22,7 +22,7 @@ public class PersistentInsurance {
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumns({
-            @JoinColumn(name = "id", referencedColumnName = "id"),
+            @JoinColumn(name = "vehicleId", referencedColumnName = "vehicleid"),
             @JoinColumn(name = "registrationNumber", referencedColumnName = "registration_number"),
     })
     private final PersistentVehicle vehicle;
