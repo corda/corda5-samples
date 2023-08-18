@@ -96,4 +96,8 @@ Below image shows the connection details:
 
 The password is `password`.
 
-A schema would have been created for each vNode in the format: `vnode_vault_<identity_short_hash>`.
+A schema would have been created for each vNode in the format: `vnode_vault_<identity_short_hash>`. The image
+below highlights the custom tables created in the database.
+<p align="center">
+  <img src="./db-tables.png" alt="Database URL" width="400">
+</p>
