@@ -73,7 +73,10 @@ public class IssueInsuranceFlow implements ClientStartableFlow {
 
             UtxoSignedTransaction signedTransaction = txBuilder.toSignedTransaction();
 
+            // Persist the state information in custom database tables.
             PersistentInsurance persistentInsurance = persistInsurance(insurance);
+
+            // Send the entity to counterparty. They use it to persist the information at their end.
             FlowSession session = flowMessaging.initiateFlow(flowArgs.getInsuree());
             session.send(persistentInsurance);
 

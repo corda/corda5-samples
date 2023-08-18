@@ -94,6 +94,7 @@ public class InsuranceClaimFlow implements ClientStartableFlow {
                     claims,
                     loanStateAndRef.getState().getContractState().getParticipants());
 
+            //Build the transaction
             UtxoTransactionBuilder txBuilder = ledgerService.createTransactionBuilder()
                     .setNotary(loanStateAndRef.getState().getNotaryName())
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
@@ -102,10 +103,16 @@ public class InsuranceClaimFlow implements ClientStartableFlow {
                     .addCommand(new InsuranceContract.AddClaim())
                     .addSignatories(myInfo.getLedgerKeys().get(0));
 
+            // Sign the transaction
             UtxoSignedTransaction signedTransaction = txBuilder.toSignedTransaction();
+
+            // Persist in custom database table
             PersistentInsurance persistentInsurance = persistInsurance(output, claims);
+
+            // Send the entity to counterparty. They use it to persist the information at their end.
             FlowSession session = flowMessaging.initiateFlow(loanStateAndRef.getState().getContractState().getInsurer());
             session.send(persistentInsurance);
+
 
             UtxoSignedTransaction finalizedTransaction = ledgerService.finalize(signedTransaction,
                     Collections.singletonList(session)).getTransaction();

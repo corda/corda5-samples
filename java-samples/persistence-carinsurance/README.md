@@ -1,14 +1,32 @@
 # Car Insurance -- Persistence
 
 This CorDapp demonstrates how Persistence works in Next Gen Corda. 
-Corda allows developers to have the ability to expose some or all parts of their states to a custom database table using an ORM tools. To support this feature the state must implement QueryableState.
+Corda allows developers to create custom schema to store state data separately, so that it can be used for other functionality
+like reporting etc.
 
+Unlike Corda 4, Next Gen Corda doesn't have the QueryableState functionality, however it exposes the Persistence Service which 
+can be used to achieve similar result.
 
-## Concepts
-This CorDapp allows two nodes to enter into an IOU agreement, but enforces that both parties belong to a list of sanctioned entities. This list of sanctioned entities is taken from a referenced SanctionedEntities state.
+In this CorDapp we would use an Insurance state and persist its properties in a custom table in the database. 
+The Insurance state among other fields also contains an VehicleDetail object, which is the asset being insured. 
+We have used this VehicleDetail to demonstrate One-to-One relationship. 
+Similarly, we also have a list of Claim objects in the Insurance state which represents claims made against the insurance. 
+We use them to demonstrate One-to-Many relationship.
+
+### Entities
+The entities for the custom tables are defined in the `contracts` module in the package `com.r3.developers.samples.persistence.schema`.
+The corresponding liquibase scripts can be found in the `workflows` module under `resources/migration`.
+
+### Flows
+
+There are two flow in this CorDapp:
+
+1. `IssueInsuranceFlow`: It creates the insurance state with the associated vehicle information.
+
+2. `InsuranceClaimFlow`: It creates the claims against the insurance.
+
 
 ## Usage
-
 
 ### Setting up
 
@@ -28,72 +46,54 @@ In Corda 5, flows will be triggered via `POST /flow/{holdingidentityshorthash}` 
 
 ### Running the flows
 
-Pick the SanctionBody VNode identity to issue the sanctions list
-Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(SanctionBody's hash) and request body:
-
-    {
-    "clientRequestId": "issue-sanction",
-    "flowClassName": "com.r3.developers.samples.persistence.workflows.IssueSanctionsListFlow",
-    "requestBody": {
-      }
-    }
-
-Now that the sanctions list has been made, Next, we want to issue an IOU. Pick Bob VNode identity to issue the IOU.
+Pick Bob's VNode identity to issue the sanctions list
 Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Bob's hash) and request body:
 
-    {
-      "clientRequestId": "issue-iou",
-      "flowClassName": "com.r3.developers.samples.persistence.workflows.IOUIssueFlow",
-      "requestBody": {
-      "iouValue": 100,
-      "lenderName": "CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB",
-      "sanctionAuthority": "CN=SanctionsBody, OU=Test Dept, O=R3, L=London, C=GB"
+      {
+         "clientRequestId": "issue-1",
+         "flowClassName": "com.r3.developers.samples.persistence.workflows.IssueInsuranceFlow",
+         "requestBody": {
+            "vehicleInfo": {
+            "registrationNumber": "MH7777",
+            "chasisNumber": "CH8771",
+            "make": "Hyundai",
+            "model": "i20",
+            "variant": "Asta",
+            "color": "grey",
+            "fuelType": "Petrol"
+            },
+            "policyNumber" : "P001",
+            "insuredValue": 500000,
+            "duration": 2,
+            "premium": 20000,
+            "insuree": "CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB"
+         }
       }
-    }
 
-We've seen how to successfully send an IOU to a non-sanctioned party, so what if we want to send one to a sanctioned party? First we need to update the sanction list.
-Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(SanctionBody's hash) and request body:
+This should create the insurance state and the state data should also have been persisted in the custom tables.
 
-    {
-      "clientRequestId": "update-sanction",
-      "flowClassName": "com.r3.developers.samples.persistence.workflows.UpdateSanctionListFlow",
-      "requestBody": {
-      "partyToSanction": "CN=DodgyParty, OU=Test Dept, O=R3, L=London, C=GB"
+Now in order to add claims, Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Charlie's hash) and request body:
+
+      {
+         "clientRequestId": "claim-1",
+         "flowClassName": "com.r3.developers.samples.persistence.workflows.InsuranceClaimFlow",
+         "requestBody": {
+            "policyNumber" : "P001",
+            "claimNumber": "CM001",
+            "claimDescription": "Simple Claim",
+            "claimAmount": 50000
+         }
       }
-    }
 
+This should add claims to the insurance and it can be viewed in the custom database tables. 
 
-Now try an issue an IOU to DodgyParty. Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Bob's hash) and request body:
+### Connecting to the Database
+To connect to the postgres database, you could use any db explorer of your choice.
+Below image shows the connection details:
+<p align="center">
+  <img src="./db-details.png" alt="Database URL" width="400">
+</p>
 
-    {
-      "clientRequestId": "issue-iou-1",
-      "flowClassName": "com.r3.developers.samples.persistence.workflows.IOUIssueFlow",
-      "requestBody": {
-      "iouValue": 100,
-      "lenderName": "CN=DodgyParty, OU=Test Dept, O=R3, L=London, C=GB",
-      "sanctionAuthority": "CN=SanctionsBody, OU=Test Dept, O=R3, L=London, C=GB"
-      }
-    }
+The password is `password`.
 
-The flow will error with the message: The borrower O=DodgyParty, L=Moscow, C=RU is a sanctioned entity'!
-
-You could use the GetIOUFlow and GetSanctionListFlow to query the vault and check the current unconsumed states
-issued on the ledgers. Go to `POST /flow/{holdingidentityshorthash}`, enter the vnode's identity short hash and request body:
-
-To Get IOU List:
-
-    {
-       "clientRequestId": "get-iou",
-       "flowClassName": "com.r3.developers.samples.persistence.workflows.GetIOUFlow",
-       "requestBody": {
-       }
-    }
-
-To Get Sanction List:
-
-    {
-       "clientRequestId": "get-sanction",
-       "flowClassName": "com.r3.developers.samples.persistence.workflows.GetSanctionListFlow",
-       "requestBody": {
-       }
-    }
+A schema would have been created for each vNode in the format: `vnode_vault_<identity_short_hash>`.
