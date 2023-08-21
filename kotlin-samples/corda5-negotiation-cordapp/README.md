@@ -103,23 +103,5 @@ And as for the result of this flow, go to `GET /flow/{holdingidentityshorthash}/
 
 Thus, we have concluded a full run through of the Negotiation app.
 
-### App Diagrams
-Below are the app diagrams which are useful for the visual understanding.
-
-#### Dynamic Diagram
-
-
-![img_2.png](img_2.png)
-
-
-
-
-
-#### Static Diagram
-
-![img.png](img.png)
-
-
-
 
 

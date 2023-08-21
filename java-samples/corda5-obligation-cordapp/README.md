@@ -88,15 +88,4 @@ And as for the result, you need to go to the Get API again and enter the short h
 
 Thus, we have concluded a full run through of the obligation app. 
 
-### App Diagrams 
-Below are the diagram of this app which are useful for the visual understanding. 
-
-#### Static Diagram
-
-![img.png](img.png)
-
-#### Dynamic Diagram
-
-![img_1.png](img_1.png)
-
 
