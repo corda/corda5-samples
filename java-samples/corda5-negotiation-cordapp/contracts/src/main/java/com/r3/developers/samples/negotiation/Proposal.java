@@ -1,4 +1,4 @@
-package com.r3.developers.samples.negotiation.contracts;
+package com.r3.developers.samples.negotiation;
 
 import com.r3.developers.samples.negotiation.util.Member;
 import net.corda.v5.base.annotations.ConstructorForDeserialization;

@@ -1,7 +1,7 @@
 package com.r3.developers.samples.negotiation.workflows.propose;
 
-import com.r3.developers.samples.negotiation.contracts.Proposal;
-import com.r3.developers.samples.negotiation.contracts.ProposalAndTradeContract;
+import com.r3.developers.samples.negotiation.Proposal;
+import com.r3.developers.samples.negotiation.ProposalAndTradeContract;
 import com.r3.developers.samples.negotiation.util.Member;
 import com.r3.developers.samples.negotiation.workflows.util.FInalizeFlow;
 import net.corda.v5.application.flows.*;

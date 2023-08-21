@@ -1,6 +1,6 @@
 package com.r3.developers.samples.negotiation.workflows.util;
 
-import com.r3.developers.samples.negotiation.contracts.Proposal;
+import com.r3.developers.samples.negotiation.Proposal;
 import net.corda.v5.application.flows.ClientRequestBody;
 import net.corda.v5.application.flows.ClientStartableFlow;
 import net.corda.v5.application.flows.CordaInject;

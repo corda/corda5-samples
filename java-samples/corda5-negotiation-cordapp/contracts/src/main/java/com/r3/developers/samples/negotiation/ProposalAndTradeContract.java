@@ -1,4 +1,4 @@
-package com.r3.developers.samples.negotiation.contracts;
+package com.r3.developers.samples.negotiation;
 
 import net.corda.v5.base.exceptions.CordaRuntimeException;
 import net.corda.v5.ledger.utxo.Command;
