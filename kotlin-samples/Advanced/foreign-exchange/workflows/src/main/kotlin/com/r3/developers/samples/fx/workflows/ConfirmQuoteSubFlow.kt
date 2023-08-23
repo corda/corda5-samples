@@ -29,8 +29,7 @@ class ConfirmQuoteSubFlow(
     }
 }
 
-@Suspendable
-@InitiatingFlow(protocol = "aaa")
+
 @InitiatedBy(protocol = "confirm-quote")
 class ConfirmQuoteSubFlowResponder(
 //    private val session: FlowSession
@@ -58,9 +57,9 @@ class ConfirmQuoteSubFlowResponder(
         log.info("[ConfirmQuoteSubFlowResponder] currencyPair:$currencyPair | fxServiceName:$fxServiceName | conversationRateProposed:$conversionRateProposed")
 
         //todo fix
-        val sessionRecipientAndService = flowMessaging.initiateFlow(fxServiceName)
+//        val sessionRecipientAndService = flowMessaging.initiateFlow(fxServiceName)
         val requestBody = QuoteFxRateRequest(currencyPair, fxServiceName)
-        val ireallyhopethisworkssubsbuflowresponse = flowEngine.subFlow(QuoteExchangeRateSubFlow(requestBody,sessionRecipientAndService))
+        val ireallyhopethisworkssubsbuflowresponse = flowEngine.subFlow(QuoteAgainSubFlow(requestBody))
         log.info("did it work: $ireallyhopethisworkssubsbuflowresponse")
 
         val response = RecipientConfirmQuoteResponse(1.5f,"accepted")
