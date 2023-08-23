@@ -12,21 +12,18 @@ import net.corda.v5.base.annotations.Suspendable
 import org.slf4j.LoggerFactory
 
 @InitiatingFlow(protocol = "quote-fx")
-class QuoteExchangeRateSubFlow(private val quoteFxRateRequest: QuoteFxRateRequest): SubFlow<QuoteFxRateResponse> {
+class QuoteExchangeRateSubFlow(
+    private val quoteFxRateRequest: QuoteFxRateRequest,
+    private val session: FlowSession
+): SubFlow<QuoteFxRateResponse> {
     private companion object {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
-
         const val FLOW_CALL = "QuoteExchangeRateSubFlow.call() called"
     }
-
-    @CordaInject
-    lateinit var flowMessaging: FlowMessaging
 
     @Suspendable
     override fun call(): QuoteFxRateResponse {
         log.info(FLOW_CALL)
-        val session = flowMessaging.initiateFlow(quoteFxRateRequest.fxServiceName)
-
         return session.sendAndReceive(QuoteFxRateResponse::class.java,quoteFxRateRequest)
     }
 

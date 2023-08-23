@@ -69,7 +69,7 @@ class CreateFxTransaction(): ClientStartableFlow {
     lateinit var flowEngine: FlowEngine
 
     @CordaInject
-    lateinit var messaging: FlowMessaging
+    lateinit var flowMessaging: FlowMessaging
 
     @Suspendable
     override fun call(requestBody: ClientRequestBody): String {
@@ -89,18 +89,19 @@ class CreateFxTransaction(): ClientStartableFlow {
         val fxServiceIdentity: PublicKey = fxServiceMemberInfo.ledgerKeys.first()
 
         log.info(GET_FX_QUOTE)
+        val sessionAliceService = flowMessaging.initiateFlow(fxServiceName)
         val currencyPair = "$convertingFrom$convertingTo"
         val quoteRequest = QuoteFxRateRequest(currencyPair, fxServiceName)
-        val quoteResponse: QuoteFxRateResponse = flowEngine.subFlow(QuoteExchangeRateSubFlow(quoteRequest))
+        val quoteResponse: QuoteFxRateResponse = flowEngine.subFlow(QuoteExchangeRateSubFlow(quoteRequest,sessionAliceService))
         val conversionRate = quoteResponse.conversionRate
 
         log.info(GET_RECIPIENT_QUOTE_CONFIRMATION)
+        val sessionAliceToRecipient = flowMessaging.initiateFlow(recipientName)
         val recipientConfirmationRequest = RecipientConfirmQuoteRequest(currencyPair,conversionRate,recipientName, fxServiceName)
-        val recipientResponse: RecipientConfirmQuoteResponse = flowEngine.subFlow(ConfirmQuoteSubFlow(recipientConfirmationRequest))
+        val recipientResponse: RecipientConfirmQuoteResponse = flowEngine.subFlow(ConfirmQuoteSubFlow(recipientConfirmationRequest,sessionAliceToRecipient))
+        log.info("recipientResponse: $recipientResponse")
 
-        log.info("recipientResponse: ${recipientResponse}")
-
-        return "Hey. currencyPair:$currencyPair | amount:$amount | conversionRate:$conversionRate"
+        return "Hey. currencyPair:$currencyPair | amount:$amount | conversionRate:$conversionRate | recipientResponse:$recipientResponse"
     }
 
 }
