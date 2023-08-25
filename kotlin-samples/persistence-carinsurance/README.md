@@ -1,16 +1,16 @@
 # Car Insurance -- Persistence
 
-This CorDapp demonstrates how Persistence works in Next Gen Corda. 
+This CorDapp demonstrates how Persistence works in Next Gen Corda.
 Corda allows developers to create custom schema to store state data separately, so that it can be used for other functionality
 like reporting etc.
 
-Unlike Corda 4, Next Gen Corda doesn't have the QueryableState functionality, however it exposes the Persistence Service which 
+Unlike Corda 4, Next Gen Corda doesn't have the QueryableState functionality, however it exposes the Persistence Service which
 can be used to achieve similar result.
 
-In this CorDapp we would use an Insurance state and persist its properties in a custom table in the database. 
-The Insurance state among other fields also contains an VehicleDetail object, which is the asset being insured. 
-We have used this VehicleDetail to demonstrate One-to-One relationship. 
-Similarly, we also have a list of Claim objects in the Insurance state which represents claims made against the insurance. 
+In this CorDapp we would use an Insurance state and persist its properties in a custom table in the database.
+The Insurance state among other fields also contains an VehicleDetail object, which is the asset being insured.
+We have used this VehicleDetail to demonstrate One-to-One relationship.
+Similarly, we also have a list of Claim objects in the Insurance state which represents claims made against the insurance.
 We use them to demonstrate One-to-Many relationship.
 
 ### Entities
@@ -85,7 +85,7 @@ Now in order to add claims, Go to `POST /flow/{holdingidentityshorthash}`, enter
          }
       }
 
-This should add claims to the insurance and it can be viewed in the custom database tables. 
+This should add claims to the insurance and it can be viewed in the custom database tables.
 
 ### Connecting to the Database
 To connect to the postgres database, you could use any db explorer of your choice.
