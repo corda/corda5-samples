@@ -40,14 +40,14 @@ There are two flow in this CorDapp:
 ### Running the app
 
 In Corda 5, flows will be triggered via `POST /flow/{holdingidentityshorthash}` and flow result will need to be view at `GET /flow/{holdingidentityshorthash}/{clientrequestid}`
-* holdingidentityshorthash: the id of the network participants, ie SanctionBody, Bob, Charlie and DodgyParty. You can view all the short hashes of the network member with another gradle task called `ListVNodes`
+* holdingidentityshorthash: the id of the network participants, ie InsuranceCompany, and Charlie. You can view all the short hashes of the network member with another gradle task called `ListVNodes`
 * clientrequestid: the id you specify in the flow requestBody when you trigger a flow.
 
 
 ### Running the flows
 
-Pick Bob's VNode identity to issue the sanctions list
-Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Bob's hash) and request body:
+Pick InsuranceCompany's VNode identity to issue the sanctions list
+Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(InsuranceCompany's hash) and request body:
 
       {
          "clientRequestId": "issue-1",

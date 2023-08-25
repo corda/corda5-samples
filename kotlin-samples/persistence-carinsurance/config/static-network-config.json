@@ -1,6 +1,6 @@
 [
   {
-    "x500Name" : "CN=Bob, OU=Test Dept, O=R3, L=London, C=GB",
+    "x500Name" : "CN=InsuranceCompany, OU=Test Dept, O=R3, L=London, C=GB",
     "cpi" : "MyCorDapp"
   },
   {

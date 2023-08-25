@@ -39,10 +39,6 @@ class InsuranceClaimFlow : ClientStartableFlow {
     @CordaInject
     lateinit var ledgerService: UtxoLedgerService
 
-    // Injects the NotaryLookup to look up the notary identity.
-    @CordaInject
-    lateinit var notaryLookup: NotaryLookup
-
     // FlowMessaging service is required to start flow sessions with counterparty
     @CordaInject
     lateinit var flowMessaging: FlowMessaging
