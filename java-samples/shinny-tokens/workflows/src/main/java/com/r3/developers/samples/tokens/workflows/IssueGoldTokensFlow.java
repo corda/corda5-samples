@@ -3,11 +3,10 @@ package com.r3.developers.samples.tokens.workflows;
 import com.r3.developers.samples.tokens.contracts.GoldContract;
 import com.r3.developers.samples.tokens.states.GoldState;
 import net.corda.v5.application.crypto.DigestService;
-import net.corda.v5.application.flows.ClientRequestBody;
-import net.corda.v5.application.flows.ClientStartableFlow;
-import net.corda.v5.application.flows.CordaInject;
+import net.corda.v5.application.flows.*;
 import net.corda.v5.application.marshalling.JsonMarshallingService;
 import net.corda.v5.application.membership.MemberLookup;
+import net.corda.v5.application.messaging.FlowMessaging;
 import net.corda.v5.base.annotations.Suspendable;
 import net.corda.v5.base.exceptions.CordaRuntimeException;
 import net.corda.v5.base.types.MemberX500Name;
@@ -18,71 +17,68 @@ import net.corda.v5.ledger.utxo.transaction.UtxoSignedTransaction;
 import net.corda.v5.ledger.utxo.transaction.UtxoTransactionBuilder;
 import net.corda.v5.membership.MemberInfo;
 import net.corda.v5.membership.NotaryInfo;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Arrays;
+import java.util.Collections;
 
 import static java.util.Objects.requireNonNull;
 import static net.corda.v5.crypto.DigestAlgorithmName.SHA2_256;
 
-// Alice will trigger this flow, by specifying the issuer. The issuer will issue tokens worth of given amount to Alice.
-public class MintGoldTokensFlow implements ClientStartableFlow {
-
-    private final static Logger log = LoggerFactory.getLogger(MintGoldTokensFlow.class);
-
+// Alice will trigger this flow to issue gold tokens to Bob.
+public class IssueGoldTokensFlow implements ClientStartableFlow {
+    private final static Logger log = LoggerFactory.getLogger(IssueGoldTokensFlow.class);
     @CordaInject
     public JsonMarshallingService jsonMarshallingService;
-
     @CordaInject
     public MemberLookup memberLookup;
-
-    // Injects the UtxoLedgerService to enable the flow to make use of the Ledger API.
     @CordaInject
     public UtxoLedgerService ledgerService;
-
     @CordaInject
     public NotaryLookup notaryLookup;
-
+    @CordaInject
+    public FlowEngine flowEngine;
     @CordaInject
     public DigestService digestService;
 
+    @NotNull
     @Suspendable
     @Override
-    public String call( ClientRequestBody requestBody) {
-
-        log.info("CreateNewChatFlow.call() called");
+    public String call(ClientRequestBody requestBody) {
 
         try {
             // Obtain the deserialized input arguments to the flow from the requestBody.
-            MintGoldFlowInputArgs mintGoldInputRequest = requestBody.getRequestBodyAs(jsonMarshallingService, MintGoldFlowInputArgs.class);
+            IssueGoldTokenFlowArgs mintGoldInputRequest =
+                    requestBody.getRequestBodyAs(jsonMarshallingService, IssueGoldTokenFlowArgs.class);
 
             // Get MemberInfos for the Vnode running the flow and the issuerMember.
             MemberInfo myInfo = memberLookup.myInfo();
-
-            MemberInfo issuerMember = requireNonNull(
-                    memberLookup.lookup(MemberX500Name.parse(mintGoldInputRequest.getIssuer())),
-                    "MemberLookup can't find issuerMember specified in flow arguments."
+            MemberInfo owner = requireNonNull(
+                    memberLookup.lookup(MemberX500Name.parse(mintGoldInputRequest.getOwner())),
+                    "MemberLookup can't find owner specified in flow arguments."
             );
-
-            GoldState goldState = new GoldState(getSecureHash(issuerMember.getName().getCommonName()),
-                    mintGoldInputRequest.getSymbol(),
-                    new BigDecimal(mintGoldInputRequest.getValue()),
-                    Arrays.asList(myInfo.getLedgerKeys().get(0)),
-                    getSecureHash(myInfo.getName().getCommonName()));
-
             // Obtain the Notary
             NotaryInfo notary = notaryLookup.getNotaryServices().iterator().next();
+
+            GoldState goldState = new GoldState(
+                    getSecureHash(myInfo.getName().getCommonName()),
+                    getSecureHash(owner.getName().getCommonName()),
+                    mintGoldInputRequest.getSymbol(),
+                    new BigDecimal(mintGoldInputRequest.getAmount()),
+                    Collections.singletonList(owner.getLedgerKeys().get(0))
+            );
+
 
             // Use UTXOTransactionBuilder to build up the draft transaction.
             UtxoTransactionBuilder txBuilder = ledgerService.createTransactionBuilder()
                     .setNotary(notary.getName())
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                     .addOutputState(goldState)
-                    .addCommand(new GoldContract.Create())
+                    .addCommand(new GoldContract.Issue())
                     .addSignatories(myInfo.getLedgerKeys().get(0));
 
             // Convert the transaction builder to a UTXOSignedTransaction. Verifies the content of the
@@ -90,15 +86,8 @@ public class MintGoldTokensFlow implements ClientStartableFlow {
             // the current node.
             UtxoSignedTransaction signedTransaction = txBuilder.toSignedTransaction();
 
-            // Call FinalizeChatSubFlow which will finalise the transaction.There is no counter-party from whom
-            // we have to take signature and hence we will not pass any flow sessions.
-            UtxoSignedTransaction finalizedSignedTransaction = ledgerService.finalize(
-                    signedTransaction,
-                    Arrays.asList()
-            ).getTransaction();
-            String result = finalizedSignedTransaction.getId().toString();
-            log.info("Success! Response: " + result);
-            return result;
+
+            return flowEngine.subFlow(new FinalizeMintSubFlow(signedTransaction, owner.getName()));
         }
         // Catch any exceptions, log them and rethrow the exception.
         catch (Exception e) {
@@ -107,6 +96,7 @@ public class MintGoldTokensFlow implements ClientStartableFlow {
         }
     }
 
+    @Suspendable
     private SecureHash getSecureHash(String commonName) {
         return digestService.hash(commonName.getBytes(), SHA2_256);
     }
@@ -115,12 +105,12 @@ public class MintGoldTokensFlow implements ClientStartableFlow {
 /*
 RequestBody for triggering the flow via REST:
 {
-    "clientRequestId": "create-1",
-    "flowClassName": "com.r3.developers.samples.tokens.workflows.MintGoldTokensFlow",
+    "clientRequestId": "mint-1",
+    "flowClassName": "com.r3.developers.samples.tokens.workflows.IssueGoldTokensFlow",
     "requestBody": {
-        "symbol":"GOLD",
-        "issuer":"CN=Bob, OU=Test Dept, O=R3, L=London, C=GB",
-        "value":"20"
-        }
+        "symbol": "GOLD",
+        "owner": "CN=Bob, OU=Test Dept, O=R3, L=London, C=GB",
+        "amount": "20"
+    }
 }
  */

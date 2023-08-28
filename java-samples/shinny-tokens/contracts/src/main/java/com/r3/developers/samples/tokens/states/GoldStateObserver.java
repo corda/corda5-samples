@@ -23,6 +23,6 @@ public class GoldStateObserver implements UtxoLedgerTokenStateObserver<GoldState
     public UtxoToken onCommit(@NotNull GoldState state, @NotNull DigestService digestService) {
         //generate a pool with key - type, issuer and symbol to mint the tokens
         UtxoTokenPoolKey poolKey = new UtxoTokenPoolKey(GoldState.class.getName(), state.getIssuer(), state.getSymbol());
-        return new UtxoToken(poolKey, state.getValue(), new UtxoTokenFilterFields(null, state.getOwner()));
+        return new UtxoToken(poolKey, state.getAmount(), new UtxoTokenFilterFields(null, state.getOwner()));
     }
 }

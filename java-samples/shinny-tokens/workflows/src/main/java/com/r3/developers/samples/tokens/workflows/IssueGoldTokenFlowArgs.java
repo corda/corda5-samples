@@ -1,36 +1,30 @@
 package com.r3.developers.samples.tokens.workflows;
 
 // A class to hold the deserialized arguments required to start the flow.
-public class TransferGoldFlowInputArgs {
+public class IssueGoldTokenFlowArgs {
 
     // Serialisation service requires a default constructor
-    public TransferGoldFlowInputArgs() {}
+    public IssueGoldTokenFlowArgs() {}
 
     private String symbol;
-    private String issuer;
     private String amount;
-    private String receiver;
+    private String owner;
 
-    public TransferGoldFlowInputArgs(String symbol, String issuer, String amount, String receiver) {
+    public IssueGoldTokenFlowArgs(String symbol, String amount, String owner) {
         this.symbol = symbol;
-        this.issuer = issuer;
         this.amount = amount;
-        this.receiver = receiver;
+        this.owner = owner;
     }
 
     public String getSymbol() {
         return symbol;
     }
 
-    public String getIssuer() {
-        return issuer;
-    }
-
     public String getAmount() {
         return amount;
     }
 
-    public String getReceiver() {
-        return receiver;
+    public String getOwner() {
+        return owner;
     }
 }
