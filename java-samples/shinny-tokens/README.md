@@ -13,9 +13,10 @@ using Next-Gen Corda.
 In this application, we will mint gold tokens and then transfer these tokens.
 
 In this app you can:
-1. Write a flow to Create a Gold Asset/State on Ledger. `MintGoldTokensFlow`
+1. Write a flow to Create a Gold Asset/State on Ledger. `IssueGoldTokensFlow`
 2. List out the gold entries you had. `ListGoldTokens`
-4. Claim and transfer the tokens to a new member. `TransferGoldTokenFlow`
+3. Claim and transfer the tokens to a new member. `TransferGoldTokenFlow`
+4. Burn tokens available with a member. `BurnGoldTokenFlow`
 
 ### Setting up
 
@@ -36,20 +37,20 @@ Pick a VNode identity, and get its short hash. (Let's pick Alice.).
 Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Alice's hash) and request body:
 ```
 {
-    "clientRequestId": "mint-1",
-    "flowClassName": "com.r3.developers.samples.tokens.workflows.MintGoldTokensFlow",
+    "clientRequestId": "issue-1",
+    "flowClassName": "com.r3.developers.samples.tokens.workflows.IssueGoldTokensFlow",
     "requestBody": {
-        "symbol":"GOLD",
-        "issuer":"CN=Bob, OU=Test Dept, O=R3, L=London, C=GB",
-        "value":"20"
-        }
+        "symbol": "GOLD",
+        "owner": "CN=Bob, OU=Test Dept, O=R3, L=London, C=GB",
+        "amount": "20"
+    }
 }
 ```
 
-After trigger the MintGoldTokensFlow flow, hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the short hash(Alice's hash) and clientrequestid to view the flow result
+After trigger the IssueGoldTokensFlow flow, hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the short hash(Alice's hash) and clientrequestid to view the flow result
 
 #### Step 2: List the gold state
-Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Alice's hash) and request body:
+Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Bob's hash) and request body:
 ```
 {
     "clientRequestId": "list-1",
@@ -59,28 +60,27 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Ali
 ```
 After trigger the ListGoldTokens flow, again, we need to hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}`
 and check the result.
-As the screenshot shows, in the response body, we will see a list of the gold state we created.
 
 #### Step 3: Transfer the gold token with `TransferGoldTokenFlow`
-In this step, Alice will transfer some tokens from his vault to Charlie.
+In this step, Bob will transfer some tokens from his vault to Charlie.
 Goto `POST /flow/{holdingidentityshorthash}`, enter the identity short hash and request body.
-Use Alice's holdingidentityshorthash to fire this post API.
+Use Bob's holdingidentityshorthash to fire this post API.
 ```
 {
     "clientRequestId": "transfer-1",
     "flowClassName": "com.r3.developers.samples.tokens.workflows.TransferGoldTokenFlow",
     "requestBody": {
-        "symbol":"GOLD",
-        "issuer":"CN=Bob, OU=Test Dept, O=R3, L=London, C=GB",
-        "newOwner":"CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB",
-        "value": "5"
+        "symbol": "GOLD",
+        "issuer": "CN=Alice, OU=Test Dept, O=R3, L=London, C=GB",
+        "receiver": "CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB",
+        "amount": "5"
         }
 }
 ```
 And as for the result of this flow, go to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the required fields.
 
-#### Step 4: Confirm the token balances of Alice and Charlie
-Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Alice's hash) and request body:
+#### Step 4: Confirm the token balances of Bob and Charlie
+Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Bob's hash) and request body:
 ```
 {
     "clientRequestId": "list-2",
@@ -98,10 +98,37 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Cha
 ```
 
 And as for the result, you need to go to the Get API again and enter the short hash and client request ID.
-Thus, we have concluded a full run through of the token app.
 
+#### Step 5: Burn gold token with BurnGoldTokenFlow
+Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Bob's hash) and request body:
+```
+{
+    "clientRequestId": "burn-1",
+    "flowClassName": "com.r3.developers.samples.tokens.workflows.BurnGoldTokenFlow",
+    "requestBody": {
+        "symbol": "GOLD",
+        "issuer": "CN=Alice, OU=Test Dept, O=R3, L=London, C=GB",
+        "amount": "5"
+        }
+}
+```
+Go to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the required fields to check the result of
+the flow.
+
+#### Step 4: Confirm the token balance of Bob
+
+Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Bob's hash) and request body:
+```
+{
+    "clientRequestId": "list-4",
+    "flowClassName": "com.r3.developers.samples.tokens.workflows.ListGoldTokens",
+    "requestBody": {}
+}
+```
+
+And as for the result, you need to go to the Get API again and enter the short hash and client request ID.
+Thus, we have concluded a full run through of the token app.
 
 # Additional Information
 
-To read more about Token Selection API, you can visit the [docs](https://docs.r3.com/en/platform/corda/5.0-beta/developing/api/api-ledger-token-selection.html#tokens) and
-read [this](https://r3-cev.atlassian.net/wiki/spaces/DR/pages/4435017960/Shiny+tokens+in+Next-Gen+Corda) blog.
+To read more about Token Selection API, you can visit the [docs](https://docs.r3.com/en/platform/corda/5.0/developing-applications/api/ledger/utxo-ledger/token-selection.html)

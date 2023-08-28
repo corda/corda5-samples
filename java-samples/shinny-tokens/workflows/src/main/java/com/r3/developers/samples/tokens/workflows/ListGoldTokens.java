@@ -36,7 +36,7 @@ public class ListGoldTokens implements ClientStartableFlow {
                 new GoldStateList(
                         stateAndRef.getState().getContractState().getIssuer(),
                         stateAndRef.getState().getContractState().getSymbol(),
-                        stateAndRef.getState().getContractState().getValue(),
+                        stateAndRef.getState().getContractState().getAmount(),
                         stateAndRef.getState().getContractState().getOwner()
                         )
         ).collect(Collectors.toList());

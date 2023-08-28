@@ -11,7 +11,7 @@ public class GoldContract implements Contract {
 
     private final static Logger log = LoggerFactory.getLogger(GoldContract.class);
 
-    public static class Create implements Command { }
+    public static class Issue implements Command { }
 
     public static class Transfer implements Command { }
 

@@ -23,25 +23,24 @@ import net.corda.v5.ledger.utxo.transaction.UtxoSignedTransaction;
 import net.corda.v5.ledger.utxo.transaction.UtxoTransactionBuilder;
 import net.corda.v5.membership.MemberInfo;
 import net.corda.v5.membership.NotaryInfo;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static net.corda.v5.crypto.DigestAlgorithmName.SHA2_256;
 
-// This flow will be triggered by Bob to transfer some of his tokens to Charlie. The remaining
-// amount of tokens will be given back as change to Bob.
-public class TransferGoldTokenFlow implements ClientStartableFlow {
+public class BurnGoldTokenFlow implements ClientStartableFlow {
 
-    private final static Logger log = LoggerFactory.getLogger(TransferGoldTokenFlow.class);
+    private final static Logger log = LoggerFactory.getLogger(BurnGoldTokenFlow.class);
 
     @CordaInject
     public JsonMarshallingService jsonMarshallingService;
@@ -60,30 +59,20 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
     public UtxoLedgerService ledgerService;
 
     @CordaInject
-    public FlowEngine flowEngine;
-
-    @CordaInject
     public DigestService digestService;
 
-    @Suspendable
+    @NotNull
     @Override
-    public String call( ClientRequestBody requestBody) {
+    @Suspendable
+    public String call(@NotNull ClientRequestBody requestBody) {
         TokenClaim tokenClaim = null;
         BigDecimal totalAmount = null;
         BigDecimal change = null;
 
-        try {
-
-            TransferGoldFlowInputArgs flowArgs = requestBody.getRequestBodyAs(
-                    jsonMarshallingService, TransferGoldFlowInputArgs.class);
+        try{
+            BurnGoldTokenFLowArgs flowArgs = requestBody.getRequestBodyAs(jsonMarshallingService, BurnGoldTokenFLowArgs.class);
 
             MemberInfo myInfo = memberLookup.myInfo();
-
-            // Take the receiver of the token whom Bob will transfer the token
-            MemberInfo receiver = requireNonNull(
-                    memberLookup.lookup(MemberX500Name.parse(flowArgs.getReceiver())),
-                    "MemberLookup can't find otherMember specified in flow arguments."
-            );
 
             // Get the issuer of the token
             MemberInfo issuerMember = requireNonNull(
@@ -112,62 +101,54 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
                 return "No Tokens Found";
             }
 
-            List<ClaimedToken> claimedTokenList = new ArrayList<>(tokenClaim.getClaimedTokens());
+            List<ClaimedToken> claimedTokenList = tokenClaim.getClaimedTokens().stream().collect(Collectors.toList());
 
             // calculate the change to be given back to the sender
-            totalAmount = claimedTokenList.stream().map(ClaimedToken::getAmount)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            totalAmount = claimedTokenList.stream().map(ClaimedToken::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
             change = totalAmount.subtract(new BigDecimal(flowArgs.getAmount()));
 
-            log.info("Found total " + totalAmount + " amount of tokens for " +
-                    jsonMarshallingService.format(tokenClaimCriteria));
-
-            // create a new state representing the new owner and the expected amount.
-            GoldState goldStateNew = new GoldState(
-                    getSecureHash(issuerMember.getName().getCommonName()),
-                    getSecureHash(receiver.getName().getCommonName()),
-                    flowArgs.getSymbol(), new BigDecimal(flowArgs.getAmount()),
-                    Arrays.asList(receiver.getLedgerKeys().get(0))
-            );
+            log.info("Found total " + totalAmount + " amount of tokens for " + jsonMarshallingService.format(tokenClaimCriteria));
 
             UtxoTransactionBuilder txBuilder = null;
 
 
             if(change.compareTo(BigDecimal.ZERO) > 0) {
-                // if there is change to be returned back to the sender, create a new gold state
-                // representing the original sender and the change.
-                GoldState goldStateChange = new GoldState(getSecureHash(issuerMember.getName().getCommonName()),
+                // if there is change to be returned back to the sender, create a new gold state representing the original
+                // sender and the change.
+                GoldState goldStateChange = new GoldState(
+                        getSecureHash(issuerMember.getName().getCommonName()),
                         getSecureHash(myInfo.getName().getCommonName()),
                         flowArgs.getSymbol(), change,
-                        Arrays.asList(myInfo.getLedgerKeys().get(0))
+                        Collections.singletonList(myInfo.getLedgerKeys().get(0))
                 );
 
                 txBuilder = ledgerService.createTransactionBuilder()
                         .setNotary(notary.getName())
                         .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
-                        .addInputStates(tokenClaim.getClaimedTokens().stream().map(ClaimedToken::getStateRef)
-                                .collect(Collectors.toList()))
-                        .addOutputStates(goldStateChange, goldStateNew)
+                        .addInputStates(tokenClaim.getClaimedTokens().stream().map(ClaimedToken::getStateRef).collect(Collectors.toList()))
+                        .addOutputStates(List.of(goldStateChange))
                         .addCommand(new GoldContract.Transfer())
-                        .addSignatories(Arrays.asList(myInfo.getLedgerKeys().get(0), receiver.getLedgerKeys().get(0)));
+                        .addSignatories(Collections.singletonList(myInfo.getLedgerKeys().get(0)));
             } else {
                 // if there is no change, no need to create state representing the change to be given back to the sender.
                 txBuilder = ledgerService.createTransactionBuilder()
                         .setNotary(notary.getName())
                         .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
-                        .addInputStates(tokenClaim.getClaimedTokens().stream().map(ClaimedToken::getStateRef)
-                                .collect(Collectors.toList()))
-                        .addOutputStates(goldStateNew)
+                        .addInputStates(tokenClaim.getClaimedTokens().stream().map(ClaimedToken::getStateRef).collect(Collectors.toList()))
                         .addCommand(new GoldContract.Transfer())
-                        .addSignatories(Arrays.asList(myInfo.getLedgerKeys().get(0), receiver.getLedgerKeys().get(0)));
+                        .addSignatories(Collections.singletonList(myInfo.getLedgerKeys().get(0)));
             }
 
             UtxoSignedTransaction signedTransaction = txBuilder.toSignedTransaction();
+            UtxoSignedTransaction finalizedSignedTransaction = ledgerService.finalize(
+                    signedTransaction,
+                    Arrays.asList()
+            ).getTransaction();
 
-            flowEngine.subFlow(new FinalizeMintSubFlow(signedTransaction, receiver.getName()));
+            String result = finalizedSignedTransaction.getId().toString();
+            log.info("Success! Response: " + result);
 
-        }
-        catch (Exception e) {
+        }catch (Exception e){
             log.warn("Failed to process utxo flow for request body " + requestBody + " because: " + e.getMessage());
 
             log.info("Released the claim on the token states, indicating we spent none of them");
@@ -175,18 +156,14 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
             tokenClaim.useAndRelease(Arrays.asList());
 
             throw new CordaRuntimeException(e.getMessage());
-        }
-        finally {
+        }finally {
             // Remove any used tokens from the cache and unlocks any remaining tokens for other flows to claim.
             if(tokenClaim != null) {
                 log.info("Release the claim on the token states, indicating we spent them all");
 
-                tokenClaim.useAndRelease(tokenClaim.getClaimedTokens().stream().map(ClaimedToken::getStateRef)
-                        .collect(Collectors.toList()));
+                tokenClaim.useAndRelease(tokenClaim.getClaimedTokens().stream().map(ClaimedToken::getStateRef).collect(Collectors.toList()));
 
-                return "Total Available amount of Tokens : " + totalAmount +
-                        " change to be given back to the owner : " + change + " Total amount satisfied " +
-                        totalAmount.subtract(change);
+                return "Total Available amount of Tokens : " + totalAmount + " change to be given back to the owner : " + change + " Total amount satisfied " + totalAmount.subtract(change);
 
             }
             return "No Tokens Found";
@@ -200,14 +177,15 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
 }
 
 /*
+RequestBody for triggering the flow via REST:
 {
-    "clientRequestId": "transfer-1",
-    "flowClassName": "com.r3.developers.samples.tokens.workflows.TransferGoldTokenFlow",
+    "clientRequestId": "burn-1",
+    "flowClassName": "com.r3.developers.samples.tokens.workflows.BurnGoldTokenFlow",
     "requestBody": {
-        "symbol":"GOLD",
-        "issuer":"CN=Bob, OU=Test Dept, O=R3, L=London, C=GB",
-        "receiver":"CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB",
+        "symbol": "GOLD",
+        "issuer": "CN=Alice, OU=Test Dept, O=R3, L=London, C=GB",
         "amount": "5"
         }
 }
  */
+
