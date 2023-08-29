@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 //@InitiatingBy declares the protocol which will be used to link the initiator to the responder.
 @InitiatedBy(protocol = "finalize-gold-protocol")
-public class FinalizeMintResponderFlow implements ResponderFlow {
-    private final static Logger log = LoggerFactory.getLogger(FinalizeMintResponderFlow.class);
+public class FinalizeGoldTokenResponderFlow implements ResponderFlow {
+    private final static Logger log = LoggerFactory.getLogger(FinalizeGoldTokenResponderFlow.class);
 
     // Injects the UtxoLedgerService to enable the flow to make use of the Ledger API.
     @CordaInject

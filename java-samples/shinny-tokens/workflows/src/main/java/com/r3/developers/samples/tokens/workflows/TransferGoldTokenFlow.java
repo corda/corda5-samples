@@ -164,7 +164,7 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
 
             UtxoSignedTransaction signedTransaction = txBuilder.toSignedTransaction();
 
-            flowEngine.subFlow(new FinalizeMintSubFlow(signedTransaction, receiver.getName()));
+            flowEngine.subFlow(new FinalizeGoldTokenSubFlow(signedTransaction, receiver.getName()));
 
         }
         catch (Exception e) {
