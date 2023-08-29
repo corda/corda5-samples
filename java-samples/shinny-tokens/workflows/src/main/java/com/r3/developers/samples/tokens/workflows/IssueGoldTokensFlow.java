@@ -6,7 +6,6 @@ import net.corda.v5.application.crypto.DigestService;
 import net.corda.v5.application.flows.*;
 import net.corda.v5.application.marshalling.JsonMarshallingService;
 import net.corda.v5.application.membership.MemberLookup;
-import net.corda.v5.application.messaging.FlowMessaging;
 import net.corda.v5.base.annotations.Suspendable;
 import net.corda.v5.base.exceptions.CordaRuntimeException;
 import net.corda.v5.base.types.MemberX500Name;
@@ -87,7 +86,7 @@ public class IssueGoldTokensFlow implements ClientStartableFlow {
             UtxoSignedTransaction signedTransaction = txBuilder.toSignedTransaction();
 
 
-            return flowEngine.subFlow(new FinalizeMintSubFlow(signedTransaction, owner.getName()));
+            return flowEngine.subFlow(new FinalizeGoldTokenSubFlow(signedTransaction, owner.getName()));
         }
         // Catch any exceptions, log them and rethrow the exception.
         catch (Exception e) {

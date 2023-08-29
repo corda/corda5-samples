@@ -16,13 +16,13 @@ import java.util.Arrays;
 import java.util.List;
 
 @InitiatingFlow(protocol = "finalize-gold-protocol")
-public class FinalizeMintSubFlow implements SubFlow<String> {
+public class FinalizeGoldTokenSubFlow implements SubFlow<String> {
 
-    private final static Logger log = LoggerFactory.getLogger(FinalizeMintSubFlow.class);
+    private final static Logger log = LoggerFactory.getLogger(FinalizeGoldTokenSubFlow.class);
     private final UtxoSignedTransaction signedTransaction;
     private final MemberX500Name otherMember;
 
-    public FinalizeMintSubFlow(UtxoSignedTransaction signedTransaction, MemberX500Name otherMember) {
+    public FinalizeGoldTokenSubFlow(UtxoSignedTransaction signedTransaction, MemberX500Name otherMember) {
         this.signedTransaction = signedTransaction;
         this.otherMember = otherMember;
     }
