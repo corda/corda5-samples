@@ -49,6 +49,7 @@ class ConfirmQuoteSubFlowResponder(): ResponderFlow {
         val fxServiceName = receivedMessage.fxServiceName
         val initiatorConversionRate = receivedMessage.conversionRate
 
+        //query to oracle
         log.info(REQUEST_QUOTE)
         val requestBody = QuoteFxRateRequest(currencyPair, fxServiceName)
         val quoteAgainResponse: QuoteFxRateResponse = flowEngine.subFlow(QuoteAgainSubFlow(requestBody))

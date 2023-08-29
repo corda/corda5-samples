@@ -27,6 +27,8 @@ import java.time.temporal.ChronoUnit
 // member nodes through flow sessions
 @CordaSerializable
 data class QuoteFxRateRequest(val currencyPair: String, val fxServiceName: MemberX500Name)
+//TODO
+
 
 @CordaSerializable
 data class QuoteFxRateResponse(val conversionRate: BigDecimal)
@@ -91,6 +93,7 @@ class CreateFxTransaction(): ClientStartableFlow {
     @Suspendable
     override fun call(requestBody: ClientRequestBody): String {
 
+        //Getting the input
         log.info(CALLED)
         val request = requestBody.getRequestBodyAs(jsonMarshallingService,CreateFxTransaction::class.java)
         val convertingFrom = request.convertingFrom
@@ -98,12 +101,14 @@ class CreateFxTransaction(): ClientStartableFlow {
         val amount = request.amount
         val recipientName = MemberX500Name.parse(request.recipientMemberName)
 
+        //get the memberinfo
         log.info(SET_UP)
         val recipientMemberInfo: MemberInfo = memberLookup.lookup(recipientName)
             ?: throw IllegalArgumentException("$RECIPIENT_NOT_FOUND: '$recipientName'")
         val ourPublicIdentity: PublicKey = memberLookup.myInfo().ledgerKeys.first()
         val recipientMemberIdentity: PublicKey = recipientMemberInfo.ledgerKeys.first()
 
+        //get the quote from oracle
         log.info(GET_FX_QUOTE)
         val sessionAliceService = flowMessaging.initiateFlow(fxServiceName)
         val currencyPair = "$convertingFrom$convertingTo"
@@ -112,6 +117,7 @@ class CreateFxTransaction(): ClientStartableFlow {
         val initiatorConversionRate = quoteResponse.conversionRate
         val convertedAmount = amount*initiatorConversionRate
 
+        //communicating the FX rate with recipient
         log.info(GET_RECIPIENT_QUOTE_CONFIRMATION)
         val sessionAliceRecipientQuote = flowMessaging.initiateFlow(recipientName)
         val recipientConfirmationRequest = RecipientConfirmQuoteRequest(currencyPair,initiatorConversionRate,recipientName, fxServiceName)
@@ -154,7 +160,7 @@ class CreateFxTransaction(): ClientStartableFlow {
             .setNotary(notaryName)
             .addOutputState(outputState) // contract state verification happens under the hood here
             .addCommand(command)
-            .addSignatories(listOf(ourPublicIdentity))
+            .addSignatories(listOf(ourPublicIdentity,recipientMemberIdentity))
             .setTimeWindowUntil(Instant.now().plus(1,ChronoUnit.DAYS))
             .toSignedTransaction()
 
