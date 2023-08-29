@@ -1,0 +1,94 @@
+package com.r3.developers.samples.persistence.schema;
+
+import net.corda.v5.base.annotations.CordaSerializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.util.UUID;
+
+/**
+ * JPA Entity for saving vehicle details to the database table
+ */
+@Entity
+@Table(name = "VEHICLE_DETAIL")
+@CordaSerializable
+public class PersistentVehicle {
+
+    @Id
+    private final UUID vehicleId;
+    @Column(name = "registration_number")
+    private final String registrationNumber;
+    @Column(name = "chasis_number")
+    private final String chasisNumber;
+    @Column
+    private final String make;
+    @Column
+    private final String model;
+    @Column
+    private final String variant;
+    @Column
+    private final String color;
+    @Column(name = "fuel_type")
+    private final String fuelType;
+
+    /**
+     * Default constructor required by Hibernate
+     */
+    public PersistentVehicle() {
+        this.vehicleId = null;
+        this.registrationNumber = null;
+        this.chasisNumber = null;
+        this.make = null;
+        this.model = null;
+        this.variant = null;
+        this.color = null;
+        this.fuelType = null;
+    }
+
+    public PersistentVehicle(String registrationNumber, String chasisNumber, String make, String model, String variant,
+                             String color, String fuelType) {
+        this.vehicleId = UUID.randomUUID();
+        this.registrationNumber = registrationNumber;
+        this.chasisNumber = chasisNumber;
+        this.make = make;
+        this.model = model;
+        this.variant = variant;
+        this.color = color;
+        this.fuelType = fuelType;
+    }
+
+    public UUID getVehicleId() {
+        return vehicleId;
+    }
+
+    public String getRegistrationNumber() {
+        return registrationNumber;
+    }
+
+    public String getChasisNumber() {
+        return chasisNumber;
+    }
+
+    public String getMake() {
+        return make;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public String getVariant() {
+        return variant;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public String getFuelType() {
+        return fuelType;
+    }
+
+}
