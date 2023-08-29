@@ -10,7 +10,7 @@ plugins {
 }
 
 allprojects {
-    group 'com.r3.developers.csdetemplate'
+    group 'com.r3.developers.samples'
     version '1.0-SNAPSHOT'
 
     def javaVersion = VERSION_11

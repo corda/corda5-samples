@@ -163,7 +163,7 @@ public class BurnGoldTokenFlow implements ClientStartableFlow {
 
                 tokenClaim.useAndRelease(tokenClaim.getClaimedTokens().stream().map(ClaimedToken::getStateRef).collect(Collectors.toList()));
 
-                return "Total Available amount of Tokens : " + totalAmount + " change to be given back to the owner : " + change + " Total amount satisfied " + totalAmount.subtract(change);
+                return "Total Available amount of Tokens before burn action: " + totalAmount +", Amount burned: " + totalAmount.subtract(change)+", Change to be given back to the owner: " + change;
 
             }
             return "No Tokens Found";
