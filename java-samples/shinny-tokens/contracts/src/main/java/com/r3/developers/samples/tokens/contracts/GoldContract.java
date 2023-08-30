@@ -15,6 +15,8 @@ public class GoldContract implements Contract {
 
     public static class Transfer implements Command { }
 
+    public static class Burn implements Command { }
+
 
     @Override
     public void verify(UtxoLedgerTransaction transaction) {

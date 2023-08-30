@@ -38,7 +38,7 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Ali
 ```
 {
     "clientRequestId": "issue-1",
-    "flowClassName": "com.r3.developers.samples.tokens.workflows.IssueGoldTokensFlow",
+    "flowClassName": "com.r3.developers.samples.tokens.workflows.IssueGoldTokenFlow",
     "requestBody": {
         "symbol": "GOLD",
         "owner": "CN=Bob, OU=Test Dept, O=R3, L=London, C=GB",
