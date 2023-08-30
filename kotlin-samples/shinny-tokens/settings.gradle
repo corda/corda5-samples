@@ -1,0 +1,26 @@
+pluginManagement {
+    // Declare the repositories where plugins are stored.
+    repositories {
+        gradlePluginPortal()
+        mavenCentral()
+        mavenLocal()
+    }
+
+    //  The plugin dependencies with versions of the plugins congruent with the specified CorDapp plugin version,
+    //  Corda API version, and Kotlin version.
+    plugins {
+        id 'net.corda.plugins.cordapp-cpk2' version cordaPluginsVersion
+        id 'net.corda.plugins.cordapp-cpb2' version cordaPluginsVersion
+        id 'net.corda.cordapp.cordapp-configuration' version cordaApiVersion
+        id 'net.corda.plugins.csde' version csdePluginVersion
+        id 'org.jetbrains.kotlin.jvm' version kotlinVersion
+        id 'org.jetbrains.kotlin.plugin.jpa' version kotlinVersion
+        id 'org.jetbrains.kotlin.plugin.allopen' version kotlinVersion
+    }
+}
+
+// Root project name, used in naming the project as a whole and used in naming objects built by the project.
+rootProject.name = 'corda5-token-sample-kotlin'
+include ':workflows'
+include ':contracts'
+

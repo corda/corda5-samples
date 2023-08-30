@@ -1,0 +1,84 @@
+import static org.gradle.api.JavaVersion.VERSION_11
+
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'net.corda.cordapp.cordapp-configuration'
+    id 'org.jetbrains.kotlin.plugin.jpa'
+    id 'java'
+    id 'maven-publish'
+    id 'net.corda.plugins.csde'
+}
+
+allprojects {
+    group 'com.r3.developers.samples'
+    version '1.0-SNAPSHOT'
+
+    def javaVersion = VERSION_11
+
+    // Configure the CSDE
+    csde {
+        cordaClusterURL = "https://localhost:8888"
+        networkConfigFile = "config/static-network-config.json"
+        r3RootCertFile = "config/r3-ca-key.pem"
+        corDappCpiName = "MyCorDapp"
+        notaryCpiName = "NotaryServer"
+        cordaRpcUser = "admin"
+        cordaRpcPasswd ="admin"
+        workflowsModuleName = workflowsModule
+        csdeWorkspaceDir = "workspace"
+        notaryVersion = cordaNotaryPluginsVersion
+        combinedWorkerVersion = combinedWorkerJarVersion
+        postgresJdbcVersion = "42.4.3"
+        cordaDbContainerName = "CSDEpostgresql"
+        cordaBinDir = "${System.getProperty("user.home")}/.corda/corda5"
+        cordaCliBinDir = "${System.getProperty("user.home")}/.corda/cli"
+    }
+
+    // Declare the set of Kotlin compiler options we need to build a CorDapp.
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions {
+            allWarningsAsErrors = false
+
+            // Specify the version of Kotlin that we are that we will be developing.
+            languageVersion = '1.7'
+            // Specify the Kotlin libraries that code is compatible with
+            apiVersion = '1.7'
+            // Note that we Need to use a version of Kotlin that will be compatible with the Corda API.
+            // Currently that is developed in Kotlin 1.7 so picking the same version ensures compatibility with that.
+
+            // Specify the version of Java to target.
+            jvmTarget = javaVersion
+
+            // Needed for reflection to work correctly.
+            javaParameters = true
+
+            // -Xjvm-default determines how Kotlin supports default methods.
+            // JetBrains currently recommends developers use -Xjvm-default=all
+            // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-default/
+            freeCompilerArgs += [
+                    "-Xjvm-default=all"
+            ]
+        }
+    }
+
+    repositories {
+        // All dependencies are held in Maven Central
+        mavenLocal()
+        mavenCentral()
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+    }
+
+}
+
+publishing {
+    publications {
+            maven(MavenPublication) {
+                artifactId "corda5-token-cordapp"
+                groupId project.group
+                artifact jar
+         }
+    }
+}
