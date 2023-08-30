@@ -12,7 +12,6 @@ import net.corda.v5.application.flows.InitiatingFlow
 import net.corda.v5.application.marshalling.JsonMarshallingService
 import net.corda.v5.application.membership.MemberLookup
 import net.corda.v5.application.messaging.FlowMessaging
-import net.corda.v5.base.annotations.CordaSerializable
 import net.corda.v5.base.annotations.Suspendable
 import net.corda.v5.base.types.MemberX500Name
 import net.corda.v5.ledger.utxo.UtxoLedgerService
@@ -22,23 +21,6 @@ import java.math.BigDecimal
 import java.security.PublicKey
 import java.time.Instant
 import java.time.temporal.ChronoUnit
-
-//The following are Data Transfer Objects classes used to easily manage what information is sent between different
-// member nodes through flow sessions
-@CordaSerializable
-data class QuoteFxRateRequest(val currencyPair: String, val fxServiceName: MemberX500Name)
-//TODO
-
-
-@CordaSerializable
-data class QuoteFxRateResponse(val conversionRate: BigDecimal)
-
-@CordaSerializable
-data class RecipientConfirmQuoteRequest(val currencyPair: String, val conversionRate: BigDecimal, val recipientName: MemberX500Name, val fxServiceName: MemberX500Name)
-
-@CordaSerializable
-data class RecipientConfirmQuoteResponse(val confirmed: Boolean, val recipientConversionRate: BigDecimal)
-
 
 // This is the client-side worfklow that gets called first. It will:
 // - set up and identify the recipient member node, the FxService node and the notary node
@@ -93,7 +75,7 @@ class CreateFxTransaction(): ClientStartableFlow {
     @Suspendable
     override fun call(requestBody: ClientRequestBody): String {
 
-        //Getting the input
+        // Deserializing the JSON string input into meaningful data for the workflow
         log.info(CALLED)
         val request = requestBody.getRequestBodyAs(jsonMarshallingService,CreateFxTransaction::class.java)
         val convertingFrom = request.convertingFrom
@@ -101,14 +83,14 @@ class CreateFxTransaction(): ClientStartableFlow {
         val amount = request.amount
         val recipientName = MemberX500Name.parse(request.recipientMemberName)
 
-        //get the memberinfo
+        // Obtaining the public identity of the member nodes involved in the transaction
         log.info(SET_UP)
         val recipientMemberInfo: MemberInfo = memberLookup.lookup(recipientName)
             ?: throw IllegalArgumentException("$RECIPIENT_NOT_FOUND: '$recipientName'")
         val ourPublicIdentity: PublicKey = memberLookup.myInfo().ledgerKeys.first()
         val recipientMemberIdentity: PublicKey = recipientMemberInfo.ledgerKeys.first()
 
-        //get the quote from oracle
+        // Executing the sub-flow to obtain a quote from the oracle FxService
         log.info(GET_FX_QUOTE)
         val sessionAliceService = flowMessaging.initiateFlow(fxServiceName)
         val currencyPair = "$convertingFrom$convertingTo"
@@ -117,12 +99,14 @@ class CreateFxTransaction(): ClientStartableFlow {
         val initiatorConversionRate = quoteResponse.conversionRate
         val convertedAmount = amount*initiatorConversionRate
 
-        //communicating the FX rate with recipient
+        // Communicating the FX rate with the recipient so that it may also execute sub-flows to obtain
+        // a quote from the oracle FxService themselves
         log.info(GET_RECIPIENT_QUOTE_CONFIRMATION)
         val sessionAliceRecipientQuote = flowMessaging.initiateFlow(recipientName)
         val recipientConfirmationRequest = RecipientConfirmQuoteRequest(currencyPair,initiatorConversionRate,recipientName, fxServiceName)
         val recipientResponse: RecipientConfirmQuoteResponse = flowEngine.subFlow(ConfirmQuoteSubFlow(recipientConfirmationRequest,sessionAliceRecipientQuote))
 
+        // If the quotes obtained by the initiator and the recipient, then the workflow ends and returns the discrepancy
         if(!recipientResponse.confirmed){
            return buildString {
                append(QUOTE_UNCONFIRMED)
@@ -132,6 +116,7 @@ class CreateFxTransaction(): ClientStartableFlow {
            }
         }
 
+        // Creating the output state and command involved when building the transaction
         log.info(PREPARE_TRANSACTION)
         val outputState = ForeignExchange(
             ourPublicIdentity,
@@ -155,6 +140,7 @@ class CreateFxTransaction(): ClientStartableFlow {
             TransactionStatuses.SUCCESSFUL
         )
 
+        // The initiator creates and signs the foreign exchange transaction
         log.info(BUILD_TRANSACTION)
         val fxTransaction = ledgerService.createTransactionBuilder()
             .setNotary(notaryName)
@@ -164,6 +150,7 @@ class CreateFxTransaction(): ClientStartableFlow {
             .setTimeWindowUntil(Instant.now().plus(1,ChronoUnit.DAYS))
             .toSignedTransaction()
 
+        // The initiator requests for the finalization of the transaction from all the involved parties
         log.info(FINALIZE_TRANSACTION)
         val sessionAliceRecipientFinalize = flowMessaging.initiateFlow(recipientName)
         val finalizedTransaction = flowEngine.subFlow(FinalizeFxTransactionSubFlow(fxTransaction,listOf(sessionAliceRecipientFinalize)))

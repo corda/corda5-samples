@@ -7,8 +7,17 @@ import net.corda.v5.application.flows.InitiatingFlow
 import net.corda.v5.application.flows.ResponderFlow
 import net.corda.v5.application.flows.SubFlow
 import net.corda.v5.application.messaging.FlowSession
+import net.corda.v5.base.annotations.CordaSerializable
 import net.corda.v5.base.annotations.Suspendable
+import net.corda.v5.base.types.MemberX500Name
 import org.slf4j.LoggerFactory
+import java.math.BigDecimal
+
+@CordaSerializable
+data class RecipientConfirmQuoteRequest(val currencyPair: String, val conversionRate: BigDecimal, val recipientName: MemberX500Name, val fxServiceName: MemberX500Name)
+
+@CordaSerializable
+data class RecipientConfirmQuoteResponse(val confirmed: Boolean, val recipientConversionRate: BigDecimal)
 
 @InitiatingFlow(protocol = "confirm-quote")
 class ConfirmQuoteSubFlow(
@@ -61,6 +70,4 @@ class ConfirmQuoteSubFlowResponder(): ResponderFlow {
         val response = RecipientConfirmQuoteResponse(doTheyMatch,recipientConversionRate)
         session.send(response)
     }
-
-
 }

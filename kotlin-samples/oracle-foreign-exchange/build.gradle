@@ -76,7 +76,7 @@ allprojects {
 publishing {
     publications {
         maven(MavenPublication) {
-            artifactId "corda-primenumber-kotlin-sample"
+            artifactId "corda-oracle-foreign-exchange-kotlin-sample"
             groupId project.group
             artifact jar
         }

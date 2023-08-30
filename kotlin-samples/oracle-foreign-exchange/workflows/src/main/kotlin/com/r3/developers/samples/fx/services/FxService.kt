@@ -37,7 +37,8 @@ Stay tuned with update notes to see when easy external messaging within the sand
  **/
 //convention for currencyPairing: "[currency_from][currency_to]"
 enum class ConversionRateTable(val conversionRate: BigDecimal) {
-    //TODO put a date/source.
+    // Source: https://www.xe.com/currencyconverter/convert/
+    // Timestamp of when data was obtained: 2023-08-24T16:00Z
     GBPGBP(BigDecimal(1)),
     GBPEUR(BigDecimal(1.16)),
     GBPUSD(BigDecimal(1.27)),

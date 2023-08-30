@@ -1,9 +1,32 @@
 package com.r3.developers.samples.fx
 
+import net.corda.v5.base.annotations.CordaSerializable
 import net.corda.v5.base.exceptions.CordaRuntimeException
+import net.corda.v5.ledger.utxo.Command
 import net.corda.v5.ledger.utxo.Contract
 import net.corda.v5.ledger.utxo.transaction.UtxoLedgerTransaction
 import java.math.BigDecimal
+import java.security.PublicKey
+
+@CordaSerializable
+enum class SupportedCurrencyCodes { GBP, EUR, USD, CAD }
+
+@CordaSerializable
+enum class TransactionStatuses { SUCCESSFUL, FAILED }
+
+//This is used by the CreateFxTransaction workflow class to add a command to a ForeignExchange state
+interface ForeignExchangeCommands: Command {
+    class Create(
+        val initiatorIdentity: PublicKey,
+        val recipientIdentity: PublicKey,
+        val amount: BigDecimal,
+        val convertingFrom: SupportedCurrencyCodes,
+        val convertingTo: SupportedCurrencyCodes,
+        val exchangeRate: BigDecimal,
+        val convertedAmount: BigDecimal,
+        val status: TransactionStatuses
+    ): ForeignExchangeCommands
+}
 
 class ForeignExchangeContract: Contract {
 
@@ -20,7 +43,7 @@ class ForeignExchangeContract: Contract {
             ?: throw CordaRuntimeException(CONTRACT_RULE_SINGLE_COMMAND)
         val commandName = command::class.java.name
         val output = transaction.getOutputStates(ForeignExchange::class.java).singleOrNull()
-            ?: throw CordaRuntimeException("$CONTRACT_RULE_SINGLE_OUTPUT")
+            ?: throw CordaRuntimeException(CONTRACT_RULE_SINGLE_OUTPUT)
 
         when(command) {
             is ForeignExchangeCommands.Create -> {
