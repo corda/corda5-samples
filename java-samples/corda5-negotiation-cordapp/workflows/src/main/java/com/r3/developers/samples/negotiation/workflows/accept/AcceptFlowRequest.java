@@ -4,7 +4,7 @@ import com.r3.developers.samples.negotiation.Proposal;
 import com.r3.developers.samples.negotiation.ProposalAndTradeContract;
 import com.r3.developers.samples.negotiation.Trade;
 import com.r3.developers.samples.negotiation.util.Member;
-import com.r3.developers.samples.negotiation.workflows.util.FInalizeFlow;
+import com.r3.developers.samples.negotiation.workflows.util.FinalizeFlow;
 import net.corda.v5.application.flows.*;
 import net.corda.v5.application.marshalling.JsonMarshallingService;
 import net.corda.v5.application.membership.MemberLookup;
@@ -66,7 +66,7 @@ public class AcceptFlowRequest implements ClientStartableFlow {
         Trade output = new Trade(proposalInput.getAmount(),
                 new Member(proposalInput.getBuyer().getName(), proposalInput.getBuyer().getLedgerKey()),
                 new Member(proposalInput.getSeller().getName(), proposalInput.getSeller().getLedgerKey()),
-                proposalInput.getParticipants()
+                request.getAcceptor(), proposalInput.getParticipants()
         );
 
         Member counterParty = (memberLookup.myInfo().getName().equals(proposalInput.getProposer().getName())) ? proposalInput.getProposee() : proposalInput.getProposer();
@@ -87,8 +87,8 @@ public class AcceptFlowRequest implements ClientStartableFlow {
         try {
             UtxoSignedTransaction signedTransaction = transactionBuilder.toSignedTransaction();
             FlowSession counterPartySession = flowMessaging.initiateFlow(counterParty.getName());
-            return flowEngine.subFlow(new FInalizeFlow.FinalizeRequest(signedTransaction, List.of(counterPartySession)));
-
+            flowEngine.subFlow(new FinalizeFlow.FinalizeRequest(signedTransaction, List.of(counterPartySession)));
+            return output.getProposalID().toString();
         } catch (Exception e) {
             throw new CordaRuntimeException(e.getMessage());
         }

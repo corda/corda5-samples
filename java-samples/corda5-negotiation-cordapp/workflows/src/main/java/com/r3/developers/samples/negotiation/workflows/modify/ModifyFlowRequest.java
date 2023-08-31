@@ -1,10 +1,9 @@
 package com.r3.developers.samples.negotiation.workflows.modify;
 
-
 import com.r3.developers.samples.negotiation.Proposal;
 import com.r3.developers.samples.negotiation.ProposalAndTradeContract;
 import com.r3.developers.samples.negotiation.util.Member;
-import com.r3.developers.samples.negotiation.workflows.util.FInalizeFlow;
+import com.r3.developers.samples.negotiation.workflows.util.FinalizeFlow;
 import net.corda.v5.application.flows.*;
 import net.corda.v5.application.marshalling.JsonMarshallingService;
 import net.corda.v5.application.membership.MemberLookup;
@@ -70,12 +69,13 @@ public class ModifyFlowRequest implements ClientStartableFlow {
 
         //creating a new Proposal as an output state
         Member counterParty = (memberLookup.myInfo().getName().equals(proposalInput.getProposer().getName())) ? proposalInput.getProposee() : proposalInput.getProposer();
+
         Proposal output = new Proposal(request.getNewAmount(),
                 new Member(proposalInput.getBuyer().getName(), proposalInput.getBuyer().getLedgerKey()),
                 new Member(proposalInput.getSeller().getName(), proposalInput.getSeller().getLedgerKey()),
                 new Member(memberLookup.myInfo().getName(), memberLookup.myInfo().getLedgerKeys().get(0)),
                 new Member(counterParty.getName(), counterParty.getLedgerKey()),
-                proposalID);
+                proposalID, new Member(memberLookup.myInfo().getName(), memberLookup.myInfo().getLedgerKeys().get(0)));
 
         // Initiating the transactionBuilder with command to "modify"
         UtxoTransactionBuilder transactionBuilder = utxoLedgerService.createTransactionBuilder()
@@ -93,8 +93,8 @@ public class ModifyFlowRequest implements ClientStartableFlow {
         try {
             UtxoSignedTransaction signedTransaction = transactionBuilder.toSignedTransaction();
             FlowSession counterPartySession = flowMessaging.initiateFlow(counterParty.getName());
-            return flowEngine.subFlow(new FInalizeFlow.FinalizeRequest(signedTransaction, List.of(counterPartySession)));
-
+            flowEngine.subFlow(new FinalizeFlow.FinalizeRequest(signedTransaction, List.of(counterPartySession)));
+            return output.getProposalID().toString();
         } catch (Exception e) {
             throw new CordaRuntimeException(e.getMessage());
         }

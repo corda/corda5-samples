@@ -101,6 +101,7 @@ public class ProposalAndTradeContract implements Contract {
         String sellerMsg = "The seller is unmodified in the output";
         String proposerMsg = "The proposer is a required signer";
         String proposeMsg = "The propose is a required signer";
+        String proposerCannotAcceptProposalMsg = "The proposer cannot accept their own proposal";
 
         @Override
         public void verify(UtxoLedgerTransaction transaction) {
@@ -112,6 +113,9 @@ public class ProposalAndTradeContract implements Contract {
             require(transaction.getOutputTransactionStates().size() == 1, oneOutputMsg);
             require(transaction.getOutputStates(Trade.class).size() == 1, outputTypeMsg);
             require(transaction.getCommands().size() == 1, oneCommandMsg);
+            require(proposalStateInputs.getModifier() == null ||
+                            !proposalStateInputs.getModifier().getName().toString().equals(tradeStateOutput.getAcceptor().toString()),
+                            proposerCannotAcceptProposalMsg);
 
             require(tradeStateOutput.getAmount() == proposalStateInputs.getAmount(), amountMsg);
             require(proposalStateInputs.getBuyer().toString().equals(tradeStateOutput.getBuyer().toString()), buyerMsg);
@@ -119,7 +123,6 @@ public class ProposalAndTradeContract implements Contract {
 
             require(transaction.getSignatories().contains(proposalStateInputs.getProposer().getLedgerKey()), proposerMsg);
             require(transaction.getSignatories().contains(proposalStateInputs.getProposee().getLedgerKey()), proposeMsg);
-
         }
     }
 
