@@ -3,11 +3,10 @@ package com.r3.developers.samples.negotiation.workflows.Propose
 import com.r3.developers.samples.negotiation.Proposal
 import com.r3.developers.samples.negotiation.ProposalAndTradeContract.Propose
 import com.r3.developers.samples.negotiation.util.Member
-import com.r3.developers.samples.negotiation.workflows.util.FinalizeFlow
+import com.r3.developers.samples.negotiation.workflows.util.FinalizeRequest
 import net.corda.v5.application.flows.*
 import net.corda.v5.application.marshalling.JsonMarshallingService
 import net.corda.v5.application.membership.MemberLookup
-import net.corda.v5.application.messaging.FlowMessaging
 import net.corda.v5.base.annotations.Suspendable
 import net.corda.v5.base.exceptions.CordaRuntimeException
 import net.corda.v5.base.types.MemberX500Name
@@ -16,12 +15,10 @@ import net.corda.v5.ledger.utxo.UtxoLedgerService
 import java.time.Duration
 import java.time.Instant
 import java.util.*
-import java.util.List
+
 
 @InitiatingFlow(protocol = "proposal")
 class ProposalFlowRequest : ClientStartableFlow {
-    @CordaInject
-    var flowMessaging: FlowMessaging? = null
 
     @CordaInject
     var jsonMarshallingService: JsonMarshallingService? = null
@@ -47,7 +44,7 @@ class ProposalFlowRequest : ClientStartableFlow {
         )
         val buyer: MemberX500Name
         val seller: MemberX500Name
-        val memberInfo = memberLookup!!.lookup(MemberX500Name.parse(request.counterParty))
+        val memberInfo = memberLookup!!.lookup(request.counterParty)
         val counterParty = Member(
             memberInfo!!.name, memberInfo.ledgerKeys[0]
         )
@@ -65,7 +62,7 @@ class ProposalFlowRequest : ClientStartableFlow {
             Member(seller, memberLookup!!.lookup(seller)!!.ledgerKeys[0]),
             Member(buyer, memberLookup!!.lookup(seller)!!.ledgerKeys[0]),
             Member(memberLookup!!.myInfo().name, memberLookup!!.myInfo().ledgerKeys[0]),
-            counterParty, UUID.randomUUID()
+            counterParty, null, UUID.randomUUID()
         )
 
         val notary = notaryLookup!!.notaryServices.iterator().next()
@@ -78,14 +75,17 @@ class ProposalFlowRequest : ClientStartableFlow {
             .addCommand(Propose())
             .addSignatories(output.participants)
 
+        val proposalStateId = output.proposalID
 
         // Call FinalizeIOUSubFlow which will finalise the transaction.
         // If successful the flow will return a String of the created transaction id,
         // if not successful it will return an error message.
-        return try {
+        try {
             val signedTransaction = transactionBuilder.toSignedTransaction()
-            val counterPartySession = flowMessaging!!.initiateFlow(counterParty.name)
-            flowEngine!!.subFlow(FinalizeFlow.FinalizeRequest(signedTransaction, List.of(counterPartySession)))
+            flowEngine!!.subFlow(FinalizeRequest(signedTransaction, listOf(counterParty.name)))
+
+            // returns the proposalId
+            return proposalStateId.toString()
         } catch (e: Exception) {
             throw CordaRuntimeException(e.message)
         }

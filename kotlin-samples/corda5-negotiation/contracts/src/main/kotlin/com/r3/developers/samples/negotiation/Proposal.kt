@@ -18,8 +18,12 @@ class Proposal(
 
     var proposee: Member,
 
+    val modifier: Member?,
+
     val proposalID: UUID,
-) : ContractState {
+
+
+    ) : ContractState {
     override fun getParticipants(): List<PublicKey> {
         return listOf(proposer.ledgerKey, proposee.ledgerKey)
     }

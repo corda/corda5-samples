@@ -4,24 +4,21 @@ import com.r3.developers.samples.negotiation.Proposal
 import com.r3.developers.samples.negotiation.ProposalAndTradeContract.Accept
 import com.r3.developers.samples.negotiation.Trade
 import com.r3.developers.samples.negotiation.util.Member
-import com.r3.developers.samples.negotiation.workflows.util.FinalizeFlow
+import com.r3.developers.samples.negotiation.workflows.util.FinalizeRequest
 import net.corda.v5.application.flows.*
 import net.corda.v5.application.marshalling.JsonMarshallingService
 import net.corda.v5.application.membership.MemberLookup
-import net.corda.v5.application.messaging.FlowMessaging
 import net.corda.v5.base.annotations.Suspendable
 import net.corda.v5.base.exceptions.CordaRuntimeException
 import net.corda.v5.ledger.utxo.StateAndRef
 import net.corda.v5.ledger.utxo.UtxoLedgerService
 import java.time.Duration
 import java.time.Instant
-import java.util.List
+import java.util.*
 import java.util.stream.Collectors
 
 @InitiatingFlow(protocol = "accept")
 class AcceptFlowRequest : ClientStartableFlow {
-    @CordaInject
-    var flowMessaging: FlowMessaging? = null
 
     @CordaInject
     var jsonMarshallingService: JsonMarshallingService? = null
@@ -61,7 +58,10 @@ class AcceptFlowRequest : ClientStartableFlow {
         val output = Trade(
             proposalInput.amount,
             Member(proposalInput.buyer.name, proposalInput.buyer.ledgerKey),
-            Member(proposalInput.seller.name, proposalInput.seller.ledgerKey), proposalInput.participants
+            Member(proposalInput.seller.name, proposalInput.seller.ledgerKey),
+            request.acceptor,
+            UUID.randomUUID(),
+            proposalInput.participants
         )
         val counterParty =
             if (memberLookup!!.myInfo().name == proposalInput.proposer.name) proposalInput.proposee else proposalInput.proposer
@@ -79,10 +79,10 @@ class AcceptFlowRequest : ClientStartableFlow {
         // Call FinalizeIOUSubFlow which will finalise the transaction.
         // If successful the flow will return a String of the created transaction id,
         // if not successful it will return an error message.
-        return try {
+        try {
             val signedTransaction = transactionBuilder.toSignedTransaction()
-            val counterPartySession = flowMessaging!!.initiateFlow(counterParty.name)
-            flowEngine!!.subFlow(FinalizeFlow.FinalizeRequest(signedTransaction, List.of(counterPartySession)))
+            flowEngine!!.subFlow(FinalizeRequest(signedTransaction, listOf(counterParty.name)))
+            return output.tradelId.toString()
         } catch (e: Exception) {
             throw CordaRuntimeException(e.message)
         }

@@ -82,6 +82,7 @@ class ProposalAndTradeContract : Contract {
         var sellerMsg = "The seller is unmodified in the output"
         var proposerMsg = "The proposer is a required signer"
         var proposeMsg = "The propose is a required signer"
+        var proposerCannotAcceptProposalMsg = "Modifier cannot accept the proposal"
         override fun verify(transaction: UtxoLedgerTransaction?) {
             val tradeStateOutput = transaction!!.getOutputStates(Trade::class.java)[0]
             val proposalStateInputs = transaction.getInputStates(Proposal::class.java)[0]
@@ -93,6 +94,10 @@ class ProposalAndTradeContract : Contract {
             require(transaction.commands.size == 1, oneCommandMsg)
             require(tradeStateOutput.amount == proposalStateInputs.amount, amountMsg)
             require(proposalStateInputs.buyer.toString() == tradeStateOutput.buyer.toString(), buyerMsg)
+            require(
+                !proposalStateInputs.modifier?.name.toString().equals(tradeStateOutput.acceptor.toString()),
+                proposerCannotAcceptProposalMsg
+            )
             require(proposalStateInputs.seller.toString() == tradeStateOutput.seller.toString(), sellerMsg)
             require(transaction.signatories.contains(proposalStateInputs.proposer.ledgerKey), proposerMsg)
             require(
