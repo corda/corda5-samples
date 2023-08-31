@@ -1,6 +1,21 @@
 pluginManagement {
     // Declare the repositories where plugins are stored.
     repositories {
+        // Remove once Corda 5.1 and Flow Testing Driver are full GA
+        maven {
+            url = "$artifactoryContextUrl/corda-os-maven"
+            content {
+                includeGroupByRegex 'net\\.corda\\.cordapp(\\..*)?'
+            }
+            authentication {
+                basic(BasicAuthentication)
+            }
+            credentials {
+                username = settings.ext.find('cordaArtifactoryUsername') ?: System.getenv('CORDA_ARTIFACTORY_USERNAME')
+                password = settings.ext.find('cordaArtifactoryPassword') ?: System.getenv('CORDA_ARTIFACTORY_PASSWORD')
+            }
+        }
+        //
         gradlePluginPortal()
         mavenCentral()
         mavenLocal()

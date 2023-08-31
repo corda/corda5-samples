@@ -19,23 +19,26 @@ public class Proposal implements ContractState {
     private final Member proposer;
     private final Member proposee;
     private final UUID proposalID;
+    private final Member modifier;
 
     @ConstructorForDeserialization
-    public Proposal(int amount, Member buyer, Member seller, Member proposer, Member proposee, UUID proposalID) {
+    public Proposal(int amount, Member buyer, Member seller, Member proposer, Member proposee, Member modifier, UUID proposalID) {
         this.amount = amount;
         this.buyer = buyer;
         this.seller = seller;
         this.proposee = proposee;
         this.proposer = proposer;
+        this.modifier = modifier;
         this.proposalID = proposalID;
     }
 
-    public Proposal(int amount, Member buyer, Member seller, Member proposer, Member proposee) {
+    public Proposal(int amount, Member buyer, Member seller, Member proposer, Member proposee, Member modifier) {
         this.amount = amount;
         this.buyer = buyer;
         this.seller = seller;
         this.proposee = proposee;
         this.proposer = proposer;
+        this.modifier = modifier;
         this.proposalID = UUID.randomUUID();
     }
 
@@ -61,6 +64,10 @@ public class Proposal implements ContractState {
 
     public UUID getProposalID() {
         return proposalID;
+    }
+
+    public Member getModifier() {
+        return modifier;
     }
 
     @NotNull

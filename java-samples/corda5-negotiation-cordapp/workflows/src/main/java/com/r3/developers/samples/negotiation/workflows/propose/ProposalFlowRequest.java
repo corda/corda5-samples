@@ -3,7 +3,7 @@ package com.r3.developers.samples.negotiation.workflows.propose;
 import com.r3.developers.samples.negotiation.Proposal;
 import com.r3.developers.samples.negotiation.ProposalAndTradeContract;
 import com.r3.developers.samples.negotiation.util.Member;
-import com.r3.developers.samples.negotiation.workflows.util.FInalizeFlow;
+import com.r3.developers.samples.negotiation.workflows.util.FinalizeFlow;
 import net.corda.v5.application.flows.*;
 import net.corda.v5.application.marshalling.JsonMarshallingService;
 import net.corda.v5.application.membership.MemberLookup;
@@ -24,6 +24,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 @InitiatingFlow(protocol = "proposal")
 public class ProposalFlowRequest implements ClientStartableFlow {
@@ -50,16 +51,15 @@ public class ProposalFlowRequest implements ClientStartableFlow {
     @Suspendable
     @Override
     public String call(@NotNull ClientRequestBody requestBody) {
-
         // Obtain the deserialized input arguments to the flow from the requestBody.
         ProposalFlowArgs request = requestBody.getRequestBodyAs(jsonMarshallingService, ProposalFlowArgs.class);
         MemberX500Name buyer;
         MemberX500Name seller;
 
-        MemberInfo memberInfo = memberLookup.lookup(MemberX500Name.parse(request.getCounterParty()));
+        MemberInfo memberInfo = memberLookup.lookup(request.getCounterParty());
         Member counterParty = new Member(Objects.requireNonNull(memberInfo).getName(), memberInfo.getLedgerKeys().get(0));
 
-        if (request.isBuyer()) {
+        if (request.getIsBuyer()) {
             buyer = memberLookup.myInfo().getName();
             seller = memberInfo.getName();
         } else {
@@ -72,8 +72,8 @@ public class ProposalFlowRequest implements ClientStartableFlow {
                 new Member(seller, Objects.requireNonNull(memberLookup.lookup(seller)).getLedgerKeys().get(0)),
                 new Member(buyer, Objects.requireNonNull(memberLookup.lookup(seller)).getLedgerKeys().get(0)),
                 new Member(memberLookup.myInfo().getName(), memberLookup.myInfo().getLedgerKeys().get(0)),
-                counterParty);
-
+                counterParty, null);
+        UUID proposalStateId = output.getProposalID();
 
         NotaryInfo notary = notaryLookup.getNotaryServices().iterator().next();
 
@@ -92,8 +92,8 @@ public class ProposalFlowRequest implements ClientStartableFlow {
         try {
             UtxoSignedTransaction signedTransaction = transactionBuilder.toSignedTransaction();
             FlowSession counterPartySession = flowMessaging.initiateFlow(counterParty.getName());
-            return flowEngine.subFlow(new FInalizeFlow.FinalizeRequest(signedTransaction, List.of(counterPartySession)));
-
+            flowEngine.subFlow(new FinalizeFlow.FinalizeRequest(signedTransaction, List.of(counterPartySession)));
+            return proposalStateId.toString();
         } catch (Exception e) {
             throw new CordaRuntimeException(e.getMessage());
         }

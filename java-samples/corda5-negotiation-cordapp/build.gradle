@@ -13,6 +13,13 @@ allprojects {
     group 'net.corda.samples'
     version '1.0-SNAPSHOT'
 
+    configurations.configureEach {
+        resolutionStrategy {
+            // FORCE Gradle to use latest SNAPSHOT versions.
+            cacheChangingModulesFor 0, 'seconds'
+        }
+    }
+
     def javaVersion = VERSION_11
 
     // Configure the CSDE
@@ -46,12 +53,36 @@ allprojects {
         // All dependencies are held in Maven Central
         mavenLocal()
         mavenCentral()
+        // Remove once Corda 5.1 and Flow Testing Driver are full GA
+        maven {
+            url = "$artifactoryContextUrl/corda-dependencies-dev"
+            authentication {
+                basic(BasicAuthentication)
+            }
+            credentials {
+                username = findProperty('cordaArtifactoryUsername') ?: System.getenv('CORDA_ARTIFACTORY_USERNAME')
+                password = findProperty('cordaArtifactoryPassword') ?: System.getenv('CORDA_ARTIFACTORY_PASSWORD')
+            }
+            mavenContent {
+                snapshotsOnly()
+            }
+        }
+        // Remove once Corda 5.1 and Flow Testing Driver are full GA
+        maven {
+            url = "$artifactoryContextUrl/corda-os-maven"
+            authentication {
+                basic(BasicAuthentication)
+            }
+            credentials {
+                username = findProperty('cordaArtifactoryUsername') ?: System.getenv('CORDA_ARTIFACTORY_USERNAME')
+                password = findProperty('cordaArtifactoryPassword') ?: System.getenv('CORDA_ARTIFACTORY_PASSWORD')
+            }
+        }
     }
 
     tasks.withType(Test).configureEach {
         useJUnitPlatform()
     }
-
 }
 
 publishing {
@@ -61,7 +92,5 @@ publishing {
             groupId project.group
             artifact jar
     }
-
    }
 }
-

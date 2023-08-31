@@ -14,8 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-public class FInalizeFlow {
-    private final static Logger log = LoggerFactory.getLogger(FInalizeFlow.class);
+public class FinalizeFlow {
+    private final static Logger log = LoggerFactory.getLogger(FinalizeFlow.class);
 
     @InitiatingFlow(protocol = "finalize-protocol")
     public static class FinalizeRequest implements SubFlow<String> {
@@ -62,7 +62,6 @@ public class FInalizeFlow {
     @InitiatedBy(protocol = "finalize-protocol")
     public static class FinalizeResponder implements ResponderFlow {
 
-
         // Injects the UtxoLedgerService to enable the flow to make use of the Ledger API.
         @CordaInject
         public UtxoLedgerService utxoLedgerService;
@@ -70,23 +69,13 @@ public class FInalizeFlow {
         @Override
         @Suspendable
         public void call(@NotNull FlowSession session) {
-            String proposalError = "Only the proposee can modify or accept a proposal.";
-            String successMessage = "Successfully finished modification responder flow - ";
+            String successMessage = "Successfully finished responder flow - ";
 
             try {
                 UtxoSignedTransaction finalizedSignedTransaction = utxoLedgerService.receiveFinality(session, transaction -> {
-                    // goes into this if block is command is either modify or accept
-                    if (!transaction.getInputStates(Proposal.class).isEmpty()) {
-                        MemberX500Name proposee = transaction.getInputStates(Proposal.class).get(0).getProposee().getName();
-                        if (!proposee.toString().equals(session.getCounterparty().toString())) {
-                            throw new CordaRuntimeException(proposalError);
-                        }
-                    }
                 }).getTransaction();
 
                 log.info(successMessage + finalizedSignedTransaction.getId());
-
-
             }
             // Soft fails the flow and log the exception.
             catch (Exception e) {
