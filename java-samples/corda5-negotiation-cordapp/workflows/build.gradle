@@ -12,9 +12,6 @@ plugins {
 // A cordaProvided declaration is required for anything that we use that the Corda API provides.
 // This is required to allow us to build CorDapp modules as OSGi bundles that CPI and CPB files are built on.
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
-
     // From other subprojects:
     cordapp project(':contracts')
 
@@ -42,7 +39,6 @@ dependencies {
     // 3rd party libraries
     // Required
     testImplementation "org.slf4j:slf4j-simple:1.7.36"
-    testRuntimeOnly "org.slf4j:slf4j-simple:1.7.36"
     testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
@@ -70,14 +66,6 @@ tasks.withType(Test).configureEach {
 
         systemProperty 'co.paralleluniverse.fibers.verifyInstrumentation', true
         systemProperty 'java.io.tmpdir', buildDir.absolutePath
-
-        systemProperty 'org.slf4j.simpleLogger.defaultLogLevel', 'info'
-        systemProperty 'org.slf4j.simpleLogger.dateTimeFormat', 'yyyy-MM-dd HH:mm:ss:SSS Z'
-        systemProperty 'org.slf4j.simpleLogger.showDateTime', true
-        systemProperty 'org.slf4j.simpleLogger.showShortLogName', true
-        systemProperty 'org.slf4j.simpleLogger.showThreadName', false
-        systemProperty 'org.slf4j.simpleLogger.logFile', 'System.out'
-        systemProperty 'org.slf4j.simpleLogger.log.org.apache.aries.spifly.BaseActivator', 'OFF'
     }
 }
 

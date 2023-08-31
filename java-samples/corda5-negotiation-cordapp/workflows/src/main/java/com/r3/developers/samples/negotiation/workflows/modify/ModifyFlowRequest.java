@@ -75,7 +75,8 @@ public class ModifyFlowRequest implements ClientStartableFlow {
                 new Member(proposalInput.getSeller().getName(), proposalInput.getSeller().getLedgerKey()),
                 new Member(memberLookup.myInfo().getName(), memberLookup.myInfo().getLedgerKeys().get(0)),
                 new Member(counterParty.getName(), counterParty.getLedgerKey()),
-                proposalID, new Member(memberLookup.myInfo().getName(), memberLookup.myInfo().getLedgerKeys().get(0)));
+                new Member(memberLookup.myInfo().getName(), memberLookup.myInfo().getLedgerKeys().get(0)),
+                proposalID);
 
         // Initiating the transactionBuilder with command to "modify"
         UtxoTransactionBuilder transactionBuilder = utxoLedgerService.createTransactionBuilder()

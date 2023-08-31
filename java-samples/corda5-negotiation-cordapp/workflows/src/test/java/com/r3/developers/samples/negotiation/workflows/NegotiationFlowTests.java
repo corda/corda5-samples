@@ -53,7 +53,7 @@ public class NegotiationFlowTests {
     // This is to be created for all tests
     @RegisterExtension
     private final AllTestsDriver driver =
-            new DriverNodes(alice, bob, charles).withNotary(charles, 1).forAllTests();
+            new DriverNodes(alice, bob).withNotary(charles, 1).forAllTests();
 
     @BeforeAll
     void setup() {
@@ -76,7 +76,7 @@ public class NegotiationFlowTests {
 
         assertThatThrownBy(() -> {
             // Execute the modify proposal flow with fake modify proposal arguments and Bob as the issuer
-            driver.let(dsl ->
+            driver.run(dsl ->
                     dsl.runFlow(virtualNodes.get(responder),
                             ModifyFlowRequest.class,
                             () -> fakeModifyProposalFlowArgs)
@@ -155,7 +155,7 @@ public class NegotiationFlowTests {
 
         assertThatThrownBy(() -> {
             // Execute the accept proposal flow with Bob as the issuer or proposer
-            driver.let(dsl ->
+            driver.run(dsl ->
                     dsl.runFlow(virtualNodes.get(responder),
                             AcceptFlowRequest.class,
                             () -> acceptProposalFlowArgs)
@@ -219,7 +219,7 @@ public class NegotiationFlowTests {
 
         assertThatThrownBy(() -> {
             // Execute the accept proposal flow with fake proposal arguments and Bob as the issuer
-             driver.let(dsl ->
+             driver.run(dsl ->
                     dsl.runFlow(virtualNodes.get(responder),
                             AcceptFlowRequest.class,
                             () -> fakeAcceptProposalFlowArgs)
@@ -292,7 +292,7 @@ public class NegotiationFlowTests {
 
         assertThatThrownBy(() -> {
             // Run the proposal flow using the proposal arguments created above
-            String result = driver.let(dsl ->
+            driver.run(dsl ->
                     dsl.runFlow(virtualNodes.get(issuer),
                             ProposalFlowRequest.class,
                             () -> proposalFlowArgs));

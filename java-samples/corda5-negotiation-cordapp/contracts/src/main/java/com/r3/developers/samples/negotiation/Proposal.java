@@ -22,14 +22,14 @@ public class Proposal implements ContractState {
     private final Member modifier;
 
     @ConstructorForDeserialization
-    public Proposal(int amount, Member buyer, Member seller, Member proposer, Member proposee, UUID proposalID, Member modifier) {
+    public Proposal(int amount, Member buyer, Member seller, Member proposer, Member proposee, Member modifier, UUID proposalID) {
         this.amount = amount;
         this.buyer = buyer;
         this.seller = seller;
         this.proposee = proposee;
         this.proposer = proposer;
-        this.proposalID = proposalID;
         this.modifier = modifier;
+        this.proposalID = proposalID;
     }
 
     public Proposal(int amount, Member buyer, Member seller, Member proposer, Member proposee, Member modifier) {
