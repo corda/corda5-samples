@@ -18,30 +18,18 @@ public class Trade implements ContractState {
     private final int amount;
     private final Member buyer;
     private final Member seller;
-    private final UUID proposalID;
+    private final UUID tradeID;
     private final MemberX500Name acceptor;
     public List<PublicKey> participants;
-
-
-    @ConstructorForDeserialization
-    public Trade(int amount, Member buyer, Member seller, UUID proposalID, MemberX500Name acceptor, List<PublicKey> participants) {
-        this.amount = amount;
-        this.buyer = buyer;
-        this.seller = seller;
-        this.proposalID = proposalID;
-        this.acceptor = acceptor;
-        this.participants = participants;
-    }
 
     public Trade(int amount, Member buyer, Member seller, MemberX500Name acceptor, List<PublicKey> participants) {
         this.amount = amount;
         this.buyer = buyer;
         this.seller = seller;
         this.acceptor = acceptor;
-        this.proposalID = UUID.randomUUID();
+        this.tradeID = UUID.randomUUID();
         this.participants = participants;
     }
-
 
     public int getAmount() {
         return amount;
@@ -55,8 +43,8 @@ public class Trade implements ContractState {
         return buyer;
     }
 
-    public UUID getProposalID() {
-        return proposalID;
+    public UUID getTradeID() {
+        return tradeID;
     }
     public MemberX500Name getAcceptor() {
         return acceptor;

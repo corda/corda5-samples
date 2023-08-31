@@ -87,13 +87,15 @@ check the result. Enter Bob's hash id and the modify flow ID which is "ModifyFlo
 #### Step 4: Accept the new proposal from bob  `AcceptFlow`
 In this step, Alice will accept the new proposal from Bob.
 Goto `POST /flow/{holdingidentityshorthash}`, enter Alice's identity short hash and request body, we also need to 
-provide the proposalId, which is same as the proposal ID used in ModifyFlow body. 
+provide the proposalId, which is same as the proposal ID used in ModifyFlow body and also Alice's own details 
+(this is because the Accept smart contract requires this information)
 ```
 {
   "clientRequestId": "AcceptFlow",
   "flowClassName": "com.r3.developers.samples.negotiation.workflows.accept.AcceptFlowRequest",
   "requestBody": {
-      "proposalID": "<use the proposal id here>"
+      "proposalID": "<use the proposal id here>",
+      "acceptor": "CN=Alice, OU=Test Dept, O=R3, L=London, C=GB"
   }
 }
 ```

@@ -88,7 +88,7 @@ public class AcceptFlowRequest implements ClientStartableFlow {
             UtxoSignedTransaction signedTransaction = transactionBuilder.toSignedTransaction();
             FlowSession counterPartySession = flowMessaging.initiateFlow(counterParty.getName());
             flowEngine.subFlow(new FinalizeFlow.FinalizeRequest(signedTransaction, List.of(counterPartySession)));
-            return output.getProposalID().toString();
+            return output.getTradeID().toString();
         } catch (Exception e) {
             throw new CordaRuntimeException(e.getMessage());
         }
