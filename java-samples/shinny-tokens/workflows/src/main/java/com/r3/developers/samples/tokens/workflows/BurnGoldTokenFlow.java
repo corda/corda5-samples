@@ -127,7 +127,7 @@ public class BurnGoldTokenFlow implements ClientStartableFlow {
                         .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                         .addInputStates(tokenClaim.getClaimedTokens().stream().map(ClaimedToken::getStateRef).collect(Collectors.toList()))
                         .addOutputStates(List.of(goldStateChange))
-                        .addCommand(new GoldContract.Transfer())
+                        .addCommand(new GoldContract.Burn())
                         .addSignatories(Collections.singletonList(myInfo.getLedgerKeys().get(0)));
             } else {
                 // if there is no change, no need to create state representing the change to be given back to the sender.
@@ -135,7 +135,7 @@ public class BurnGoldTokenFlow implements ClientStartableFlow {
                         .setNotary(notary.getName())
                         .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                         .addInputStates(tokenClaim.getClaimedTokens().stream().map(ClaimedToken::getStateRef).collect(Collectors.toList()))
-                        .addCommand(new GoldContract.Transfer())
+                        .addCommand(new GoldContract.Burn())
                         .addSignatories(Collections.singletonList(myInfo.getLedgerKeys().get(0)));
             }
 
