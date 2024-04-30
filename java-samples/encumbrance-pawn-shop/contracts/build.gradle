@@ -1,4 +1,3 @@
-
 plugins {
     // Include the cordapp-cpb plugin. This automatically includes the cordapp-cpk plugin as well.
     // These extend existing build environment so that CPB and CPK files can be built.
@@ -39,22 +38,17 @@ dependencies {
     // The CorDapp uses the slf4j logging framework. Corda-API provides this so we need a 'cordaProvided' declaration.
     cordaProvided 'org.slf4j:slf4j-api'
 
-    // This are shared so should be here.
-    // Dependencies Required By Test Tooling
-    // Todo:  these are commented out as the simulator UTXO work has not been merged into Gecko yet.
-//    testImplementation "net.corda:corda-simulator-api:$simulatorVersion"
-//    testRuntimeOnly "net.corda:corda-simulator-runtime:$simulatorVersion"
-
     // 3rd party libraries
     // Required
-    testImplementation "org.slf4j:slf4j-simple:2.0.0"
+    testImplementation "org.slf4j:slf4j-simple:$slf4jVersion"
     testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
-    // Optional used by tests.
+    // Optional but used by example tests.
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "org.hamcrest:hamcrest-library:$hamcrestVersion"
+//    testImplementation "com.r3.corda.ledger.utxo:contract-testing:$contractTestingVersion"
 }
 
 // The CordApp section.
@@ -73,11 +67,15 @@ cordapp {
     // The cordapp section contains either a workflow or contract subsection depending on the type of component.
     // Declares the type and metadata of the CPK (this CPB has one CPK).
     contract {
-        name "ContractsModuleNameHere"
+        name contractsModule
         versionId 1
-        vendor "VendorNameHere"
+        licence cordappLicense
+        vendor cordappVendorName
     }
 }
+
+// Use the name of the contract module as the name of the generated CPK and CPB.
+archivesBaseName = cordapp.contract.name.isPresent() ? cordapp.contract.name.get() : contractsModule
 
 publishing {
     publications {

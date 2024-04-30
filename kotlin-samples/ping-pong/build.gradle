@@ -1,4 +1,6 @@
-import static org.gradle.api.JavaVersion.VERSION_11
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+import static org.gradle.api.JavaVersion.VERSION_17
 
 plugins {
     id 'org.jetbrains.kotlin.jvm'
@@ -6,36 +8,38 @@ plugins {
     id 'org.jetbrains.kotlin.plugin.jpa'
     id 'java'
     id 'maven-publish'
-    id 'net.corda.plugins.csde'
+    id 'net.corda.gradle.plugin'
 }
 
 allprojects {
-    group 'com.r3.developers.samples'
+    group 'com.r3.developers.cordapptemplate'
     version '1.0-SNAPSHOT'
 
-    def javaVersion = VERSION_11
+    def javaVersion = VERSION_17
 
-    // Configure the CSDE
-    csde {
+    // Configure Corda runtime gradle plugin
+    cordaRuntimeGradlePlugin {
+        notaryVersion = cordaNotaryPluginsVersion
+        notaryCpiName = "NotaryServer"
+        corDappCpiName = "MyCorDapp"
+        cpiUploadTimeout = "30000"
+        vnodeRegistrationTimeout = "60000"
+        cordaProcessorTimeout = "300000"
+        workflowsModuleName = "workflows"
         cordaClusterURL = "https://localhost:8888"
+        cordaRestUser = "admin"
+        cordaRestPasswd ="admin"
+        composeFilePath = "config/combined-worker-compose.yaml"
         networkConfigFile = "config/static-network-config.json"
         r3RootCertFile = "config/r3-ca-key.pem"
-        corDappCpiName = "MyCorDapp"
-        notaryCpiName = "NotaryServer"
-        cordaRpcUser = "admin"
-        cordaRpcPasswd ="admin"
-        workflowsModuleName = workflowsModule
-        csdeWorkspaceDir = "workspace"
-        notaryVersion = cordaNotaryPluginsVersion
-        combinedWorkerVersion = combinedWorkerJarVersion
-        postgresJdbcVersion = "42.4.3"
-        cordaDbContainerName = "CSDEpostgresql"
+        skipTestsDuringBuildCpis = "false"
+        cordaRuntimePluginWorkspaceDir = "workspace"
         cordaBinDir = "${System.getProperty("user.home")}/.corda/corda5"
         cordaCliBinDir = "${System.getProperty("user.home")}/.corda/cli"
     }
 
     // Declare the set of Kotlin compiler options we need to build a CorDapp.
-    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    tasks.withType(KotlinCompile).configureEach {
         kotlinOptions {
             allWarningsAsErrors = false
 
@@ -75,10 +79,10 @@ allprojects {
 
 publishing {
     publications {
-            maven(MavenPublication) {
-                artifactId "corda5-pingpong-cordapp"
-                groupId project.group
-                artifact jar
-         }
+        maven(MavenPublication) {
+            artifactId "corda-dev-template-kotlin-sample"
+            groupId project.group
+            artifact jar
+        }
     }
 }

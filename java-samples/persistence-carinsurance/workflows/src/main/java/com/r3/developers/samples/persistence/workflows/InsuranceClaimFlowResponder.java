@@ -10,6 +10,8 @@ import net.corda.v5.base.annotations.Suspendable;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
+
 @InitiatedBy(protocol = "add-claim")
 public class InsuranceClaimFlowResponder implements ResponderFlow {
     @CordaInject
@@ -21,7 +23,7 @@ public class InsuranceClaimFlowResponder implements ResponderFlow {
     @Suspendable
     public void call(@NotNull FlowSession session) {
         PersistentInsurance persistentInsurance = session.receive(PersistentInsurance.class);
-        persistenceService.persist(persistentInsurance);
+        persistenceService.persist(UUID.randomUUID().toString(), persistentInsurance);
         utxoLedgerService.receiveFinality(session, transaction -> {});
     }
 }

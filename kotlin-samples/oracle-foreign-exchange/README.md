@@ -28,7 +28,7 @@ so that every node updates their record to include the new foreign exchange tran
 ## Usage
 ### Setting Up
 1. Start the sandbox environment by clicking the Gradle task `Tasks > csde-cordapp > startCorda`. 
-   A successful deployment will allow you to open the REST APIs: https://localhost:8888/api/v1/swagger
+   A successful deployment will allow you to open the REST APIs: https://localhost:8888/api/v5_2/swagger#/
 2. Deploy the CorDapp by clicking `Tasks > csde-cordapp > 5-vNodesSetup`. When successful, you should be able to see the
 CPI metadata of the CorDapp you deployed by calling the `GET /cpi/` endpoint.
 3. Take note of the identity short hash of the `Alice` member node by either:

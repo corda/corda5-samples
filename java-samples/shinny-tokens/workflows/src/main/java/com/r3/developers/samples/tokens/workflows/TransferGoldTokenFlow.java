@@ -32,6 +32,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -105,7 +106,7 @@ public class TransferGoldTokenFlow implements ClientStartableFlow {
             // tryClaim will check in the vault if there are tokens which can satisfy the expected amount.
             // If yes all the fungible tokens are returned back.
             // Remaining change will be returned back to the sender.
-            tokenClaim = tokenSelection.tryClaim(tokenClaimCriteria);
+            tokenClaim = tokenSelection.tryClaim(UUID.randomUUID().toString(), tokenClaimCriteria);
 
             if(tokenClaim == null) {
                 log.info("No tokens found for" + jsonMarshallingService.format(tokenClaimCriteria));

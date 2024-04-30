@@ -19,6 +19,8 @@ import net.corda.v5.ledger.utxo.UtxoLedgerService
 import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.time.Instant
+import java.util.*
+import kotlin.collections.ArrayList
 
 @InitiatingFlow(protocol = "add-claim")
 class InsuranceClaimFlow : ClientStartableFlow {
@@ -155,7 +157,7 @@ class InsuranceClaimFlow : ClientStartableFlow {
             persistentClaims
         )
 
-        persistentService.persist(persistentInsurance)
+        persistentService.persist(UUID.randomUUID().toString(), persistentInsurance)
         return persistentInsurance;
     }
 
@@ -185,7 +187,7 @@ class InsuranceClaimFlowResponder: ResponderFlow {
     @Suspendable
     override fun call(session: FlowSession) {
         val persistentInsurance = session.receive(PersistentInsurance::class.java)
-        persistentService.persist(persistentInsurance)
+        persistentService.persist(UUID.randomUUID().toString(), persistentInsurance)
         ledgerService.receiveFinality(session, {})
     }
 

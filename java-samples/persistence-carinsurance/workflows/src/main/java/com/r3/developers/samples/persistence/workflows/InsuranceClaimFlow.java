@@ -31,6 +31,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @InitiatingFlow(protocol = "add-claim")
@@ -157,7 +158,7 @@ public class InsuranceClaimFlow implements ClientStartableFlow {
                 persistentClaims
         );
 
-        persistenceService.persist(persistentInsurance);
+        persistenceService.persist(UUID.randomUUID().toString(), persistentInsurance);
         return persistentInsurance;
     }
 }

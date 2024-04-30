@@ -31,6 +31,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.UUID;
 
 @InitiatingFlow(protocol = "issue-insurance")
 public class IssueInsuranceFlow implements ClientStartableFlow {
@@ -109,7 +110,7 @@ public class IssueInsuranceFlow implements ClientStartableFlow {
                 ),
                 Collections.emptyList()
         );
-            persistenceService.persist(persistentInsurance);
+            persistenceService.persist(UUID.randomUUID().toString(), persistentInsurance);
         return persistentInsurance;
     }
 

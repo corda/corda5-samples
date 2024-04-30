@@ -88,7 +88,7 @@ class BurnGoldTokenFlow : ClientStartableFlow{
             // tryClaim will check in the vault if there are tokens which can satisfy the expected amount.
             // If yes all the fungible tokens are returned back.
             // Remaining change will be returned back to the sender.
-            tokenClaim = tokenSelection.tryClaim(tokenClaimCriteria)
+            tokenClaim = tokenSelection.tryClaim(UUID.randomUUID().toString(), tokenClaimCriteria)
 
 
             if (tokenClaim == null) {

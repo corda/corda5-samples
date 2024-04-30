@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory
 import java.security.PublicKey
 import java.time.Duration
 import java.time.Instant
+import java.util.*
 
 @InitiatingFlow(protocol = "issue-insurance")
 class IssueInsuranceFlow : ClientStartableFlow {
@@ -143,7 +144,7 @@ class IssueInsuranceFlow : ClientStartableFlow {
             ),
             emptyList()
         )
-        persistentService.persist(persistentInsurance)
+        persistentService.persist(UUID.randomUUID().toString(), persistentInsurance)
         return persistentInsurance
     }
 
@@ -182,7 +183,7 @@ class IssueInsuranceResponder: ResponderFlow{
     @Suspendable
     override fun call(session: FlowSession) {
         val persistentInsurance = session.receive(PersistentInsurance::class.java)
-        persistentService.persist(persistentInsurance)
+        persistentService.persist(UUID.randomUUID().toString(), persistentInsurance)
         ledgerService.receiveFinality(session, {})
     }
 

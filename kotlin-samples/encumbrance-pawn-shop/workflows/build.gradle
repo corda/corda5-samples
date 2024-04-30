@@ -12,6 +12,15 @@ plugins {
 // A cordaProvided declaration is required for anything that we use that the Corda API provides.
 // This is required to allow us to build CorDapp modules as OSGi bundles that CPI and CPB files are built on.
 dependencies {
+    constraints {
+        testImplementation('org.slf4j:slf4j-api') {
+            version {
+                // Corda cannot use SLF4J 2.x yet.
+                strictly '1.7.36'
+            }
+        }
+    }
+
     // From other subprojects:
     cordapp project(':contracts')
 
@@ -42,7 +51,7 @@ dependencies {
 
     // 3rd party libraries
     // Required
-    testImplementation "org.slf4j:slf4j-simple:2.0.0"
+    testImplementation "org.slf4j:slf4j-simple:$slf4jVersion"
     testImplementation "org.junit.jupiter:junit-jupiter:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
 
@@ -50,7 +59,8 @@ dependencies {
     testImplementation "org.mockito:mockito-core:$mockitoVersion"
     testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
     testImplementation "org.hamcrest:hamcrest-library:$hamcrestVersion"
-
+    testImplementation "org.assertj:assertj-core:$assertjVersion"
+    testImplementation "com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion"
 }
 
 // The CordApp section.
@@ -69,11 +79,15 @@ cordapp {
     // The cordapp section contains either a workflow or contract subsection depending on the type of component.
     // Declares the type and metadata of the CPK (this CPB has one CPK).
     workflow {
-        name "WorkflowsModuleNameHere"
+        name workflowsModule
         versionId 1
-        vendor "VendorNameHere"
+        licence cordappLicense
+        vendor cordappVendorName
     }
 }
+
+// Use the name of the workflow module as the name of the generated CPK and CPB.
+archivesBaseName = cordapp.workflow.name.isPresent() ? cordapp.workflow.name.get() : workflowsModule
 
 publishing {
     publications {

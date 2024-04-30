@@ -29,7 +29,7 @@ In the `AcceptanceFlow.java`, we receive the modified ProposalState and it's con
 ### Setting up
 
 1. We will begin our test deployment with clicking the `startCorda`. This task will load up the combined Corda workers in docker.
-   A successful deployment will allow you to open the REST APIs at: https://localhost:8888/api/v1/swagger#. You can test out some
+   A successful deployment will allow you to open the REST APIs at: https://localhost:8888/api/v5_2/swagger#/. You can test out some
    functions to check connectivity. (GET /cpi function call should return an empty list as for now.)
 2. We will now deploy the cordapp with a click of `5-vNodeSetup` task. Upon successful deployment of the CPI, the GET /cpi function call should now return the meta data of the cpi you just upload.
 
@@ -102,6 +102,18 @@ Goto `POST /flow/{holdingidentityshorthash}`, enter the identity short hash (of 
 And as for the result of this flow, go to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the required fields.
 
 Thus, we have concluded a full run through of the Negotiation app.
+
+#### Step 5: list the trade from Alice
+Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Alice's hash) and request body:
+```
+{
+    "clientRequestId": "list-2",
+    "flowClassName": "com.r3.developers.samples.negotiation.workflows.util.ListTrade",
+    "requestBody": {}
+}
+```
+After trigger the Trade Proposal, hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the short hash(Alice's hash) and client request id ("list-2" in the case above) to view the flow result.
+
 
 ### App Diagrams
 Below are the app diagrams which are useful for the visual understanding.
