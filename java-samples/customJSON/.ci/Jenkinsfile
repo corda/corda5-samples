@@ -1,0 +1,11 @@
+@Library('corda-shared-build-pipeline-steps@5.2') _
+
+cordaPipeline(
+    publishRepoPrefix: '',
+    slimBuild: true,
+    runUnitTests: false,
+    dedicatedJobForSnykDelta: false,
+    slackChannel: '#corda-corda5-dev-ex-build-notifications',
+    gitHubComments: false,
+    javaVersion: '17'
+    )
