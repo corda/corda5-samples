@@ -12,6 +12,7 @@ import net.corda.v5.base.types.MemberX500Name;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,7 +31,7 @@ public class GetSanctionListFlow implements ClientStartableFlow {
     public String call(@NotNull ClientRequestBody requestBody) {
 
         List<SanctionListDetail> sanctionList =
-                ledgerService.findUnconsumedStatesByType(SanctionList.class).stream().map(
+                ledgerService.findUnconsumedStatesByExactType(SanctionList.class,100, Instant.now()).getResults().stream().map(
                         it-> new SanctionListDetail(
                                 it.getState().getContractState().getBadPeople().stream().map(Member::getName)
                                         .collect(Collectors.toList()),

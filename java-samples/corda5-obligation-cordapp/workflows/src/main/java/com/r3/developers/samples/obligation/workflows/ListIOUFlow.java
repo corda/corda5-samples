@@ -11,6 +11,7 @@ import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,7 @@ public class ListIOUFlow implements ClientStartableFlow {
         log.info("ListIOUFlow.call() called");
 
         // Queries the VNode's vault for unconsumed states and converts the result to a serializable DTO.
-        List<StateAndRef<IOUState>> states = utxoLedgerService.findUnconsumedStatesByType(IOUState.class);
+        List<StateAndRef<IOUState>> states = utxoLedgerService.findUnconsumedStatesByExactType(IOUState.class,100, Instant.now()).getResults();
         List<ListIOUFlowResults> results = states.stream().map(stateAndRef ->
                 new ListIOUFlowResults(
                         stateAndRef.getState().getContractState().getLinearId(),

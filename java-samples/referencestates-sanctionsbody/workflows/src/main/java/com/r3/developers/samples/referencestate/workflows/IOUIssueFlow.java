@@ -90,7 +90,7 @@ public class IOUIssueFlow implements ClientStartableFlow {
     @Suspendable
     public StateAndRef<SanctionList> getSanctionsList(MemberX500Name sanctionsBody) {
         List<StateAndRef<SanctionList>> sanctionLists =
-                ledgerService.findUnconsumedStatesByType(SanctionList.class).stream().filter(
+                ledgerService.findUnconsumedStatesByExactType(SanctionList.class,100, Instant.now()).getResults().stream().filter(
                         it -> it.getState().getContractState().getIssuer().getName().equals(sanctionsBody)
                         ).collect(Collectors.toList());
         if(sanctionLists.isEmpty()){

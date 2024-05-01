@@ -64,7 +64,7 @@ public class IOUSettleFlow implements ClientStartableFlow {
             int amountSettle = Integer.parseInt(flowArgs.getAmountSettle());
 
             //query the IOU input
-            List<StateAndRef<IOUState>> iouStateAndRefs = ledgerService.findUnconsumedStatesByType(IOUState.class);
+            List<StateAndRef<IOUState>> iouStateAndRefs = ledgerService.findUnconsumedStatesByExactType(IOUState.class,100, Instant.now()).getResults();
             List<StateAndRef<IOUState>> iouStateAndRefsWithId = iouStateAndRefs.stream()
                     .filter(sar -> sar.getState().getContractState().getLinearId().equals(iouID)).collect(toList());
 

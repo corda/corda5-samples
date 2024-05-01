@@ -10,6 +10,7 @@ import net.corda.v5.base.types.MemberX500Name;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,7 @@ public class GetLoanFlow implements ClientStartableFlow {
     @Suspendable
     public String call(@NotNull ClientRequestBody requestBody) {
         List<LoanDetail> loanList =
-                ledgerService.findUnconsumedStatesByType(Loan.class).stream().map(
+                ledgerService.findUnconsumedStatesByExactType(Loan.class,100, Instant.now()).getResults().stream().map(
                         it -> new LoanDetail(
                                 it.getState().getContractState().getLoanId(),
                                 it.getState().getContractState().getLender().getName(),

@@ -10,6 +10,7 @@ import net.corda.v5.base.types.MemberX500Name;
 import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,7 +28,7 @@ public class GetIOUFlow implements ClientStartableFlow {
     public String call(@NotNull ClientRequestBody requestBody) {
 
         List<IOU> iouList =
-                ledgerService.findUnconsumedStatesByType(SanctionableIOUState.class).stream().map(
+                ledgerService.findUnconsumedStatesByExactType(SanctionableIOUState.class,100, Instant.now()).getResults().stream().map(
                         it -> new IOU(
                                 it.getState().getContractState().getValue(),
                                 it.getState().getContractState().getLender().getName(),

@@ -59,7 +59,7 @@ public class UpdateSanctionListFlow implements ClientStartableFlow {
                     requestBody.getRequestBodyAs(jsonMarshallingService, UpdateSanctionListFlowArgs.class);
 
             List<StateAndRef<SanctionList>> oldList =
-                    ledgerService.findUnconsumedStatesByType(SanctionList.class);
+                    ledgerService.findUnconsumedStatesByExactType(SanctionList.class,100, Instant.now()).getResults();
 
             if(oldList.isEmpty()){
                 throw new CordaRuntimeException("Sanction List not found.");

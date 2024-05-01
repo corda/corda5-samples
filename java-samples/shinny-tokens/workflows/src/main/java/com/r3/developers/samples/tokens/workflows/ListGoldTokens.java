@@ -12,6 +12,7 @@ import net.corda.v5.ledger.utxo.UtxoLedgerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,7 +31,7 @@ public class ListGoldTokens implements ClientStartableFlow {
     @Suspendable
     @Override
     public String call(ClientRequestBody requestBody) {
-        List<StateAndRef<GoldState>> states = utxoLedgerService.findUnconsumedStatesByType(GoldState.class);
+        List<StateAndRef<GoldState>> states = utxoLedgerService.findUnconsumedStatesByExactType(GoldState.class,100, Instant.now()).getResults();
 
         List<GoldStateList> results = states.stream().map(stateAndRef ->
                 new GoldStateList(

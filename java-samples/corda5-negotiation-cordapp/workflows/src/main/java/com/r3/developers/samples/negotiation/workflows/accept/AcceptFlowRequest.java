@@ -52,7 +52,7 @@ public class AcceptFlowRequest implements ClientStartableFlow {
         UUID proposalID = request.getProposalID();
 
         // Getting the old Proposal State as an input state
-        List<StateAndRef<Proposal>> proposalStatAndRef = utxoLedgerService.findUnconsumedStatesByType(Proposal.class);
+        List<StateAndRef<Proposal>> proposalStatAndRef = utxoLedgerService.findUnconsumedStatesByExactType(Proposal.class ,100, Instant.now()).getResults();
         List<StateAndRef<Proposal>> proposalStatAndRefWithId = proposalStatAndRef.stream().
                 filter(it -> it.getState().getContractState().getProposalID().equals(proposalID)).collect(Collectors.toList());
 

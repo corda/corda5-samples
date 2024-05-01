@@ -51,7 +51,7 @@ public class SettleLoanFlow implements ClientStartableFlow {
             SettleLoanFlowArgs flowArgs = requestBody.getRequestBodyAs(jsonMarshallingService, SettleLoanFlowArgs.class);
 
             List<StateAndRef<Loan>> filteredLoanStateAndRefs =
-                ledgerService.findUnconsumedStatesByType(Loan.class).stream().filter(
+                ledgerService.findUnconsumedStatesByExactType(Loan.class,100, Instant.now()).getResults().stream().filter(
                         it -> it.getState().getContractState().getLoanId().equals(flowArgs.getLoanId())
                 ).collect(Collectors.toList());
 
@@ -63,7 +63,7 @@ public class SettleLoanFlow implements ClientStartableFlow {
             StateAndRef<Loan> loanStateAndRef = filteredLoanStateAndRefs.get(0);
 
             List<StateAndRef<Asset>> filteredAssetStateAndRefs =
-                    ledgerService.findUnconsumedStatesByType(Asset.class).stream().filter(
+                    ledgerService.findUnconsumedStatesByExactType(Asset.class,100, Instant.now()).getResults().stream().filter(
                             it -> it.getState().getContractState().getAssetId().equals(
                                     loanStateAndRef.getState().getContractState().getCollateral()
                             )
