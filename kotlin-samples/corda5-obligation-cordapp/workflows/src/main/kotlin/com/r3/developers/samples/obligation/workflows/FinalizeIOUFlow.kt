@@ -79,8 +79,7 @@ class FinalizeIOUResponderFlow: ResponderFlow {
             val finalizedSignedTransaction = ledgerService.receiveFinality(session) { ledgerTransaction ->
 
                 // Note, this exception will only be shown in the logs if Corda Logging is set to debug.
-                val state = ledgerTransaction.getOutputStates(IOUState::class.java).singleOrNull() ?:
-                throw CordaRuntimeException("Failed verification - transaction did not have exactly one output IOUState.")
+                val state = ledgerTransaction.getOutputStates(IOUState::class.java).singleOrNull() ?: throw CordaRuntimeException("Failed verification - transaction did not have exactly one output IOUState.")
 
                 log.info("Verified the transaction- ${ledgerTransaction.id}")
             }

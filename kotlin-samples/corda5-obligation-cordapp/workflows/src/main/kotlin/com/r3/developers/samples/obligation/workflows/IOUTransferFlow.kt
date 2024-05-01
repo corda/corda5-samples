@@ -54,7 +54,7 @@ class IOUTransferFlow: ClientStartableFlow {
             val iouID = flowArgs.iouID
 
             //query the IOU input
-            val iouStateAndRefs = ledgerService.findUnconsumedStatesByType(IOUState::class.java)
+            val iouStateAndRefs = ledgerService.findUnconsumedStatesByExactType(IOUState::class.java,100, Instant.now()).results
             val iouStateAndRefsWithId = iouStateAndRefs.filter { it.state.contractState.linearId.equals(iouID)}
             if (iouStateAndRefsWithId.size != 1) throw CordaRuntimeException("Multiple or zero IOU states with id \" + iouID + \" found")
             val iouStateAndRef = iouStateAndRefsWithId[0]

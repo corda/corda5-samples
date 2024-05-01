@@ -8,6 +8,7 @@ import net.corda.v5.application.marshalling.JsonMarshallingService
 import net.corda.v5.base.annotations.Suspendable
 import net.corda.v5.ledger.utxo.UtxoLedgerService
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.util.*
 
 // A class to hold the deserialized arguments required to start the flow.
@@ -32,7 +33,7 @@ class ListIOUFlow: ClientStartableFlow {
         log.info("ListIOUFlow.call() called")
 
         // Queries the VNode's vault for unconsumed states and converts the result to a serializable DTO.
-        val states = ledgerService.findUnconsumedStatesByType(IOUState::class.java)
+        val states = ledgerService.findUnconsumedStatesByExactType(IOUState::class.java,100, Instant.now()).results
         val results = states.map { stateAndRef ->
             ListIOUFlowResults(
                 stateAndRef.state.contractState.linearId,
