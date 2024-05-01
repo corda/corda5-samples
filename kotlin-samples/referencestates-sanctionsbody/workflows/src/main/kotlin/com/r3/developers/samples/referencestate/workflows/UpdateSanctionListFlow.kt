@@ -54,7 +54,7 @@ class UpdateSanctionListFlow : ClientStartableFlow {
             val partyToSanction =  memberLookup.lookup(partyToSanctionName) ?: throw  CordaRuntimeException("MemberLookup can't find partyToSanctionName specified in flow arguments.")
             val allParties = memberLookup.lookup().filter { it -> !it.name.commonName.equals("NotaryRep1") }.toList()
 
-            val oldSanctionListRef = ledgerService.findUnconsumedStatesByType(SanctionList::class.java).singleOrNull()?: throw  CordaRuntimeException("Sanction List not found.")
+            val oldSanctionListRef = ledgerService.findUnconsumedStatesByExactType(SanctionList::class.java, 100, Instant.now()).results.singleOrNull()?: throw  CordaRuntimeException("Sanction List not found.")
             val oldSanctionList =oldSanctionListRef.state.contractState
             val badPeople = ArrayList(oldSanctionList.badPeople)
             badPeople.add(Member(partyToSanctionName,partyToSanction.ledgerKeys[0]))

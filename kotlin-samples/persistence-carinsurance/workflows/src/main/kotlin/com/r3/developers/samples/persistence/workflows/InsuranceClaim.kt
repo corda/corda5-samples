@@ -60,7 +60,7 @@ class InsuranceClaimFlow : ClientStartableFlow {
             // to fetch the desired Insurance state from the vault. This filtered state would be used as input to the
             // transaction.
             val filteredInsuranceStateAndRefs =
-                ledgerService.findUnconsumedStatesByType(InsuranceState::class.java).filter {
+                ledgerService.findUnconsumedStatesByExactType(InsuranceState::class.java, 100, Instant.now()).results.filter {
                 it.state.contractState.policyNumber.equals(flowArgs.policyNumber)
             }
 

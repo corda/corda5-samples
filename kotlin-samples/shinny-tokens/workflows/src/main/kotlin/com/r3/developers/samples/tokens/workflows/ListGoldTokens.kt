@@ -10,6 +10,7 @@ import net.corda.v5.crypto.SecureHash
 import net.corda.v5.ledger.utxo.UtxoLedgerService
 import org.slf4j.LoggerFactory
 import java.math.BigDecimal
+import java.time.Instant
 import java.util.stream.Collectors
 
 // This flow is used to list all the gold tokens available in the vault.
@@ -28,9 +29,7 @@ class ListGoldTokens: ClientStartableFlow {
 
     @Suspendable
     override fun call(requestBody: ClientRequestBody): String {
-        val states = utxoLedgerService.findUnconsumedStatesByType(
-            GoldState::class.java
-        )
+        val states = utxoLedgerService.findUnconsumedStatesByExactType(GoldState::class.java, 100, Instant.now()).results
 
         // Queries the VNode's vault for unconsumed states and converts the result to a serializable DTO.
         val results = states.stream().map{

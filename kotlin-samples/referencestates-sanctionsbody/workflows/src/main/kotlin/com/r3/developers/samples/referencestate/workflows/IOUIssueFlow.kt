@@ -81,7 +81,7 @@ class IOUIssueFlow : ClientStartableFlow {
 
     @Suspendable
     fun getSanctionsList(sanctionsBody: MemberX500Name): StateAndRef<SanctionList>? {
-        val sanctionLists = ledgerService.findUnconsumedStatesByType(SanctionList::class.java).stream().filter { it ->
+        val sanctionLists = ledgerService.findUnconsumedStatesByExactType(SanctionList::class.java, 100, Instant.now()).results.stream().filter { it ->
             it.state.contractState.issuer.name.equals(sanctionsBody)
         }.toList()[0]
         return sanctionLists

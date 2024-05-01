@@ -9,6 +9,7 @@ import net.corda.v5.base.annotations.Suspendable
 import net.corda.v5.base.types.MemberX500Name
 import net.corda.v5.ledger.utxo.UtxoLedgerService
 import org.slf4j.LoggerFactory
+import java.time.Instant
 
 data class LoanDetail(val  loanId:String,
                       val  lender: MemberX500Name,
@@ -36,7 +37,7 @@ class GetLoanFlow : ClientStartableFlow {
         log.info("GetLoanFlow.call() called")
 
         // Queries the VNode's vault for unconsumed states and converts the result to a serializable DTO.
-        val states = ledgerService.findUnconsumedStatesByType(Loan::class.java)
+        val states = ledgerService.findUnconsumedStatesByExactType(Loan::class.java, 100, Instant.now()).results
         val results = states.map {it ->
             LoanDetail(
                 it.state.contractState.loanId,

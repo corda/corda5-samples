@@ -1,5 +1,6 @@
 package com.r3.developers.samples.referencestate.workflows
 
+import com.r3.developers.samples.referencestate.states.SanctionList
 import com.r3.developers.samples.referencestate.states.SanctionableIOUState
 import net.corda.v5.application.flows.ClientRequestBody
 import net.corda.v5.application.flows.ClientStartableFlow
@@ -9,6 +10,7 @@ import net.corda.v5.base.annotations.Suspendable
 import net.corda.v5.base.types.MemberX500Name
 import net.corda.v5.ledger.utxo.UtxoLedgerService
 import org.slf4j.LoggerFactory
+import java.time.Instant
 import java.util.*
 
 data class IOU(val value: Int,
@@ -34,7 +36,7 @@ class GetIOUFlow : ClientStartableFlow {
         log.info("GetIOUFlow.call() called")
 
         // Queries the VNode's vault for unconsumed states and converts the result to a serializable DTO.
-        val states = ledgerService.findUnconsumedStatesByType(SanctionableIOUState::class.java)
+        val states = ledgerService.findUnconsumedStatesByExactType(SanctionableIOUState::class.java, 100, Instant.now()).results
         val results = states.map {it ->
             IOU(
                 it.state.contractState.value,

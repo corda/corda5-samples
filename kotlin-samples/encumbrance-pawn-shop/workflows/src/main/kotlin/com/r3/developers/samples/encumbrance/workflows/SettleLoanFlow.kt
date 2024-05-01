@@ -45,13 +45,13 @@ class SettleLoanFlow: ClientStartableFlow {
         try {
             val (loanId) = requestBody.getRequestBodyAs(jsonMarshallingService, SettleLoanFlowArgs::class.java)
 
-            val loanStateAndRef = ledgerService.findUnconsumedStatesByType(Loan::class.java).singleOrNull {
+            val loanStateAndRef = ledgerService.findUnconsumedStatesByExactType(Loan::class.java, 100, Instant.now()).results.singleOrNull {
                 it.state.contractState.loanId == loanId
             } ?: throw CordaRuntimeException("Multiple or zero Loan states with id ${loanId} found.")
 
             val loan = loanStateAndRef.state.contractState
 
-            val assetStateAndRef = ledgerService.findUnconsumedStatesByType(Asset::class.java).singleOrNull {
+            val assetStateAndRef = ledgerService.findUnconsumedStatesByExactType(Asset::class.java, 100, Instant.now()).results.singleOrNull {
                 it.state.contractState.assetId == loan.collateral
             } ?: throw CordaRuntimeException("Multiple or zero Asset states with id ${loan.collateral} found.")
 

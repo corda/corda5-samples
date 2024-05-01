@@ -9,6 +9,7 @@ import net.corda.v5.base.annotations.Suspendable
 import net.corda.v5.base.types.MemberX500Name
 import net.corda.v5.ledger.utxo.UtxoLedgerService
 import org.slf4j.LoggerFactory
+import java.time.Instant
 
 data class AssetDetail(
     val owner: MemberX500Name,
@@ -36,7 +37,7 @@ class GetAssetFlow : ClientStartableFlow {
         log.info("GetAssetFlow.call() called")
 
         // Queries the VNode's vault for unconsumed states and converts the result to a serializable DTO.
-        val states = ledgerService.findUnconsumedStatesByType(Asset::class.java)
+        val states = ledgerService.findUnconsumedStatesByExactType(Asset::class.java, 100, Instant.now()).results
         val results = states.map {it ->
             AssetDetail(
                 it.state.contractState.owner.name,

@@ -47,7 +47,7 @@ class TransferAssetFlow: ClientStartableFlow {
             val otherMember = memberLookup.lookup(MemberX500Name.parse(flowArgs.buyer)) ?: throw CordaRuntimeException("MemberLookup can't find otherMember specified in flow arguments.")
             val buyer = Member(otherMember.name,otherMember.ledgerKeys[0])
 
-            val stateAndRef = ledgerService.findUnconsumedStatesByType(Asset::class.java).singleOrNull {
+            val stateAndRef = ledgerService.findUnconsumedStatesByExactType(Asset::class.java, 100, Instant.now()).results.singleOrNull {
                 it.state.contractState.assetId == flowArgs.assetId
             } ?: throw CordaRuntimeException("Multiple or zero Asset states with id ${flowArgs.assetId} found.")
 
