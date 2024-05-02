@@ -26,7 +26,7 @@ public class GetAssetFlow implements ClientStartableFlow {
     @Suspendable
     public String call(@NotNull ClientRequestBody requestBody) {
         List<AssetDetail> assetList =
-                ledgerService.findUnconsumedStatesByExactType(Asset.class,100, Instant.now()).getResults().stream().map(
+                ledgerService.findUnconsumedStatesByExactType (Asset.class,100, Instant.now()).getResults().stream().map(
                         it -> new AssetDetail(
                                 it.getState().getContractState().getOwner().getName(),
                                 it.getState().getContractState().getAssetId(),

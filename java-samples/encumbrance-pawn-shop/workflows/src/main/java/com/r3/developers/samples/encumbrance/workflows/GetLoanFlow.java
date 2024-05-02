@@ -27,7 +27,7 @@ public class GetLoanFlow implements ClientStartableFlow {
     @Suspendable
     public String call(@NotNull ClientRequestBody requestBody) {
         List<LoanDetail> loanList =
-                ledgerService.findUnconsumedStatesByExactType(Loan.class,100, Instant.now()).getResults().stream().map(
+                ledgerService.findUnconsumedStatesByExactType (Loan.class,100, Instant.now()).getResults().stream().map(
                         it -> new LoanDetail(
                                 it.getState().getContractState().getLoanId(),
                                 it.getState().getContractState().getLender().getName(),

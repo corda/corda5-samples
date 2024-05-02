@@ -56,7 +56,7 @@ public class TransferAssetFlow implements ClientStartableFlow {
             Member buyer = new Member(memberInfo.getName(), memberInfo.getLedgerKeys().get(0));
 
             List<StateAndRef<Asset>> filteredAssetStateAndRefs =
-                    ledgerService.findUnconsumedStatesByExactType(Asset.class,100, Instant.now()).getResults().stream().filter(
+                    ledgerService.findUnconsumedStatesByExactType (Asset.class,100, Instant.now()).getResults().stream().filter(
                     it -> it.getState().getContractState().getAssetId().equals(flowArgs.getAssetId())
             ).collect(Collectors.toList());
 

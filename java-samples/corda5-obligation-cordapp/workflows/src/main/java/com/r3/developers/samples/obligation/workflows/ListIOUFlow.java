@@ -34,7 +34,7 @@ public class ListIOUFlow implements ClientStartableFlow {
         log.info("ListIOUFlow.call() called");
 
         // Queries the VNode's vault for unconsumed states and converts the result to a serializable DTO.
-        List<StateAndRef<IOUState>> states = utxoLedgerService.findUnconsumedStatesByExactType(IOUState.class,100, Instant.now()).getResults();
+        List<StateAndRef<IOUState>> states = utxoLedgerService.findUnconsumedStatesByExactType (IOUState.class,100, Instant.now()).getResults();
         List<ListIOUFlowResults> results = states.stream().map(stateAndRef ->
                 new ListIOUFlowResults(
                         stateAndRef.getState().getContractState().getLinearId(),

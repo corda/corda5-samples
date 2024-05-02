@@ -61,7 +61,7 @@ public class RequestLoanFlow implements ClientStartableFlow {
             Member lender = new Member(memberInfo.getName(), memberInfo.getLedgerKeys().get(0));
 
             List<StateAndRef<Asset>> filteredAssetStateAndRefs =
-                    ledgerService.findUnconsumedStatesByExactType(Asset.class,100, Instant.now()).getResults().stream().filter(
+                    ledgerService.findUnconsumedStatesByExactType (Asset.class,100, Instant.now()).getResults().stream().filter(
                         it -> it.getState().getContractState().getAssetId().equals(flowArgs.getCollateral())
                     ).collect(Collectors.toList());
             if (filteredAssetStateAndRefs.size() != 1) {

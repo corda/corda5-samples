@@ -28,7 +28,7 @@ public class GetIOUFlow implements ClientStartableFlow {
     public String call(@NotNull ClientRequestBody requestBody) {
 
         List<IOU> iouList =
-                ledgerService.findUnconsumedStatesByExactType(SanctionableIOUState.class,100, Instant.now()).getResults().stream().map(
+                ledgerService.findUnconsumedStatesByExactType (SanctionableIOUState.class,100, Instant.now()).getResults().stream().map(
                         it -> new IOU(
                                 it.getState().getContractState().getValue(),
                                 it.getState().getContractState().getLender().getName(),

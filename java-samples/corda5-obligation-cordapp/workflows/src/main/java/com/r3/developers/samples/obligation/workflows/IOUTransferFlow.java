@@ -62,7 +62,7 @@ public class IOUTransferFlow implements ClientStartableFlow {
             UUID iouID = flowArgs.getIouID();
 
             //query the IOU input
-            List<StateAndRef<IOUState>> iouStateAndRefs = ledgerService.findUnconsumedStatesByExactType(IOUState.class,100, Instant.now()).getResults();
+            List<StateAndRef<IOUState>> iouStateAndRefs = ledgerService.findUnconsumedStatesByExactType (IOUState.class,100, Instant.now()).getResults();
             List<StateAndRef<IOUState>> iouStateAndRefsWithId = iouStateAndRefs.stream()
                     .filter(sar -> sar.getState().getContractState().getLinearId().equals(iouID)).collect(toList());
             if (iouStateAndRefsWithId.size() != 1) throw new CordaRuntimeException("Multiple or zero IOU states with id " + iouID + " found");
