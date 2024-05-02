@@ -27,7 +27,7 @@ public class ListTrade implements ClientStartableFlow {
     @Override
     public String call(@NotNull ClientRequestBody requestBody) {
         // Queries the VNode's vault for unconsumed states and converts the result to a serializable DTO.
-        List<StateAndRef<Trade>> states = utxoLedgerService.findUnconsumedStatesByExactType (Trade.class, 100, Instant.now()).getResults();
+        List<StateAndRef<Trade>> states = utxoLedgerService.findUnconsumedStatesByExactType(Trade.class, 100, Instant.now()).getResults();
         List<ListTradeArgs> results = states.stream().map(stateAndRef ->
                 new ListTradeArgs(
                         stateAndRef.getState().getContractState().getProposalID(),

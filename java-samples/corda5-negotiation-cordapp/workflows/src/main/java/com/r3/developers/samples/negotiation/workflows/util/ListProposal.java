@@ -27,7 +27,7 @@ public class ListProposal implements ClientStartableFlow {
     @Override
     public String call(@NotNull ClientRequestBody requestBody) {
         // Queries the VNode's vault for unconsumed states and converts the result to a serializable DTO.
-        List<StateAndRef<Proposal>> states = utxoLedgerService.findUnconsumedStatesByExactType (Proposal.class, 100, Instant.now()).getResults();
+        List<StateAndRef<Proposal>> states = utxoLedgerService.findUnconsumedStatesByExactType(Proposal.class, 100, Instant.now()).getResults();
         List<ListProposalArgs> results = states.stream().map(stateAndRef ->
                 new ListProposalArgs(
                         stateAndRef.getState().getContractState().getProposalID(),

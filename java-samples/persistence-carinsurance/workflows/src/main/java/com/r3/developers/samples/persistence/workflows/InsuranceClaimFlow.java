@@ -62,7 +62,7 @@ public class InsuranceClaimFlow implements ClientStartableFlow {
             // to fetch the desired Insurance state from the vault. This filtered state would be used as input to the
             // transaction.
             List<StateAndRef<InsuranceState>> filteredInsuranceStateAndRefs =
-                    ledgerService.findUnconsumedStatesByExactType (InsuranceState.class,100, Instant.now()).getResults().stream().filter(
+                    ledgerService.findUnconsumedStatesByExactType(InsuranceState.class,100, Instant.now()).getResults().stream().filter(
                             it -> it.getState().getContractState().getPolicyNumber().equals(flowArgs.getPolicyNumber())
                     ).collect(Collectors.toList());
             if (filteredInsuranceStateAndRefs.size() != 1) {

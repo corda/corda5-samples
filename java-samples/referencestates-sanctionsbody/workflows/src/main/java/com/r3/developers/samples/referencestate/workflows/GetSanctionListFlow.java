@@ -31,7 +31,7 @@ public class GetSanctionListFlow implements ClientStartableFlow {
     public String call(@NotNull ClientRequestBody requestBody) {
 
         List<SanctionListDetail> sanctionList =
-                ledgerService.findUnconsumedStatesByExactType (SanctionList.class,100, Instant.now()).getResults().stream().map(
+                ledgerService.findUnconsumedStatesByExactType(SanctionList.class,100, Instant.now()).getResults().stream().map(
                         it-> new SanctionListDetail(
                                 it.getState().getContractState().getBadPeople().stream().map(Member::getName)
                                         .collect(Collectors.toList()),

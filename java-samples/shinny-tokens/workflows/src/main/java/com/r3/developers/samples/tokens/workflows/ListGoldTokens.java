@@ -31,7 +31,7 @@ public class ListGoldTokens implements ClientStartableFlow {
     @Suspendable
     @Override
     public String call(ClientRequestBody requestBody) {
-        List<StateAndRef<GoldState>> states = utxoLedgerService.findUnconsumedStatesByExactType (GoldState.class,100, Instant.now()).getResults();
+        List<StateAndRef<GoldState>> states = utxoLedgerService.findUnconsumedStatesByExactType(GoldState.class,100, Instant.now()).getResults();
 
         List<GoldStateList> results = states.stream().map(stateAndRef ->
                 new GoldStateList(
