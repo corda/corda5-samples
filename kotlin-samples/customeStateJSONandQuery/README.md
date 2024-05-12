@@ -12,7 +12,7 @@
 
 - The MyFirstFlow code which forms the basis of this getting started documentation, this is located in package com.r3.developers.cordapptemplate.flowexample
 
-- A UTXO example in package com.r3.developers.cordapptemplate.customeStateJSONandQuery packages
+- A UTXO example in package com.r3.developers.cordapptemplate.customStateJSONandQuery packages
 
 - Ability to configure the Members of the Local Corda Network.
 
@@ -63,7 +63,7 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Ali
 ```
 {
     "clientRequestId": "create-1",
-    "flowClassName": "com.r3.developers.cordapptemplate.customeStateJSONandQuery.workflows.CreateNewChatFlow",
+    "flowClassName": "com.r3.developers.cordapptemplate.customStateJSONandQuery.workflows.CreateNewChatFlow",
     "requestBody": {
         "chatName":"Chat with Bob",
         "otherMember":"CN=Bob, OU=Test Dept, O=R3, L=London, C=GB",
@@ -80,7 +80,7 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Ali
 ```
 {
     "clientRequestId": "list-1",
-    "flowClassName": "com.r3.developers.cordapptemplate.customeStateJSONandQuery.workflows.ListChatsFlow",
+    "flowClassName": "com.r3.developers.cordapptemplate.customStateJSONandQuery.workflows.ListChatsFlow",
     "requestBody": {}
 }
 ```
@@ -95,7 +95,7 @@ this message will be recorded as a message from Alice, vice versa. And the id fi
 ```
 {
     "clientRequestId": "update-1",
-    "flowClassName": "com.r3.developers.cordapptemplate.customeStateJSONandQuery.workflows.UpdateChatFlow",
+    "flowClassName": "com.r3.developers.cordapptemplate.customStateJSONandQuery.workflows.UpdateChatFlow",
     "requestBody": {
         "id":" ** fill in id **",
         "message": "How are you today?"
@@ -110,7 +110,7 @@ After a few back and forth of the messaging, you can view entire chat history by
 ```
 {
     "clientRequestId": "get-1",
-    "flowClassName": "com.r3.developers.cordapptemplate.customeStateJSONandQuery.workflows.GetChatFlow",
+    "flowClassName": "com.r3.developers.cordapptemplate.customStateJSONandQuery.workflows.GetChatFlow",
     "requestBody": {
         "id":" ** fill in id **",
         "numberOfRecords":"4"
@@ -120,79 +120,3 @@ After a few back and forth of the messaging, you can view entire chat history by
 And as for the result, you need to go to the Get API again and enter the short hash and client request ID.
 
 Thus, we have concluded a full run through of the chat app. 
-
-## Saving a run as JSON
-
-#### Description
-The ChatJsonFactory is a custom JSON factory designed to facilitate the serialization and deserialization of ChatState objects to and from JSON format within a Corda application.
-
-#### Usage
-This factory is utilized within Corda applications to convert ChatState objects to JSON format after each use.
-It is integrated into the Corda framework, ensuring seamless interoperability with other components of the application.
-
-#### Functionality
-getStateType(): Specifies the type of state the factory is responsible for, in this case, ChatState.
-create(ChatState state, JsonMarshallingService jsonMarshallingService): Generates a JSON representation of a ChatState object by constructing a map and serializing it to JSON format using the provided JsonMarshallingService constants
-
-ID: Key name for the identifier of the chat.
-
-CHATNAME: Key name for the name of the chat.
-
-MESSAGE: Key name for the content of the message.
-
-MESSAGEFROM: Key name for the sender of the message.
-
-#### Integration
-The app is integrated automatically by corda when implementing ContractStateVaultJsonFactory for the class.
-It will run whenever a flow runs for the chatState
-
-## Running the query
-
-#### Description
-The CustomChatQuery class provides custom named queries for querying Vault states related to a chat application within a Corda application.
-These queries are designed to facilitate specific data retrieval operations from the Corda vault which were stored
-using the JSON function previously mentioned.
-
-#### Usage
-This component is integrated into Corda applications to execute custom named queries for retrieving chat-related states from the Corda vault.
-It enables developers to perform targeted data retrieval operations efficiently.
-
-#### Functionality
-create(VaultNamedQueryBuilderFactory vaultNamedQueryBuilderFactory): Defines custom named queries for querying the Corda vault.
-GET_ALL_MSG: Retrieves all messages from the vault.
-GET_MSG_FROM: Retrieves messages from a specific sender.
-
-### Integration
-#### Process
-The integration process began with the instantiation of the ListChatByCustomQueryFlow class within the application codebase.
-This class provides the necessary functionality to execute custom named queries against the Corda vault from the saved JSONs.
-
-Subsequently, the custom query GET_MSG_FROM was executed using the query method provided by VaultService.
-This involved setting parameters for the query, such as specifying the name of the sender whose messages were to be retrieved in this
-application it is hard coded to alice.
-Additionally, optional parameters like timestamp limits and result limits were configured as per the application's requirements.
-
-Once the query execution was completed, the results were processed to extract the relevant ChatState objects.
-This step involved mapping the query results to extract the desired states from the Corda vault.
-
-Following the retrieval of ChatState objects, they were converted into a human-readable format or DTOs suitable for presentation purposes.
-This ensured that the retrieved chat messages were formatted in a manner understandable by users or other components of the application.
-
-Finally, the results were serialized to JSON format using a JsonMarshallingService.
-This step prepared the results for transmission as a response,
-enabling other components or external systems to consume the data in a standardized format.
-
-#### Calling a query
-
-After creating the query it can be run using the following REST call using Bob's id:
-
-```
-{
-    "clientRequestId": "customlist-1",
-    "flowClassName": "com.r3.developers.cordapptemplate.utxoexample.workflows.ListChatsByCustomQueryFlow",
-    "requestBody": {}
-}
-```
-
-Which will display all messages sent by just Alice.
-So even if Bob received messages from someone else it will only display the messages sent by Alice

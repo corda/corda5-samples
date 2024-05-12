@@ -6,22 +6,22 @@ This user guide provides step-by-step instructions on using the Corda 5 flow man
 ## Prerequisites
 * Install and run Python and Flask framework. link.
 
-* Prepare your local Corda 5 environment. (By default, the Flow Management Tool is looking to connect to https://localhost:8888/api/v5_2/swagger#/ with Login: Admin and Password: Admin.)
+* Prepare your local Corda 5 environment. (By default, the Flow Management Tool is looking to connect to https://localhost:8888/api/v1/swagger#/ with Login: Admin and Password: Admin.)
 
 * Clong the Flow Management Tool repository. FlowManagementUI: main
 
 ## Set Up
 
-1. Assuming your local Corda 5 environment is populated and the swagger endpoint is at: https://localhost:8888/api/v5_2/swagger#/
+1. Assuming your local Corda 5 environment is populated and the swagger endpoint is at: https://localhost:8888/api/v1/swagger#/
 
 2. Navigate to where you downloaded the Corda 5 Flow Management Tool
 
 3. To run the framework
-    * Navigate to the file name using cd command.
-    * use the python app.py command to run it.
-      ![image](https://github.com/parisyup/FlowManagementUI/assets/51169685/f0c3bf59-8180-48a0-91cc-80f2d260e530)
+   * Navigate to the file name using cd command.
+   * use the python app.py command to run it.
+     ![image](https://github.com/parisyup/FlowManagementUI/assets/51169685/f0c3bf59-8180-48a0-91cc-80f2d260e530)
 
-    * Later on, click on the IP Address which will open the Interface:
+   * Later on, click on the IP Address which will open the Interface:
 
 ![image(4)](https://github.com/parisyup/FlowManagementUI/assets/66366646/8d88e37c-edbb-4d6d-8bcd-d773e818a106)
 
@@ -52,7 +52,7 @@ the `your-image-name` at the end of the command can be whatever you like but mak
 
 ### Selecting the Flow Initiator
 
-As the first step of using the Flow Management Tool, you would need to select the Flow Initiator. The Flow Initiator indicates which vNode will be triggering the flow. If you wish to have Alice to run a transaction to Bob, select the X500Name of Alice. The selected vNode’s shortHash (Corda 5 Network participant identifier) will also be shown below the dropdown list to signify your selection.
+As the first step of using the Flow Management Tool, you would need to select the Flow Initiator. The Flow Initiator indicates which vNode will be triggering the flow. If you wish to have Alice to run a transaction to Bob, select the X500Name of Alice. The selected vNode’s shortHash (Corda 5 Network participant identifier) will also be shown below the dropdown list to signify your selection. 
 
 ### Function 1: To Make a Flow Call
 
