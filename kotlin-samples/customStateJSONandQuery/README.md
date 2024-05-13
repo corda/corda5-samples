@@ -57,7 +57,10 @@ After trigger the create-chat flow, hop to `GET /flow/{holdingidentityshorthash}
 #### Step 2: View the Custom StateJson in Database
 By using database tool such DBeaver or similar app, we connect to the postgre Database. Then, we locate to the Alice's vNode. We select 
 `utxo_visible_transaction_output` table, and we should be able to see the transaction record of Alice. We can see one column is called `custom_representation`, and 
-it will hold the custom StateJSON of the chat state that Alice created for Bob. For example,
+it will hold the custom StateJSON of the chat state that Alice created for Bob. 
+![image](https://github.com/corda/corda5-samples/assets/51169685/f9b11845-013b-4a34-99f3-307a49c074cb)
+
+For example,
 ```
 {
    "net.corda.v5.ledger.utxo.ContractState":{
