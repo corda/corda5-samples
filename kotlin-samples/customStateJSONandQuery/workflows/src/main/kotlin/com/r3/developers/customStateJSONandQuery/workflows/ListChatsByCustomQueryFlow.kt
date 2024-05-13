@@ -31,8 +31,7 @@ class ListChatsByCustomQueryFlow : ClientStartableFlow {
         log.info("ListChatsByCustomQueryFlow.call() called")
 
         //this is our custom query
-        val resultSet = ledgerService.query("GET_MSG_FROM", StateAndRef::class.java)
-            .setParameter("nameOfSender", "CN=Alice, OU=Test Dept, O=R3, L=London, C=GB")
+        val resultSet = ledgerService.query("GET_MSG_FROM_ALICE", StateAndRef::class.java)
             .setCreatedTimestampLimit(Instant.now()).setLimit(1000)
             .execute()
 
