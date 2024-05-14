@@ -21,14 +21,14 @@ class ChatCustomQueryFactory : VaultNamedQueryFactory {
                 "WHERE visible_states.custom_representation -> 'com.r3.developers.advanceCustomQuery.states.ChatState' ->> 'messageContentFrom' = :nameOfSender"
             )
             .register()
-        vaultNamedQueryBuilderFactory.create("GET_MSG_WITH_MORE_THAN_4_CHAR")
+        vaultNamedQueryBuilderFactory.create("GET_MSGS_CONTAINING_HELLO")
             .whereJson(
                 "WHERE visible_states.custom_representation ? 'com.r3.developers.advanceCustomQuery.states.ChatState' "
             )
             .filter(CustomQueryFilter())
             .register()
 
-        vaultNamedQueryBuilderFactory.create("GET_ALL_MSGS_FROM")
+        vaultNamedQueryBuilderFactory.create("GET_ALL_MSGS_CONTENT")
             .whereJson(
                 "WHERE visible_states.custom_representation ? 'com.r3.developers.advanceCustomQuery.states.ChatState' "
             )
@@ -41,18 +41,34 @@ class ChatCustomQueryFactory : VaultNamedQueryFactory {
             )
             .collect(CustomQueryCollector())
             .register()
+
+        vaultNamedQueryBuilderFactory.create("GET_MSG_AMOUNT_HAS_HELLO")
+            .whereJson(
+                "WHERE visible_states.custom_representation ? 'com.r3.developers.advanceCustomQuery.states.ChatState' "
+            )
+            .filter(CustomQueryFilter())
+            .collect(CustomQueryCollector())
+            .register()
+
+        vaultNamedQueryBuilderFactory.create("GET_ALL_MSGS_CONTENT_HAS_HELLO")
+            .whereJson(
+                "WHERE visible_states.custom_representation ? 'com.r3.developers.advanceCustomQuery.states.ChatState' "
+            )
+            .filter(CustomQueryFilter())
+            .map(CustomQueryTransformer())
+            .register()
     }
 }
 
 class CustomQueryFilter : VaultNamedQueryStateAndRefFilter<ChatState> {
     override fun filter(data: StateAndRef<ChatState>, parameters: MutableMap<String, Any>): Boolean {
-        return data.state.contractState.message.length > 4
+        return data.state.contractState.message.lowercase().contains("hello")
     }
 }
 
 class CustomQueryTransformer : VaultNamedQueryStateAndRefTransformer<ChatState, String> {
     override fun transform(data: StateAndRef<ChatState>, parameters: MutableMap<String, Any>): String {
-        return data.state.contractState.messageFrom.toString()
+        return data.state.contractState.message
     }
 }
 
