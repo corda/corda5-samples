@@ -12,7 +12,6 @@ class ChatCustomQueryFactory : VaultNamedQueryFactory {
     override fun create(vaultNamedQueryBuilderFactory: VaultNamedQueryBuilderFactory) {
 
         //Returns all the chat states that stores in the vNode
-        //(not used in this sample app, used in the basic custom query app)
         vaultNamedQueryBuilderFactory.create("GET_ALL_MSG")
             .whereJson(
                 "WHERE visible_states.custom_representation ? 'com.r3.developers.advanceCustomQuery.states.ChatState' "
