@@ -1,4 +1,4 @@
-package com.r3.developers.advanceCustomQuery.workflows
+package com.r3.developers.advanceCustomQuery.listUtil
 
 import net.corda.v5.application.flows.ClientRequestBody
 import net.corda.v5.application.flows.ClientStartableFlow
@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory
 import java.time.Instant
 
 // See Chat CorDapp Design section of the getting started docs for a description of this flow.
-class ListNumberOfTotalMessages : ClientStartableFlow {
+class ListNumberOfTotalMessagesIncludingHello : ClientStartableFlow {
 
     private companion object {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
@@ -26,10 +26,10 @@ class ListNumberOfTotalMessages : ClientStartableFlow {
     @Suspendable
     override fun call(requestBody: ClientRequestBody): String {
 
-        log.info("ListNumberOfTotalMessages.call() called")
+        log.info("ListNumberOfTotalMessagesIncludingHello.call() called")
 
         //this is our custom query
-        val resultSet = ledgerService.query("GET_MSG_AMOUNT", Integer::class.java)
+        val resultSet = ledgerService.query("GET_MSG_AMOUNT_HAS_HELLO", Integer::class.java)
             .setCreatedTimestampLimit(Instant.now()).setLimit(1000)
             .execute()
 
@@ -47,8 +47,8 @@ class ListNumberOfTotalMessages : ClientStartableFlow {
 /*
 RequestBody for triggering the flow via REST:
 {
-    "clientRequestId": "ListNumberOfTotalMessages-1",
-    "flowClassName": "com.r3.developers.advanceCustomQuery.workflows.ListNumberOfTotalMessages",
+    "clientRequestId": "ListNumberOfTotalMessagesIncludingHello-1",
+    "flowClassName": "com.r3.developers.advanceCustomQuery.listUtil.ListNumberOfTotalMessagesIncludingHello",
     "requestBody": {}
 }
 */

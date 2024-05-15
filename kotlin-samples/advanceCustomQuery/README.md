@@ -90,72 +90,86 @@ In order to demonstrate the custom query functionality, we will need to create a
 ```
 Notice, the `chatName` and `message` are annotated with "from Dave".
 
+#### Step 4: Create a Follow-up Chat Entry from Alice
+Pick a VNode identity to initiate the chat, and get its short hash. (Let's pick Alice. Dont pick Bob because Bob is the person who we will have the chat with).
 
+Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Alice's hash) and request body:
+```
+{
+    "clientRequestId": "create-2",
+    "flowClassName": "com.r3.developers.advanceCustomQuery.workflows.CreateNewChatFlow",
+    "requestBody": {
+        "chatName":"Follow up with Bob",
+        "otherMember":"CN=Bob, OU=Test Dept, O=R3, L=London, C=GB",
+        "message": "Are you there bob?"
+        }
+}
+```
 
 ### Querying
 
-#### Step 4: Perform Generic Query at Bob
+#### Step 5: Perform Generic Query at Bob
 As a contrast, we will perform a generic query at Bob to query all the chat entries that Bob receives. This will print out all the chats that Bob has, including the message from Dave.
 ```
 {
     "clientRequestId": "list-1",
-    "flowClassName": "com.r3.developers.advanceCustomQuery.workflows.ListChatsFlow",
+    "flowClassName": "com.r3.developers.advanceCustomQuery.listUtil.ListChatsFlow",
     "requestBody": {}
 }
 ```
 
-#### Step 5: Perform Custom Filter Query to fetch all messages with hello
+#### Step 6: Perform Custom Filter Query to fetch all messages with hello
 Now, we will perform the filter custom query, we will select Alice to trigger the flow with the following requestBody. Note that the `ListAllMsgsWithHello` is hard coded
 to query only every message with "hello" in the chat entries.
 ```
 {
     "clientRequestId": "listMsgsWithHello-1",
-    "flowClassName": "com.r3.developers.advanceCustomQuery.workflows.ListAllMsgsWithHello",
+    "flowClassName": "com.r3.developers.advanceCustomQuery.listUtil.ListAllMsgsWithHello",
     "requestBody": {}
 }
 ```
 
-#### Step 6: Perform Custom Transform Query to fetch all contents
+#### Step 7: Perform Custom Transform Query to fetch all contents
 Now, we will perform the custom transform query, we will select Alice to trigger the flow with the following requestBody. This will 
 fetch all message contents only. So it will return only the message and not the messageFrom or ID.
 ```
 {
-    "clientRequestId": "ListMsgContents-1",
-    "flowClassName": "com.r3.developers.advanceCustomQuery.workflows.ListAllMsgContents",
+    "clientRequestId": "ListOnlyMessagesFromResult-1",
+    "flowClassName": "com.r3.developers.advanceCustomQuery.listUtil.ListAllMsgContents",
     "requestBody": {}
 }
 ```
 
-#### Step 7: Perform Custom Count Query to get the total number of messages sent or received
+#### Step 8: Perform Custom Count Query to get the total number of messages sent or received
 Now, we will perform the custom count query, we will select Alice to trigger the flow with the following requestBody. which will
 return the number of messages sent and received by Alice.
 
 ```
 {
     "clientRequestId": "ListNumberOfTotalMessages-1",
-    "flowClassName": "com.r3.developers.advanceCustomQuery.workflows.ListNumberOfTotalMessages",
+    "flowClassName": "com.r3.developers.advanceCustomQuery.listUtil.ListNumberOfTotalMessages",
     "requestBody": {}
 }
 ```
 
-#### Step 8: Perform Custom Combined Filter and Transform Query
+#### Step 9: Perform Custom Combined Filter and Transform Query
 Now, we will perform the custom combined filter and transform query, we will select Alice to trigger the flow with the following requestBody. 
-This will list all the message contents that include the word "Hello" in it. Combining step 6 and 5 together in one query
+This will list all the message contents that include the word "Hello" in it. Combining step 7 and 6 together in one query
 ```
 {
-    "clientRequestId": "ListAllMsgContentsIncludingHello-1",
-    "flowClassName": "com.r3.developers.advanceCustomQuery.workflows.ListAllMsgContentsIncludingHello",
+    "clientRequestId": "ListOnlyMessagesFromResultIncludingHello-1",
+    "flowClassName": "com.r3.developers.advanceCustomQuery.listUtil.ListAllMsgContentsIncludingHello",
     "requestBody": {}
 }
 ```
 
-#### Step 9: Perform Custom Combined Count and Filter Query
+#### Step 10: Perform Custom Combined Count and Filter Query
 Now, we will perform the custom query, we will select Alice to trigger the flow with the following requestBody. 
-This will list the number of messages sent and received by Alice that include the word "Hello" in it. Combining step 5 and 7 together in one query.
+This will list the number of messages sent and received by Alice that include the word "Hello" in it. Combining step 6 and 8 together in one query.
 ```
 {
     "clientRequestId": "ListNumberOfTotalMessagesIncludingHello-1",
-    "flowClassName": "com.r3.developers.advanceCustomQuery.workflows.ListNumberOfTotalMessagesIncludingHello",
+    "flowClassName": "com.r3.developers.advanceCustomQuery.listUtil.ListNumberOfTotalMessagesIncludingHello",
     "requestBody": {}
 }
 ```

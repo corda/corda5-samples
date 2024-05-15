@@ -1,4 +1,4 @@
-package com.r3.developers.advanceCustomQuery.workflows
+package com.r3.developers.advanceCustomQuery.listUtil
 
 import net.corda.v5.application.flows.ClientRequestBody
 import net.corda.v5.application.flows.ClientStartableFlow
@@ -48,7 +48,7 @@ class ListAllMsgContents : ClientStartableFlow {
 RequestBody for triggering the flow via REST:
 {
     "clientRequestId": "ListMsgContents-1",
-    "flowClassName": "com.r3.developers.advanceCustomQuery.workflows.ListAllMsgContents",
+    "flowClassName": "com.r3.developers.advanceCustomQuery.listUtil.ListAllMsgContents",
     "requestBody": {}
 }
 */

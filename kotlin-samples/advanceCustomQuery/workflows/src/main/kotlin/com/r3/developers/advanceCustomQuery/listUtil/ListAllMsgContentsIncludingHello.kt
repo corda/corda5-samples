@@ -1,18 +1,16 @@
-package com.r3.developers.advanceCustomQuery.workflows
+package com.r3.developers.advanceCustomQuery.listUtil
 
-import com.r3.developers.advanceCustomQuery.states.ChatState
 import net.corda.v5.application.flows.ClientRequestBody
 import net.corda.v5.application.flows.ClientStartableFlow
 import net.corda.v5.application.flows.CordaInject
 import net.corda.v5.application.marshalling.JsonMarshallingService
 import net.corda.v5.base.annotations.Suspendable
-import net.corda.v5.ledger.utxo.StateAndRef
 import net.corda.v5.ledger.utxo.UtxoLedgerService
 import org.slf4j.LoggerFactory
 import java.time.Instant
 
 // See Chat CorDapp Design section of the getting started docs for a description of this flow.
-class ListChatsByCustomQueryFlow : ClientStartableFlow {
+class ListAllMsgContentsIncludingHello : ClientStartableFlow {
 
     private companion object {
         val log = LoggerFactory.getLogger(this::class.java.enclosingClass)
@@ -28,28 +26,19 @@ class ListChatsByCustomQueryFlow : ClientStartableFlow {
     @Suspendable
     override fun call(requestBody: ClientRequestBody): String {
 
-        log.info("ListChatsByCustomQueryFlow.call() called")
+        log.info("ListAllMsgContentsIncludingHello.call() called")
 
         //this is our custom query
-        val resultSet = ledgerService.query("GET_MSG_WITH_MORE_THAN_4_CHAR", StateAndRef::class.java)
+        val resultSet = ledgerService.query("GET_ALL_MSGS_CONTENT_HAS_HELLO", String::class.java)
             .setCreatedTimestampLimit(Instant.now()).setLimit(1000)
             .execute()
 
-        //from custom query to states, we can operate
-        val resultState = resultSet.results.map {it.state.contractState as ChatState }
 
-        //from the states -> human-readable.
-        val results = resultState.map {
-            ChatStateResults(
-                it.id,
-                it.chatName,
-                it.messageFrom.toString(),
-                it.message) }
         log.info("-------------results will be printed------")
-        log.warn(results.toString())
+        log.warn(resultSet.toString())
 
         // Uses the JsonMarshallingService's format() function to serialize the DTO to Json.
-        return jsonMarshallingService.format(results.toString())
+        return jsonMarshallingService.format(resultSet.results.toString()) //use .results to get the results of the query
     }
 }
 
@@ -58,8 +47,8 @@ class ListChatsByCustomQueryFlow : ClientStartableFlow {
 /*
 RequestBody for triggering the flow via REST:
 {
-    "clientRequestId": "customlist-1",
-    "flowClassName": "com.r3.developers.advanceCustomQuery.workflows.ListChatsByCustomQueryFlow",
+    "clientRequestId": "ListAllMsgContentsIncludingHello-1",
+    "flowClassName": "com.r3.developers.advanceCustomQuery.listUtil.ListAllMsgContentsIncludingHello",
     "requestBody": {}
 }
 */

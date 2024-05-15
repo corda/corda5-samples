@@ -1,4 +1,4 @@
-package com.r3.developers.advanceCustomQuery.workflows
+package com.r3.developers.advanceCustomQuery.listUtil
 
 import com.r3.developers.advanceCustomQuery.states.ChatState
 import net.corda.v5.application.flows.ClientRequestBody
@@ -56,7 +56,7 @@ class ListChatsFlow : ClientStartableFlow {
 RequestBody for triggering the flow via REST:
 {
     "clientRequestId": "list-1",
-    "flowClassName": "com.r3.developers.advanceCustomQuery.workflows.ListChatsFlow",
+    "flowClassName": "com.r3.developers.advanceCustomQuery.listUtil.ListChatsFlow",
     "requestBody": {}
 }
 */
