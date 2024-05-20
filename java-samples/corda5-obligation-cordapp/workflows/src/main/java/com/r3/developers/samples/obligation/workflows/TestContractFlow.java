@@ -21,12 +21,10 @@ import net.corda.v5.membership.MemberInfo;
 import net.corda.v5.membership.NotaryInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.security.PublicKey;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-
 import static java.util.stream.Collectors.toList;
 
 public class TestContractFlow implements ClientStartableFlow {
@@ -66,11 +64,12 @@ public class TestContractFlow implements ClientStartableFlow {
             if (otherMember == null) {
                 throw new CordaRuntimeException("MemberLookup can't find otherMember specified in flow arguments.");
             }
-
+            // Obtain the Notary name and public key.
             NotaryInfo notary = notaryLookup.getNotaryServices().stream().findFirst().get();
 
             UUID iouStateId = null;
-
+            // Create a well formed transaction with an output State which can be referenced
+            // as an input StateRef in the tests
             try {
                 IOUState iouState = new IOUState(
                         10,
@@ -116,6 +115,13 @@ public class TestContractFlow implements ClientStartableFlow {
             // Issue needs only one output
             results.put("Issue needs only one output", testIssueNeedsOnlyOneOutput(myInfo, otherMember, notary));
 
+            // Issue needs only one output
+            results.put("Settle needs only one input", testSettleNeedsOnlyOneInput(myInfo, otherMember, notary));
+
+            // Transfer needs only one output
+            results.put("Transfer needs only one input", testTransferNeedsOnlyOneInput(myInfo, otherMember, notary));
+
+
             return results.toString();
 
         } catch (Exception e) {
@@ -127,6 +133,7 @@ public class TestContractFlow implements ClientStartableFlow {
     @Suspendable
     private String testMultipleCommandsNotPermitted(MemberInfo myInfo, MemberInfo otherMember, NotaryInfo notary) {
         try {
+            //create sample output state for the test
             IOUState iouState = new IOUState(
                     10,
                     myInfo.getName(),
@@ -136,6 +143,7 @@ public class TestContractFlow implements ClientStartableFlow {
                     Arrays.asList(myInfo.getLedgerKeys().get(0), otherMember.getLedgerKeys().get(0))
             );
 
+            //build sample transaction to test
             var txBuilder = ledgerService.createTransactionBuilder()
                     .setNotary(notary.getName())
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
@@ -145,15 +153,21 @@ public class TestContractFlow implements ClientStartableFlow {
                     .addCommand(new IOUContract.Transfer())
                     .addSignatories(iouState.getParticipants());
 
+            //sign the test to check if it fails
             var signedTransaction = txBuilder.toSignedTransaction();
 
+            //no error found. Contract failed.
             return "Fail";
 
+            //catching the error to see if the contract passed
         } catch (Exception e) {
+            //check if gotten the expected error
             String exceptionMessage = e.getMessage() != null ? e.getMessage() : "No exception message";
             if (exceptionMessage.contains("Require a single command")) {
+                //expected error found so the contract passes the test
                 return "Pass";
             } else {
+                //different error thrown. Contract failed
                 return "Contract failed but with a different Exception: " + e.getMessage();
             }
         }
@@ -294,5 +308,84 @@ public class TestContractFlow implements ClientStartableFlow {
                 return "Contract failed but with a different Exception: " + e.getMessage();
             }
         }
+
+    }
+
+    @Suspendable
+    private String testSettleNeedsOnlyOneInput(MemberInfo myInfo, MemberInfo otherMember, NotaryInfo notary) {
+        try {
+            IOUState iouOutputState = new IOUState(
+                    10,
+                    myInfo.getName(),
+                    otherMember.getName(),
+                    3,
+                    UUID.randomUUID(),
+                    Arrays.asList(myInfo.getLedgerKeys().get(0), otherMember.getLedgerKeys().get(0))
+            );
+
+            var txBuilder = ledgerService.createTransactionBuilder()
+                    .setNotary(notary.getName())
+                    .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
+                    .addOutputState(iouOutputState)
+                    .addCommand(new IOUContract.Transfer())
+                    .addSignatories(iouOutputState.getParticipants());
+
+            var signedTransaction = txBuilder.toSignedTransaction();
+
+            return "Fail";
+
+        } catch (Exception e) {
+            String exceptionMessage = e.getMessage() != null ? e.getMessage() : "No exception message";
+            if (exceptionMessage.contains("one input")) {
+                return "Pass";
+            } else {
+                return "Contract failed but with a different Exception: " + e.getMessage();
+            }
+        }
+    }
+
+    @Suspendable
+    private String testTransferNeedsOnlyOneInput(MemberInfo myInfo, MemberInfo otherMember, NotaryInfo notary) {
+        try {
+            IOUState iouOutputState = new IOUState(
+                    10,
+                    myInfo.getName(),
+                    otherMember.getName(),
+                    3,
+                    UUID.randomUUID(),
+                    Arrays.asList(myInfo.getLedgerKeys().get(0), otherMember.getLedgerKeys().get(0))
+            );
+
+            var txBuilder = ledgerService.createTransactionBuilder()
+                    .setNotary(notary.getName())
+                    .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
+                    .addOutputState(iouOutputState)
+                    .addCommand(new IOUContract.Transfer())
+                    .addSignatories(iouOutputState.getParticipants());
+
+            var signedTransaction = txBuilder.toSignedTransaction();
+
+            return "Fail";
+
+        } catch (Exception e) {
+            String exceptionMessage = e.getMessage() != null ? e.getMessage() : "No exception message";
+            if (exceptionMessage.contains("one input")) {
+                return "Pass";
+            } else {
+                return "Contract failed but with a different Exception: " + e.getMessage();
+            }
+        }
     }
 }
+
+
+/*
+RequestBody for triggering the flow via http-rpc:
+{
+    "clientRequestId": "dummy-1",
+    "flowClassName": "com.r3.developers.samples.obligation.workflows.TestContractFlow",
+    "requestBody": {
+        "otherMember":"CN=Bob, OU=Test Dept, O=R3, L=London, C=GB"
+    }
+}
+*/

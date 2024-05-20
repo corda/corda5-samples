@@ -120,6 +120,7 @@ class TestContractFlow: ClientStartableFlow {
                     .setNotary(notary.name)
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                     .addOutputState(iouState)
+                    .addInputState(inputStateRef)
                     .addCommand(IOUContract.Issue())
                     .addCommand(IOUContract.Transfer())
                     .addSignatories(iouState.participants)
@@ -137,7 +138,7 @@ class TestContractFlow: ClientStartableFlow {
                     "Contract failed but with a different Exception: ${e.message}"
                 }
             }
-            // Multiple Commands not permitted
+            // Only Two Participants
             results["Only Two Participants"] = try {
                 val iouState = IOUState(
                     amount = 10,
@@ -170,7 +171,7 @@ class TestContractFlow: ClientStartableFlow {
             }
 
 
-            // Multiple Commands not permitted
+            // Settle needs only one output
             results["Settle needs only one output"] = try {
                 val iouState = IOUState(
                     amount = 10,
@@ -186,6 +187,7 @@ class TestContractFlow: ClientStartableFlow {
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                     .addOutputState(iouState)
                     .addOutputState(iouState)
+                    .addInputState(inputStateRef)
                     .addCommand(IOUContract.Settle())
                     .addSignatories(iouState.participants)
 
@@ -204,7 +206,7 @@ class TestContractFlow: ClientStartableFlow {
             }
 
 
-            // Multiple Commands not permitted
+            // Transfer needs only one output
             results["Transfer needs only one output"] = try {
                 val iouState = IOUState(
                     amount = 10,
@@ -220,6 +222,7 @@ class TestContractFlow: ClientStartableFlow {
                     .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
                     .addOutputState(iouState)
                     .addOutputState(iouState)
+                    .addInputState(inputStateRef)
                     .addCommand(IOUContract.Transfer())
                     .addSignatories(iouState.participants)
 
@@ -238,7 +241,7 @@ class TestContractFlow: ClientStartableFlow {
             }
 
 
-            // Multiple Commands not permitted
+            // Issue needs only one output
             results["Issue needs only one output"] = try {
                 val iouState = IOUState(
                     amount = 10,
@@ -265,6 +268,70 @@ class TestContractFlow: ClientStartableFlow {
             } catch (e:Exception) {
                 val exceptionMessage =  e.message ?: "No exception message"
                 if (exceptionMessage.contains("one output state")) {
+                    "Pass" }
+                else {
+                    "Contract failed but with a different Exception: ${e.message}"
+                }
+            }
+
+            // Transfer requires one input
+            results["Transfer requires one input"] = try {
+                val iouState = IOUState(
+                    amount = 10,
+                    paid = 3,
+                    lender = myInfo.name,
+                    borrower = otherMember.name,
+                    linearId = UUID.randomUUID(),
+                    participants = listOf(myInfo.ledgerKeys.first(), otherMember.ledgerKeys.first())
+                )
+
+                val txBuilder = ledgerService.createTransactionBuilder()
+                    .setNotary(notary.name)
+                    .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
+                    .addOutputState(iouState)
+                    .addCommand(IOUContract.Transfer())
+                    .addSignatories(iouState.participants)
+
+                @Suppress("DEPRECATION", "UNUSED_VARIABLE")
+                val signedTransaction = txBuilder.toSignedTransaction()
+
+                "Fail"
+
+            } catch (e:Exception) {
+                val exceptionMessage =  e.message ?: "No exception message"
+                if (exceptionMessage.contains("one input state")) {
+                    "Pass" }
+                else {
+                    "Contract failed but with a different Exception: ${e.message}"
+                }
+            }
+
+            // Settle requires one input
+            results["Settle requires one input"] = try {
+                val iouState = IOUState(
+                    amount = 10,
+                    paid = 3,
+                    lender = myInfo.name,
+                    borrower = otherMember.name,
+                    linearId = UUID.randomUUID(),
+                    participants = listOf(myInfo.ledgerKeys.first(), otherMember.ledgerKeys.first())
+                )
+
+                val txBuilder = ledgerService.createTransactionBuilder()
+                    .setNotary(notary.name)
+                    .setTimeWindowBetween(Instant.now(), Instant.now().plusMillis(Duration.ofDays(1).toMillis()))
+                    .addOutputState(iouState)
+                    .addCommand(IOUContract.Settle())
+                    .addSignatories(iouState.participants)
+
+                @Suppress("DEPRECATION", "UNUSED_VARIABLE")
+                val signedTransaction = txBuilder.toSignedTransaction()
+
+                "Fail"
+
+            } catch (e:Exception) {
+                val exceptionMessage =  e.message ?: "No exception message"
+                if (exceptionMessage.contains("one input state")) {
                     "Pass" }
                 else {
                     "Contract failed but with a different Exception: ${e.message}"

@@ -31,10 +31,12 @@ class IOUContract : Contract {
             // Rules applied only to transactions with the Settle Command.
             is Settle -> {
                 "When command is Update there should be one and only one output state." using (transaction.outputContractStates.size == 1)
+                "When command is Update there should be one and only one input state." using (transaction.inputContractStates.size == 1)
             }
             // Rules applied only to transactions with the Transfer Command.
             is Transfer -> {
                 "When command is Update there should be one and only one output state." using (transaction.outputContractStates.size == 1)
+                "When command is Update there should be one and only one input state." using (transaction.inputContractStates.size == 1)
             }
             else -> {
                 throw CordaRuntimeException("Command not allowed.")
