@@ -27,6 +27,7 @@ public class IOUContract implements Contract {
         IOUState output = transaction.getOutputStates(IOUState.class).get(0);
         requireThat(output.getParticipants().size() == 2, "The output state should have two and only two participants.");
 
+        requireThat(transaction.getOutputStates(IOUState.class).size() == 1, "Must have one output state.");
         // Switches case based on the command
         if(command.getClass() == IOUContract.Issue.class) {// Rules applied only to transactions with the Issue Command.
             requireThat(transaction.getOutputContractStates().size() == 1, "Only one output states should be created when issuing an IOU.");
