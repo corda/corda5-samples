@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class FinalizeIOUFlow {
     private final static Logger log = LoggerFactory.getLogger(FinalizeIOUFlow.class);
@@ -107,6 +108,12 @@ public class FinalizeIOUFlow {
                 // responder should sign the Transaction.
                 UtxoSignedTransaction finalizedSignedTransaction = utxoLedgerService.receiveFinality(session, txValidator).getTransaction();
                 log.info("Finished responder flow - " + finalizedSignedTransaction.getId());
+                log.info("HEREEE PPP- " + finalizedSignedTransaction.getOutputStateAndRefs().stream().map(it -> it.getRef().toString()).toString());
+                log.warn(finalizedSignedTransaction.getOutputStateAndRefs().stream()
+                        .map(stateAndRef -> stateAndRef.getRef().toString())
+                        .toList()
+                        .toString());
+
             }
             // Soft fails the flow and log the exception.
             catch(Exception e)

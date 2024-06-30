@@ -26,6 +26,10 @@ class FinalizeIOUSubFlow(private val signedTransaction: UtxoSignedTransaction, p
     @CordaInject
     lateinit var flowMessaging: FlowMessaging
 
+    @CordaInject
+    lateinit var utxoLedgerService: UtxoLedgerService
+
+
     @Suspendable
     override fun call(): String {
 
@@ -33,6 +37,7 @@ class FinalizeIOUSubFlow(private val signedTransaction: UtxoSignedTransaction, p
 
         // Initiates a session with the other Member.
         val sessions = otherMember.map { flowMessaging.initiateFlow(it) }
+
 
         return try {
             // Calls the Corda provided finalise() function which gather signatures from the counterparty,
@@ -84,6 +89,8 @@ class FinalizeIOUResponderFlow: ResponderFlow {
                 log.info("Verified the transaction- ${ledgerTransaction.id}")
             }
             log.info("Finished responder flow - ${finalizedSignedTransaction.transaction.id}")
+            log.warn("HEY OVER HERE!")
+            log.warn(finalizedSignedTransaction.transaction.outputStateAndRefs.map { it.ref.toString() }.toString())
         }
         // Soft fails the flow and log the exception.
         catch (e: Exception) {

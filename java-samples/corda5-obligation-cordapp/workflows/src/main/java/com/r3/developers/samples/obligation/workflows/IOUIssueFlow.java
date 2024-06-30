@@ -66,7 +66,7 @@ public class IOUIssueFlow implements ClientStartableFlow {
                     memberLookup.lookup(MemberX500Name.parse(flowArgs.getLender())),
                     "MemberLookup can't find otherMember specified in flow arguments."
             );
-
+            log.info("PASS 0");
             // Create the IOUState from the input arguments and member information.
             IOUState iou = new IOUState(
                     Integer.parseInt(flowArgs.getAmount()),
@@ -74,30 +74,33 @@ public class IOUIssueFlow implements ClientStartableFlow {
                     myInfo.getName(),
                     Arrays.asList(myInfo.getLedgerKeys().get(0), lenderInfo.getLedgerKeys().get(0))
             );
-
+            log.info("PASS 1");
             // Obtain the Notary name and public key.
             NotaryInfo notary = requireNonNull(
                     notaryLookup.lookup(MemberX500Name.parse("CN=NotaryService, OU=Test Dept, O=R3, L=London, C=GB")),
                     "NotaryLookup can't find notary specified in flow arguments."
             );
 
-
-            PublicKey notaryKey = null;
+            log.info("PASS 2");
+            PublicKey notaryKey = notary.getPublicKey();;
             for(MemberInfo memberInfo: memberLookup.lookup()){
-                if(Objects.equals(
-                        memberInfo.getMemberProvidedContext().get("corda.notary.service.name"),
-                        notary.getName().toString())) {
-                    notaryKey = memberInfo.getLedgerKeys().get(0);
-                    break;
+                if(!memberInfo.getLedgerKeys().isEmpty()) {
+                    if (Objects.equals(
+                            memberInfo.getMemberProvidedContext().get("corda.notary.service.name"),
+                            notary.getName().toString())) {
+                        notaryKey = memberInfo.getLedgerKeys().get(0);
+                        break;
+                    }
                 }
             }
-
+            log.info("PASS 3");
             // Note, in Java CorDapps only unchecked RuntimeExceptions can be thrown not
             // declared checked exceptions as this changes the method signature and breaks override.
             if(notaryKey == null) {
                 throw new CordaRuntimeException("No notary PublicKey found");
-            }
 
+            }
+            log.info("PASS 4");
             // Use UTXOTransactionBuilder to build up the draft transaction.
             UtxoTransactionBuilder txBuilder = ledgerService.createTransactionBuilder()
                     .setNotary(notary.getName())
@@ -105,7 +108,7 @@ public class IOUIssueFlow implements ClientStartableFlow {
                     .addOutputState(iou)
                     .addCommand(new IOUContract.Issue())
                     .addSignatories(iou.getParticipants());
-
+            log.info("PASS 5");
             // Convert the transaction builder to a UTXOSignedTransaction and sign with this Vnode's first Ledger key.
             // Note, toSignedTransaction() is currently a placeholder method, hence being marked as deprecated.
             @SuppressWarnings("DEPRECATION")

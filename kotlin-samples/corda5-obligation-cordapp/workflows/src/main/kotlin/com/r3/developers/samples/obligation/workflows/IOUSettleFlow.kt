@@ -42,6 +42,9 @@ class IOUSettleFlow: ClientStartableFlow {
     @CordaInject
     lateinit var flowEngine: FlowEngine
 
+    @CordaInject
+    lateinit var utxoLedgerService: UtxoLedgerService
+
     @Suspendable
     override fun call(requestBody: ClientRequestBody): String {
         log.info("IOUSettleFlow.call() called")
@@ -86,6 +89,9 @@ class IOUSettleFlow: ClientStartableFlow {
             // UtxoTransactionBuilder and signs the transaction with any required signatories that belong to
             // the current node.
             val signedTransaction = txBuilder.toSignedTransaction()
+
+
+
 
             // Call FinalizeIOUSubFlow which will finalise the transaction.
             // If successful the flow will return a String of the created transaction id,
