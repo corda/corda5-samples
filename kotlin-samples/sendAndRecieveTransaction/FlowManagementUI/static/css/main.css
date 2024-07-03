@@ -1,0 +1,202 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 50px; /* Add margin to the entire body */
+    padding: 0;
+}
+
+h1 {
+    text-align: center;
+    color: #0e0c0c;
+}
+
+/* Style for the label */
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #333;
+}
+/* Style for the dropdown button */
+select {
+    width: 20%;
+    padding: 8px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+    color: #555;
+}
+
+#itemDropdown {
+    width: 40%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+#clientID{
+    padding: 8px;
+    margin-bottom: 15px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+    color: #555;
+}
+
+#OneFlowButon{
+    padding: 8px;
+    margin-bottom: 15px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+#result {
+    margin-bottom: 10px;
+}
+
+/* Button styling */
+button {
+    background-color: #3498db;
+    color: #fff;
+    padding: 10px 25px;
+    font-size: 16px;
+    border: 2px;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+/* Tab styling */
+.tab {
+    list-style-type: none; /* Remove default list styles */
+    display: inline-block; /* Display tabs inline */
+    padding: 2px 00px; /* Add padding to the tabs */
+    margin: 0 1px; /* Add margin between tabs */
+    cursor: pointer; /* Change cursor to pointer on hover */
+}
+
+
+.tab li {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    background-color: #3498db;
+    color: #fff;
+    border-radius: 8px 15px 0 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.tab li:hover {
+    background-color: #2980b9;
+}
+
+/* Tab content styling */
+.tab-content {
+    display: none;
+    padding: 20px;
+    border: 1px solid #3498db;
+    border-radius: 0 0 5px 5px;
+    background-color: #fff;
+}
+
+.styled-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.output {
+    border: 1px solid #3498db;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+#idResutl {
+    border: 1px solid #3498db;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #fff;
+    margin-top: 10px;
+    height: 290px;
+    max-height: 290px; /* Set a maximum height for the scroll box */
+    overflow-y: auto; /* Enable vertical scrolling if content exceeds the box height */
+}
+
+/* Responsive design */
+@media screen and (max-width: 600px) {
+    .tab li {
+        border-radius: 5px;
+        margin-bottom: 5px;
+    }
+    .tab-content {
+        border-radius: 5px;
+    }
+}
+#call {
+    display: -ms-inline-flexbox;
+    flex-wrap: wrap;
+
+}
+
+/* Style for side-by-side input boxes */
+.flowcall-container {
+    display: flex;
+}
+
+.input-box, .text-box {
+    width: 150px; /* Set the desired width */
+    margin-right: 10px; /* Optional: Add margin for spacing between input boxes */
+    border-radius: 5px;
+    border: 1px solid #3498db;
+}
+
+.queryoption-container{
+        display: flex;
+}
+
+
+
+#requestBody {
+    flex: 1;
+    box-sizing: border-box;
+    width: 100px; /* Set the desired width */
+    height: 300px; /* Set the desired height */
+    padding: 10px; /* Optional: Add padding for better aesthetics */
+    margin-right: 10px; /* Add some margin between the input and button */
+}
+
+#postBtn {
+    flex: 0 0 auto; /* Don't allow the button to grow or shrink */
+    margin-top: 10px; /* Add some margin between the button and result box */
+    margin-right: 10px; /* Add some margin between the button and result box */
+    width: 500px; /* Set the desired width */
+    height: 50px; /* Set the desired height */
+}
+
+#queryResult {
+    flex: 1;
+    box-sizing: border-box;
+    width: 100px; /* Set the desired width */
+    height: 300px; /* Set the desired height */
+    padding: 10px; /* Optional: Add padding for better aesthetics */
+}
+.content-box{
+    padding: 10px; /* Add padding to the content boxes */
+}
+
+
