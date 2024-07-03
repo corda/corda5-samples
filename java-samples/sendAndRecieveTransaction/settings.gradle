@@ -20,6 +20,6 @@ pluginManagement {
 }
 
 // Root project name, used in naming the project as a whole and used in naming objects built by the project.
-rootProject.name = 'corda5-obligation-java'
+rootProject.name = 'sendAndRecieveTransaction'
 include ':workflows'
 include ':contracts'

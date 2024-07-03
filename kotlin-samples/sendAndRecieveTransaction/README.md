@@ -1,15 +1,18 @@
-# C5-Obligation-CorDapp
+# sendAndReceiveTransaction
 
-This app is our signature CorDapp that we use to show the main functionalities of Corda, which are creating a digital asset,
-updating the digital asset, and transferring the digital asset. This app depicts a simple use
-case of money borrowing between two parties. In the app, the borrowed asset is called the `IOUState` (I-owe-you)
-and it is quantifiable.
-
-In this app you can:
-1. Create a new IOUState with a counterparty. `IOUIssueFlow`
-2. List out the IOU entries you had. `ListIOUFlow`
-3. Settle(pau back) the IOUState `IOUSettleFlow`
-4. Lender transfer the debt to a different person `IOUTransferFlow`
+When working with the Corda platform, every transaction is stored in the participants' 
+vaults. The vault is a where all the transactions involving the owner are securely saved. 
+Each vault is unique and accessible only by its owner, 
+serving as a ledger to track all the owner's transactions.
+However, there are scenarios where you may want a third party to receive a copy of the 
+transaction. This is where the SendAndRecieveTransaction function becomes essential.
+For instance, if Alice conducts a transaction with Bob and wants Charlie to receive a copy,
+Alice can simply run a flow using the transaction ID to send a copy to Charlie's vault.
+Another application of this function can be an automated reporting tool,
+which can be utilized at the end of each transaction finalizing flow to automatically 
+report to a specific vnode. This functionality can act like a bookkeeper, 
+meticulously tracking each transaction and ensuring accurate record-keeping.
+`
 
 ### Setting up
 
@@ -40,50 +43,25 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Ali
         }
 }
 ```
+The stateRef of the transaction will be returned as a result of the flow.
 
-After trigger the create-IOUflow, hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the short hash(Alice's hash) and client request id to view the flow result
+#### Step 2: Sending a copy of the transaction to a third party.
+If a member needs to share a copy of their transaction with another member,
+they can do so using the process outlined below. For instance,
+if Alice wishes to send a copy of the transaction to Dave,
+we can execute the following request body with her short hash:
 
-#### Step 2: List created IOU state
-In order to continue the app logics, we would need the IOU ID. This step will bring out all the IOU entries this entity (Alice) has.
-Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Alice's hash) and request body:
 ```
 {
-    "clientRequestId": "list-1",
-    "flowClassName": "com.r3.developers.samples.obligation.workflows.ListIOUFlow",
-    "requestBody": {}
-}
-```
-After trigger the list-IOUs flow, again, we need to hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and check the result. Let's record that id.
-
-
-#### Step 3: Partially settle the IOU with `IOUSettleFlow`
-In this step, we will partially settle the IOU with some amount.
-Goto `POST /flow/{holdingidentityshorthash}`, enter the identity short hash and request body. Note that the settle action can only be initiated by the borrower of the IOU
-```
-{
-    "clientRequestId": "settleiou-1",
-    "flowClassName": "com.r3.developers.samples.obligation.workflows.IOUSettleFlow",
+    "clientRequestId": "sendAndRecieve-1",
+    "flowClassName": "com.r3.developers.samples.obligation.workflows.sendAndRecieveTransactionFlow",
     "requestBody": {
-        "amountSettle":"10",
-        "iouID":" ** fill in id **"
+        "stateRef": "[STATEREF ID HERE]",
+        "members": ["CN=Dave, OU=Test Dept, O=R3, L=London, C=GB"],
+        "forceBackchain": "false"
     }
 }
 ```
-And as for the result of this flow, go to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the required fields.
 
-#### Step 4: Lastly, the lender of the IOU can transfer the IOU to a different owner.
-Note this transfer action can only be initiated by the lender of the IOU. We will have Bob transfer his IOU to Charlie.
-We will now take Bob's shorthash and enter the following request Body.
-```
-{
-    "clientRequestId": "transferiou-1",
-    "flowClassName": "com.r3.developers.samples.obligation.workflows.IOUTransferFlow",
-    "requestBody": {
-        "newLender":"CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB",
-        "iouID":" ** fill in id **"
-        }
-}
-```
-And as for the result, you need to go to the Get API again and enter the short hash and client request ID.
-
-Thus, we have concluded a full run through of the obligation app. 
+Ensure to replace the stateRef with the stateRef of the transaction.
+After running this flow Dave will have the transaction in his vault.
