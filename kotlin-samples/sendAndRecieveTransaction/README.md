@@ -43,7 +43,9 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Ali
         }
 }
 ```
-The stateRef of the transaction will be returned as a result of the flow.
+
+After trigger the create-IOU flow, hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the short hash(Alice's hash) and client request id to view the flow result
+The stateRef of the transaction will be returned as a result of the flow query. Which is the "flowResult"
 
 #### Step 2: Sending a copy of the transaction to a third party.
 If a member needs to share a copy of their transaction with another member,
@@ -56,7 +58,7 @@ we can execute the following request body with her short hash:
     "clientRequestId": "sendAndRecieve-1",
     "flowClassName": "com.r3.developers.samples.obligation.workflows.sendAndRecieveTransactionFlow",
     "requestBody": {
-        "stateRef": "[STATEREF ID HERE]",
+        "stateRef": "STATEREF ID HERE",
         "members": ["CN=Dave, OU=Test Dept, O=R3, L=London, C=GB"],
         "forceBackchain": "false"
     }

@@ -19,6 +19,7 @@ public class ReceiveTransactionFlow implements ResponderFlow {
     @Suspendable
     @Override
     public void call(FlowSession session) {
+        // Receive the transaction and log its details.
         var transaction = utxoLedgerService.receiveTransaction(session);
         log.info("Received transaction - " + transaction.getId());
     }

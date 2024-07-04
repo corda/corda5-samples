@@ -89,8 +89,6 @@ class FinalizeIOUResponderFlow: ResponderFlow {
                 log.info("Verified the transaction- ${ledgerTransaction.id}")
             }
             log.info("Finished responder flow - ${finalizedSignedTransaction.transaction.id}")
-            log.warn("HEY OVER HERE!")
-            log.warn(finalizedSignedTransaction.transaction.outputStateAndRefs.map { it.ref.toString() }.toString())
         }
         // Soft fails the flow and log the exception.
         catch (e: Exception) {

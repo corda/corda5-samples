@@ -20,8 +20,6 @@ class sendAndRecieveTransactionFlow : ClientStartableFlow {
         val forceBackchain: Boolean = false
     )
 
-    data class Response(val transactionId: String)
-
     @CordaInject
     lateinit var flowMessaging: FlowMessaging
 
@@ -42,18 +40,26 @@ class sendAndRecieveTransactionFlow : ClientStartableFlow {
     @Suspendable
     override fun call(requestBody: ClientRequestBody): String {
         val request = requestBody.getRequestBodyAs(jsonMarshallingService, Request::class.java)
-        val transactionId = StateRef.parse(request.stateRef, digestService).transactionId
+
+        // Parse the state reference to obtain the transaction ID.
+        val transactionId = StateRef.parse(request.stateRef + ":0", digestService).transactionId
+
+        // Retrieve the signed transaction from the ledger.
         val transaction = requireNotNull(utxoLedgerService.findSignedTransaction(transactionId)) {
             "Transaction is not found or verified."
         }
 
+        // Map the X500 names in the request to Member objects, ensuring each member exists.
         val members = request.members.map { x500 ->
             requireNotNull(memberLookup.lookup(MemberX500Name.parse(x500))) {
                 "Member $x500 does not exist in the membership group"
             }
         }
+
+        // Initialize the sessions with the memebers that will be used to send the transaction.
         val sessions = members.map { flowMessaging.initiateFlow(it.name) }
 
+        // Send the transaction with or without backchain depending on the request.
         try {
             if (request.forceBackchain) {
                 utxoLedgerService.sendTransactionWithBackchain(transaction, sessions)
@@ -61,37 +67,41 @@ class sendAndRecieveTransactionFlow : ClientStartableFlow {
                 utxoLedgerService.sendTransaction(transaction, sessions)
             }
         } catch (e: Exception) {
+            // Log and rethrow any exceptions encountered during transaction sending.
             log.warn("Sending transaction for $transactionId failed.", e)
             throw e
         }
 
-        return jsonMarshallingService.format(Response(transactionId.toString())).also {
+        // Format and log the successful transaction response.
+        return jsonMarshallingService.format(transactionId.toString()).also {
             log.info("SendTransaction is successful. Response: $it")
+        }
+    }
+
+
+    @InitiatedBy(protocol = "utxo-transaction-transmission-protocol")
+    class ReceiveTransactionFlow : ResponderFlow {
+        private val log = LoggerFactory.getLogger(ReceiveTransactionFlow::class.java)
+
+        @CordaInject
+        lateinit var utxoLedgerService: UtxoLedgerService
+
+        @Suspendable
+        override fun call(session: FlowSession) {
+            // Receive the transaction and log its details.
+            val transaction = utxoLedgerService.receiveTransaction(session)
+            log.info("Received transaction - ${transaction.id}")
         }
     }
 }
 
-@InitiatedBy(protocol = "utxo-transaction-transmission-protocol")
-class ReceiveTransactionFlow: ResponderFlow {
-    private val log = LoggerFactory.getLogger(ReceiveTransactionFlow::class.java)
-
-    @CordaInject
-    lateinit var utxoLedgerService: UtxoLedgerService
-    @Suspendable
-    override fun call(session: FlowSession) {
-        val transaction = utxoLedgerService.receiveTransaction(session)
-        log.info("Received transaction - ${transaction.id}")
-    }
-}
-
-
 /*
 RequestBody for triggering the flow via http-rpc:
 {
-    "clientRequestId": "sendAndRecieve-2",
+    "clientRequestId": "sendAndRecieve-1",
     "flowClassName": "com.r3.developers.samples.obligation.workflows.sendAndRecieveTransactionFlow",
     "requestBody": {
-    "stateRef": "SHA-256D:01EE53398B06F1E59C8064564E49EA31C1E396ECF130D6158E71FE60A26148D2:0",
+    "stateRef": "STATE REF ID HERE",
     "members": ["CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB"],
     "forceBackchain": "false"
 

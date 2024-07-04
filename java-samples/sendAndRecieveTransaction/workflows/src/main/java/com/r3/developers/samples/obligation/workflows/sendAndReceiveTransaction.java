@@ -41,19 +41,26 @@ public class sendAndReceiveTransaction implements ClientStartableFlow {
     @Override
     public String call(ClientRequestBody requestBody) {
         sendAndRecieveTransactionArgs request = requestBody.getRequestBodyAs(jsonMarshallingService, sendAndRecieveTransactionArgs.class);
-        SecureHash transactionId = StateRef.parse(request.getStateRef(), digestService).getTransactionId();
+
+        // Parse the state reference to obtain the transaction ID.
+        SecureHash transactionId = StateRef.parse(request.getStateRef() + ":0", digestService).getTransactionId();
+
+        // Retrieve the signed transaction from the ledger.
         var transaction = requireNotNull(utxoLedgerService.findSignedTransaction(transactionId),
                 "Transaction is not found or verified.");
 
+        // Map the X500 names in the request to Member objects, ensuring each member exists.
         var members = request.getMembers().stream()
                 .map(x500 -> requireNotNull(memberLookup.lookup(MemberX500Name.parse(x500)),
                         "Member " + x500 + " does not exist in the membership group"))
                 .collect(Collectors.toList());
 
+        // Initialize the sessions with the memebers that will be used to send the transaction.
         var sessions = members.stream()
                 .map(member -> flowMessaging.initiateFlow(member.getName()))
                 .collect(Collectors.toList());
 
+        // Send the transaction with or without backchain depending on the request.
         try {
             if (request.isForceBackchain()) {
                 utxoLedgerService.sendTransactionWithBackchain(transaction, sessions);
@@ -61,11 +68,13 @@ public class sendAndReceiveTransaction implements ClientStartableFlow {
                 utxoLedgerService.sendTransaction(transaction, sessions);
             }
         } catch (Exception e) {
+            // Log and rethrow any exceptions encountered during transaction sending.
             log.warn("Sending transaction for " + transactionId + " failed.", e);
             throw e;
         }
 
-        String response = jsonMarshallingService.format(new RecieveTransactionFlowArgs(transactionId.toString()));
+        // Format and log the successful transaction response.
+        String response = jsonMarshallingService.format(transactionId.toString());
         log.info("SendTransaction is successful. Response: " + response);
         return response;
     }
@@ -79,10 +88,10 @@ public class sendAndReceiveTransaction implements ClientStartableFlow {
 /*
 RequestBody for triggering the flow via http-rpc:
 {
-    "clientRequestId": "sendAndRecieve-2",
+    "clientRequestId": "sendAndRecieve-1",
     "flowClassName": "com.r3.developers.samples.obligation.workflows.sendAndReceiveTransaction",
     "requestBody": {
-        "stateRef": "SHA-256D:8DFDD6723450146F64CE22D6B39D4127652ABF45066E0BDD7C63BC18998EBD9A:0",
+        "stateRef": "STATE REF ID HERE",
         "members": ["CN=Charlie, OU=Test Dept, O=R3, L=London, C=GB"],
         "forceBackchain": "false"
     }
