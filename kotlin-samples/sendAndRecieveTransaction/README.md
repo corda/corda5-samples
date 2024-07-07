@@ -45,7 +45,7 @@ Go to `POST /flow/{holdingidentityshorthash}`, enter the identity short hash(Ali
 ```
 
 After trigger the create-IOU flow, hop to `GET /flow/{holdingidentityshorthash}/{clientrequestid}` and enter the short hash(Alice's hash) and client request id to view the flow result
-The stateRef of the transaction will be returned as a result of the flow query. Which is the "flowResult"
+The stateRef of the transaction will be returned as a result of the flow query. Which is the "flowResult".
 
 #### Step 2: Sending a copy of the transaction to a third party.
 If a member needs to share a copy of their transaction with another member,
@@ -65,5 +65,43 @@ we can execute the following request body with her short hash:
 }
 ```
 
-Ensure to replace the stateRef with the stateRef of the transaction.
+Ensure to replace the stateRef variable with the stateRef of the transaction in the requestbody 
+of the transaction.
 After running this flow Dave will have the transaction in his vault.
+
+
+Results
+
+Currently, Alice has two transactions stored in her vault. 
+The transaction we aim to send to Charlie is identified by the ID SHA-256D:8DFDD672…. 
+You can view Alice's transactions in the image provided below:
+
+<p align="center">
+  <img width="1000" alt="Encumbrance Flow" src="./aliceVault.png">
+</p>
+
+On the other hand, Charlie’s vault currently holds no transactions,
+as illustrated in the image below:
+
+<p align="center">
+  <img width="1000" alt="Encumbrance Flow" src="./charlieBefore.png">
+</p>
+
+Once Alice executes the flow, Charlie’s vault is updated to include the transaction, 
+which is displayed as follows:
+
+<p align="center">
+  <img width="1000" alt="Encumbrance Flow" src="./charlieAfter.png">
+</p>
+
+All images of the vault were sourced through DBeaver by establishing a connection 
+to the Cordapp using PostgreSQL. The credentials utilized for this connection are as follows:
+
+POSTGRES_DB = cordacluster <br>
+POSTGRES_USER = postgres <br>
+POSTGRES_PASSWORD = password
+
+To access the vault, navigate through the hierarchy in
+PostgreSQL: Databases > cordacluster > Schemas > vnode_vault_(HASH_ID_OF_VNODE) >
+Tables > utxo_transaction. To view the transactions, 
+simply double-click on utxo_transaction.
