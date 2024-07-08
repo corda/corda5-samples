@@ -65,8 +65,21 @@ we can execute the following request body with her short hash:
 }
 ```
 
-Ensure to replace the stateRef variable with the stateRef of the transaction in the requestbody
-of the transaction.
+Ensure to replace the stateRef variable with the stateRef of the transaction. The stateRef will be found when you run the GET call,
+QueryAll in the swaggerAPI. The stateRef is labeled as `flowResult` in response body， begins with SHA-256D:XXXXX..
+```
+[
+  {
+    "holdingIdentityShortHash": "A93A019B324E",
+    "clientRequestId": "createiou-1",
+    "flowId": "26ea3f95-141b-4aaa-9b58-e3a685dc54d3",
+    "flowStatus": "COMPLETED",
+    "flowResult": "SHA-256D:B3D87C8B446C277B5658BBB2A18DC7491539D898B70F074418878091AE315B4A",
+    "flowError": null,
+    "timestamp": "2024-07-08T04:37:16.175Z"
+  }
+]
+```
 After running this flow Dave will have the transaction in his vault.
 
 
