@@ -1,0 +1,87 @@
+<!-- Declaration of the HTML5 document type and language -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta tags for character set and viewport settings -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Title of the HTML page -->
+    <title>Flask Frontend Example</title>
+
+    <!-- Include jQuery library for DOM manipulation -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <!-- Include the script.js file for handling API requests and UI interactions -->
+    <script src="../static/Scripts/script.js"></script>
+
+    <!-- Link to the main CSS file -->
+    <link rel="stylesheet" href="../static/css/main.css">
+</head>
+<body>
+    <!-- Main heading for the page -->
+    <h1>Flow Management APIs</h1>
+    <hr>
+
+    <!-- Dropdown button for selecting a Flow Initiator -->
+    <label for="itemDropdown"><b>Flow Initiator:</b></label>
+    <select id="itemDropdown"></select>
+
+    <!-- Display the selected Flow Initiator -->
+    <p id="selectedX500Display">Please select a flow initiator</p>
+
+    <!-- Content for the tabs -->
+    <ul class="tab">
+        <!-- Tabs for different actions -->
+        <li class="tab" onclick="openTab('call')" id="call-tab" style="background-color: rgb(173,216,230)">Flow Call</li>
+        <li class="tab" onclick="openTab('Query')" id="Query-tab" style="background-color: rgb(52,152,219)">Flow Query</li>
+
+        <!-- Container for displaying query results under the 'Query' tab -->
+        <div id="queryResult1"></div>
+    </ul>
+
+    <!-- Content for the 'Flow Call' tab -->
+    <div id="call" class="tab-content content-box" style="display: block">
+
+        <div class="text-container">
+            <!-- Input field for the request body -->
+            <label for="requestBody">Request Body: </label>
+            <!-- Display area for the result of the Flow Call -->
+
+        </div>
+        <div class="flowcall-container">
+            <textarea type="text" id="requestBody" class="input-box" placeholder="Enter Json Format" style="resize: none; " ></textarea>
+
+            <div type="text" id="queryResult" class="text-box output">Result will be displayed here</div>
+        </div>
+        <!-- Button to initiate a Flow Call -->
+        <center><button id="postBtn" onclick="postCallFlow()">Post</button></center>
+    </div>
+
+    <!-- Content for the 'Flow Query' tab -->
+    <div id="Query" class="tab-content content-box">
+                    <label for="dropdown">Select Option</label>
+
+
+        <div class="queryoption-container">      
+            <!-- Dropdown for selecting a query option -->
+            <select id="dropdown" class="dropdown" style="height: 35px" onchange="queryDropDownChange()">
+                <option value="option1">Query All Flows</option>
+                <option value="option2">Query Single Flow</option>
+            </select>
+
+            <!-- Input field for providing a ClientID for queries -->
+            <input type="text" id="clientID" placeholder="ClientID" style="display: none; height: 35px">
+
+            <!-- Button to execute the selected Flow Query -->
+            <button id="OneFlowButon" onclick="executeButtonFlow()" style="width: 100px; height: 35px">Get</button>  
+        </div>
+
+
+        
+
+        <!-- Display area for the result of the Flow Query -->
+        <div type="text" id="idResutl" class="styled-input output">Result will be displayed here</div>
+    </div>
+</body>
+</html>
